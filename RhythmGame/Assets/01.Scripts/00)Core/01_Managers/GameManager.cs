@@ -28,18 +28,38 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 게임 씬 관리
+    // 게임 상태 관리
     #region Game State
-    public void ChangeState(SceneType targetScene, ScenePayload payload = null)
+    public enum GameState
     {
-        if (ProgressData.chapters[0].isUnlocked == true)
-        {
-            SceneChanger.Instance.LoadScene(targetScene, payload);
-        }
+        Title,
+        Lobby,
+        Playing,
+        Paused,
+        Result,
+        GameOver
+    }
+ 
+    public GameState CurrentState { get; private set; } = GameState.Title;
+ 
+    /// <summary>상태가 바뀔 때 UIManager, SoundManager 등이 구독</summary>
+    public event Action<GameState, GameState> OnGameStateChanged; // (이전 상태, 새 상태)
+ 
+    public void ChangeState(GameState newState)
+    {
+        if (CurrentState == newState) return;
+ 
+        GameState prevState = CurrentState;
+        CurrentState = newState;
+ 
+        // 일시정지 상태에 따른 시간 흐름 제어
+        Time.timeScale = (newState == GameState.Paused) ? 0f : 1f;
+ 
+        OnGameStateChanged?.Invoke(prevState, newState);
     }
     #endregion
 
-    // 챕터 데이터 관리
+    // 챕터 진행도 관리
     #region Progress Data
     [Serializable]
     public class ChapterProgress
@@ -183,7 +203,7 @@ public class GameManager : MonoBehaviour
         SaveGame();
 
         OnPlayResultProcessed?.Invoke(result);
-        ChangeState(SceneType.Result);
+        ChangeState(GameState.Result);
     }
 
     private string CalculateRank(float accuracy)
@@ -223,7 +243,7 @@ public class GameManager : MonoBehaviour
     #region Pause / Resume
     public void PauseGame()
     {
-        if (SceneType.CurrentState == GameState.Playing)
+        if (CurrentState == GameState.Playing)
         {
             ChangeState(GameState.Paused);
         }
