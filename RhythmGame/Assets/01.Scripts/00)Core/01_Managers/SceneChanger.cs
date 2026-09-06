@@ -29,13 +29,15 @@ public class SceneChanger : MonoBehaviour
     #region Scene Type
     public enum SceneType
     {
+        Loading,
         Title,
         Lobby,
         ChapterSelect,
         SongSelect,
-        RhythmPlay,
+        InGame,
         Result,
-        Settings
+        Settings,
+        Story
     }
 
     /// <summary>SceneType과 실제 빌드 씬 이름 매핑 (Build Settings에 등록된 이름과 일치시킬 것)</summary>
