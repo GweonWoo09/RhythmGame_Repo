@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SceneChanger : MonoBehaviour
 {
+    // 싱글톤
     #region Singleton
     public static SceneChanger Instance { get; private set; }
 
@@ -26,6 +27,7 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
+    // 씬 종류 매핑
     #region Scene Type
     public enum SceneType
     {
@@ -36,8 +38,8 @@ public class SceneChanger : MonoBehaviour
         SongSelect,
         InGame,
         Result,
-        Settings,
-        Story
+        CutScene,
+        Settings
     }
 
     /// <summary>SceneType과 실제 빌드 씬 이름 매핑 (Build Settings에 등록된 이름과 일치시킬 것)</summary>
@@ -94,6 +96,7 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
+    // 진행도 데이터 로드 및 씬 트랜지션
     #region Load / Transition Events
     /// <summary>로딩 진행률 (0~1)을 UI(로딩바)가 구독</summary>
     public event Action<float> OnLoadProgress;
@@ -109,6 +112,7 @@ public class SceneChanger : MonoBehaviour
     private bool _isLoading = false;
     #endregion
 
+    // 씬 불러오기 API
     #region Public API
     public void LoadScene(SceneType targetScene, ScenePayload payload = null)
     {

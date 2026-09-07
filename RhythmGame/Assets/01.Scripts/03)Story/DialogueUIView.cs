@@ -2,6 +2,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Serializable]
+public struct SpeakerData
+{
+    public Image spriteRenderer;
+    public TextMeshProUGUI textName;
+    public TextMeshProUGUI textDialog;
+    public Image dialogImage;
+}
+
 /// <summary>
 /// DialogueManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 알파)를
 /// 갱신하는 역할만 담당한다. 대화 진행 로직은 갖지 않는다.
@@ -99,13 +108,4 @@ public class DialogueUIView : MonoBehaviour
         color.a = active ? 1f : 0f;
         speaker.spriteRenderer.color = color;
     }
-}
-
-[System.Serializable]
-public struct SpeakerData
-{
-    public Image spriteRenderer;
-    public TextMeshProUGUI textName;
-    public TextMeshProUGUI textDialog;
-    public Image dialogImage;
 }

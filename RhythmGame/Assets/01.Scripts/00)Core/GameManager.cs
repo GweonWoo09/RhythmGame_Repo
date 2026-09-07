@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 챕터 진행도 관리
+    // 챕터 진행도 관리 DataManager
     #region Progress Data
     [Serializable]
     public class ChapterProgress
@@ -147,7 +147,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 결과 화면 핸들링
+    // 결과 화면 핸들링 ResultManager
     #region Play Result Handling
     [Serializable]
     public class PlayResult
@@ -222,7 +222,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 세이브 / 로드
+    // 세이브 / 로드 DataManager
     #region Save / Load
     /// <summary>
     /// 실제 파일 입출력은 DataManager에 위임하고,
