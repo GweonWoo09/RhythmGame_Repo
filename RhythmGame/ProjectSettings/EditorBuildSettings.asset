@@ -15,11 +15,23 @@ EditorBuildSettings:
     path: Assets/00.Scenes/2.Lobby.unity
     guid: 15fa02eed54629447b1404c4e3ad4a12
   - enabled: 1
+    path: Assets/00.Scenes/3.ChapterSelect.unity
+    guid: 649f554d6f54d204fa81e77e03bb4acf
+  - enabled: 1
     path: Assets/00.Scenes/4.SongSelect.unity
     guid: 6db7eaba0340c9141aea0848e79f21f5
   - enabled: 1
     path: Assets/00.Scenes/5.InGame.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/00.Scenes/6.Result.unity
+    guid: 7c104df6cf0704f44859624ff0200fef
+  - enabled: 1
+    path: Assets/00.Scenes/7.CutScene.unity
+    guid: 037629582b035c147ba8f990298adbda
+  - enabled: 1
+    path: Assets/00.Scenes/8.Setting.unity
+    guid: 37ec0cd57669e60408b1e6efaccfccc9
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

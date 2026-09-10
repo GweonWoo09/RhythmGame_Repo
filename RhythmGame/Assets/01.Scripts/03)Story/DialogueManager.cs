@@ -13,9 +13,13 @@ public class DialogueManager : MonoBehaviour
 
     private int currentDialogIndex = -1;
     private bool isFinished = false;
+    private bool isWaitingForChoice = false;
 
     /// <summary>새 대사가 표시될 때: (스피커 인덱스, 스피커 이름, 대사 텍스트)</summary>
     public event Action<int, string, string> OnDialogUpdated;
+
+    /// <summary>현재 줄이 선택지를 가지고 있을 때 발행. UI는 이 배열로 버튼을 그린다.</summary>
+    public event Action<DialogChoice[]> OnChoicesPresented;
 
     /// <summary>대화가 모두 끝났을 때</summary>
     public event Action OnDialogEnd;
@@ -31,19 +35,27 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager로부터 payload로 전달받은 경우)
     /// </summary>
-    public void SetdialogData(DialogueData sequence)
+    public void SetdialogInit(DialogueData sequence, int startIndex = 0)
     {
         dialogData = sequence;
-        ResetDialog();
+        currentDialogIndex = -1;
+        isFinished = false;
+        isWaitingForChoice = false;
+
+        if (HasLines())
+        {
+            ShowDialog(startIndex);
+        }
     }
 
     /// <summary>
     /// 외부(입력 처리 스크립트, PlayerInput 등)에서 "다음으로 진행" 요청 시 호출.
     /// 입력 처리와 대화 로직을 분리하기 위해 외부에서 트리거하는 방식으로 구성.
+    /// 선택지 대기 중일 때는 무시된다 (선택지는 SelectChoice로만 진행).
     /// </summary>
     public void AdvanceDialog()
     {
-        if (isFinished || !HasLines()) return;
+        if (isFinished || isWaitingForChoice || !HasLines()) return;
 
         int nextIndex = currentDialogIndex + 1;
 
@@ -58,23 +70,54 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>UI에서 선택지 버튼을 눌렀을 때 호출. choiceIndex는 현재 줄의 choices 배열 인덱스.</summary>
+    public void SelectChoice(int choiceIndex)
+    {
+        if (!isWaitingForChoice) return;
+
+        var currentLine = dialogData.lines[currentDialogIndex];
+        if (choiceIndex < 0 || choiceIndex >= currentLine.choices.Length) return;
+
+        var choice = currentLine.choices[choiceIndex];
+        isWaitingForChoice = false;
+
+        if (choice.storyFlagValue >= 0 && GameManager.Instance != null)
+        {
+            GameManager.Instance.ProgressData.storyFlag = choice.storyFlagValue;
+        }
+
+        if (choice.targetSequence != null)
+        {
+            // 다른 시퀀스(챕터 분기)로 전환
+            SetdialogInit(choice.targetSequence, choice.targetIndex);
+        }
+        else
+        {
+            // 같은 시퀀스 내에서 점프
+            ShowDialog(choice.targetIndex);
+        }
+    }
+
     private void ShowDialog(int index)
     {
         currentDialogIndex = index;
 
         var line = dialogData.lines[index];
         OnDialogUpdated?.Invoke(line.speakerIndex, line.speakerName, line.dialogText);
+
+        if (line.choices != null && line.choices.Length > 0)
+        {
+            isWaitingForChoice = true;
+            OnChoicesPresented?.Invoke(line.choices);
+        }
     }
 
-    /// <summary>씬 진입 시 처음부터 다시 재생 (세이브 데이터로 특정 지점부터 시작하도록 확장 가능)</summary>
+    /// <summary>씬 진입 시 처음부터 다시 재생</summary>
     public void ResetDialog()
     {
-        currentDialogIndex = -1;
-        isFinished = false;
-
         if (HasLines())
         {
-            ShowDialog(0);
+            SetdialogInit(dialogData, 0);
         }
     }
 
@@ -84,4 +127,5 @@ public class DialogueManager : MonoBehaviour
     }
 
     public bool IsFinished => isFinished;
+    public bool IsWaitingForChoice => isWaitingForChoice;
 }

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54fa979028e1cb341b87d19d7fe968cc, type: 3}
+  m_Name: Test1
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  lines:
+  - speakerIndex: 0
+    speakerName: asdf
+    dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6541"
+    choices: []
+  - speakerIndex: 0
+    speakerName: asdf
+    dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6542"
+    choices: []
+  - speakerIndex: 0
+    speakerName: asdf
+    dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
+    choices:
+    - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
+      targetIndex: 0
+      targetSequence: {fileID: 11400000, guid: c431d72f65ebefa49afc3bf33e5bea93, type: 2}
+      storyFlagValue: -1
+    - choiceText: "B\uB97C \uACE0\uB974\uAE30 "
+      targetIndex: 0
+      targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
+      storyFlagValue: -1
