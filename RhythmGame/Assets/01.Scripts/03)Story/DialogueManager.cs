@@ -35,7 +35,7 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager로부터 payload로 전달받은 경우)
     /// </summary>
-    public void SetdialogInit(DialogueData sequence, int startIndex = 0)
+    public void SetDialogSequence(DialogueData sequence, int startIndex = 0)
     {
         dialogData = sequence;
         currentDialogIndex = -1;
@@ -89,7 +89,7 @@ public class DialogueManager : MonoBehaviour
         if (choice.targetSequence != null)
         {
             // 다른 시퀀스(챕터 분기)로 전환
-            SetdialogInit(choice.targetSequence, choice.targetIndex);
+            SetDialogSequence(choice.targetSequence, choice.targetIndex);
         }
         else
         {
@@ -117,7 +117,7 @@ public class DialogueManager : MonoBehaviour
     {
         if (HasLines())
         {
-            SetdialogInit(dialogData, 0);
+            SetDialogSequence(dialogData, 0);
         }
     }
 

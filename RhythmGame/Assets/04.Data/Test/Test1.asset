@@ -26,10 +26,10 @@ MonoBehaviour:
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
     choices:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
-      targetIndex: 0
+      targetIndex: 3
       targetSequence: {fileID: 11400000, guid: c431d72f65ebefa49afc3bf33e5bea93, type: 2}
       storyFlagValue: -1
     - choiceText: "B\uB97C \uACE0\uB974\uAE30 "
-      targetIndex: 0
+      targetIndex: 4
       targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
       storyFlagValue: -1

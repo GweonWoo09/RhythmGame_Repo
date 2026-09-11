@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static SceneChanger;
 
 /// <summary>
 /// 게임 전체의 상태와 진행도를 총괄하는 싱글톤 매니저.
+/// - "어디로 이동할지"는 SceneManager가 담당
 /// - "이동해도 되는지 / 저장할지 / 결과를 어떻게 반영할지"는 GameManager가 담당
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    // 싱글톤
     #region Singleton
     public static GameManager Instance { get; private set; }
 
@@ -28,7 +27,6 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 게임 상태 관리
     #region Game State
     public enum GameState
     {
@@ -39,27 +37,26 @@ public class GameManager : MonoBehaviour
         Result,
         GameOver
     }
- 
+
     public GameState CurrentState { get; private set; } = GameState.Title;
- 
+
     /// <summary>상태가 바뀔 때 UIManager, SoundManager 등이 구독</summary>
     public event Action<GameState, GameState> OnGameStateChanged; // (이전 상태, 새 상태)
- 
+
     public void ChangeState(GameState newState)
     {
         if (CurrentState == newState) return;
- 
+
         GameState prevState = CurrentState;
         CurrentState = newState;
- 
+
         // 일시정지 상태에 따른 시간 흐름 제어
         Time.timeScale = (newState == GameState.Paused) ? 0f : 1f;
- 
+
         OnGameStateChanged?.Invoke(prevState, newState);
     }
     #endregion
 
-    // 챕터 진행도 관리 DataManager
     #region Progress Data
     [Serializable]
     public class ChapterProgress
@@ -80,15 +77,54 @@ public class GameManager : MonoBehaviour
         public int maxCombo;
     }
 
+    /// <summary>
+    /// Dictionary는 JsonUtility로 직렬화되지 않으므로, 저장 가능한 형태(List)로 스토리 플래그를 관리한다.
+    /// key 예시: "chapter2_helpedA", value 예시: 0/1 또는 임의의 정수
+    /// </summary>
+    [Serializable]
+    public class StoryFlagEntry
+    {
+        public string key;
+        public int value;
+    }
+
     [Serializable]
     public class GameProgressData
     {
         public List<ChapterProgress> chapters = new List<ChapterProgress>();
         public List<SongRecord> songRecords = new List<SongRecord>();
-        public int storyFlag = 0; // 어느 대화/컷씬까지 진행했는지
+        public List<StoryFlagEntry> storyFlags = new List<StoryFlagEntry>();
     }
 
     public GameProgressData ProgressData { get; private set; }
+
+    /// <summary>스토리 플래그 값을 설정 (이미 있으면 덮어쓰기, 없으면 새로 추가)</summary>
+    public void SetStoryFlag(string key, int value)
+    {
+        if (string.IsNullOrEmpty(key)) return;
+
+        var entry = ProgressData.storyFlags.Find(f => f.key == key);
+        if (entry == null)
+        {
+            ProgressData.storyFlags.Add(new StoryFlagEntry { key = key, value = value });
+        }
+        else
+        {
+            entry.value = value;
+        }
+    }
+
+    /// <summary>플래그가 없으면 defaultValue를 반환</summary>
+    public int GetStoryFlag(string key, int defaultValue = 0)
+    {
+        var entry = ProgressData.storyFlags.Find(f => f.key == key);
+        return entry != null ? entry.value : defaultValue;
+    }
+
+    public bool HasStoryFlag(string key)
+    {
+        return ProgressData.storyFlags.Exists(f => f.key == key);
+    }
 
     private void InitializeGameData()
     {
@@ -100,24 +136,6 @@ public class GameManager : MonoBehaviour
         {
             chapterId = 1,
             isUnlocked = true,
-            isCleared = false
-        });
-        ProgressData.chapters.Add(new ChapterProgress
-        {
-            chapterId = 2,
-            isUnlocked = false,
-            isCleared = false
-        });
-        ProgressData.chapters.Add(new ChapterProgress
-        {
-            chapterId = 3,
-            isUnlocked = false,
-            isCleared = false
-        });
-        ProgressData.chapters.Add(new ChapterProgress
-        {
-            chapterId = 4,
-            isUnlocked = false,
             isCleared = false
         });
     }
@@ -147,7 +165,6 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 결과 화면 핸들링 ResultManager
     #region Play Result Handling
     [Serializable]
     public class PlayResult
@@ -222,7 +239,6 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 세이브 / 로드 DataManager
     #region Save / Load
     /// <summary>
     /// 실제 파일 입출력은 DataManager에 위임하고,
@@ -239,7 +255,6 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 정지 / 재개
     #region Pause / Resume
     public void PauseGame()
     {
