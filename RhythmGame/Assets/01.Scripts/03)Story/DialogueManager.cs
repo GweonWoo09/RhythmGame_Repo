@@ -3,13 +3,13 @@ using UnityEngine;
 
 /// <summary>
 /// 대화 진행 로직만 담당한다. 실제 UI(Image, Text)는 건드리지 않고
-/// 이벤트를 통해 현재 대사 정보를 알린다. 화면 표시는 DialogUIView가 담당.
+/// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogUIView가 담당.
 /// 대사 데이터는 DialogueData 에셋으로부터 받아온다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
     [Tooltip("재생할 대화 시퀀스 에셋 (DialogueData)")]
-    [SerializeField] private DialogueData dialogData;
+    [SerializeField] private DialogueData dialogSequence;
 
     private int currentDialogIndex = -1;
     private bool isFinished = false;
@@ -33,11 +33,11 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager로부터 payload로 전달받은 경우)
+    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager의 payload로 전달받은 경우)
     /// </summary>
     public void SetDialogSequence(DialogueData sequence, int startIndex = 0)
     {
-        dialogData = sequence;
+        dialogSequence = sequence;
         currentDialogIndex = -1;
         isFinished = false;
         isWaitingForChoice = false;
@@ -49,8 +49,7 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 외부(입력 처리 스크립트, PlayerInput 등)에서 "다음으로 진행" 요청 시 호출.
-    /// 입력 처리와 대화 로직을 분리하기 위해 외부에서 트리거하는 방식으로 구성.
+    /// 외부(입력 처리 스크립트 등)에서 "다음으로 진행" 요청 시 호출.
     /// 선택지 대기 중일 때는 무시된다 (선택지는 SelectChoice로만 진행).
     /// </summary>
     public void AdvanceDialog()
@@ -59,7 +58,7 @@ public class DialogueManager : MonoBehaviour
 
         int nextIndex = currentDialogIndex + 1;
 
-        if (nextIndex < dialogData.lines.Length)
+        if (nextIndex < dialogSequence.lines.Length)
         {
             ShowDialog(nextIndex);
         }
@@ -75,15 +74,15 @@ public class DialogueManager : MonoBehaviour
     {
         if (!isWaitingForChoice) return;
 
-        var currentLine = dialogData.lines[currentDialogIndex];
+        var currentLine = dialogSequence.lines[currentDialogIndex];
         if (choiceIndex < 0 || choiceIndex >= currentLine.choices.Length) return;
 
         var choice = currentLine.choices[choiceIndex];
         isWaitingForChoice = false;
 
-        if (choice.storyFlagValue >= 0 && GameManager.Instance != null)
+        if (!string.IsNullOrEmpty(choice.flagKey) && GameManager.Instance != null)
         {
-            GameManager.Instance.ProgressData.storyFlag = choice.storyFlagValue;
+            GameManager.Instance.SetStoryFlag(choice.flagKey, choice.storyFlagValue);
         }
 
         if (choice.targetSequence != null)
@@ -100,9 +99,10 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowDialog(int index)
     {
+
         currentDialogIndex = index;
 
-        var line = dialogData.lines[index];
+        var line = dialogSequence.lines[index];
         OnDialogUpdated?.Invoke(line.speakerIndex, line.speakerName, line.dialogText);
 
         if (line.choices != null && line.choices.Length > 0)
@@ -117,13 +117,13 @@ public class DialogueManager : MonoBehaviour
     {
         if (HasLines())
         {
-            SetDialogSequence(dialogData, 0);
+            SetDialogSequence(dialogSequence, 0);
         }
     }
 
     private bool HasLines()
     {
-        return dialogData != null && dialogData.lines != null && dialogData.lines.Length > 0;
+        return dialogSequence != null && dialogSequence.lines != null && dialogSequence.lines.Length > 0;
     }
 
     public bool IsFinished => isFinished;

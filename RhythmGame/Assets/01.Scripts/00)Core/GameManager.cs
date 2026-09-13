@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    #region Progress Data
+#region Progress Data
     [Serializable]
     public class ChapterProgress
     {
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
         public bool isUnlocked;
         public bool isCleared;
     }
-
+ 
     [Serializable]
     public class SongRecord
     {
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
         public string bestRank;        // S / A / B / C 등
         public int maxCombo;
     }
-
+ 
     /// <summary>
     /// Dictionary는 JsonUtility로 직렬화되지 않으므로, 저장 가능한 형태(List)로 스토리 플래그를 관리한다.
     /// key 예시: "chapter2_helpedA", value 예시: 0/1 또는 임의의 정수
@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
         public string key;
         public int value;
     }
-
+ 
     [Serializable]
     public class GameProgressData
     {
@@ -95,14 +95,14 @@ public class GameManager : MonoBehaviour
         public List<SongRecord> songRecords = new List<SongRecord>();
         public List<StoryFlagEntry> storyFlags = new List<StoryFlagEntry>();
     }
-
+ 
     public GameProgressData ProgressData { get; private set; }
-
+ 
     /// <summary>스토리 플래그 값을 설정 (이미 있으면 덮어쓰기, 없으면 새로 추가)</summary>
     public void SetStoryFlag(string key, int value)
     {
         if (string.IsNullOrEmpty(key)) return;
-
+ 
         var entry = ProgressData.storyFlags.Find(f => f.key == key);
         if (entry == null)
         {
@@ -113,24 +113,24 @@ public class GameManager : MonoBehaviour
             entry.value = value;
         }
     }
-
+ 
     /// <summary>플래그가 없으면 defaultValue를 반환</summary>
     public int GetStoryFlag(string key, int defaultValue = 0)
     {
         var entry = ProgressData.storyFlags.Find(f => f.key == key);
         return entry != null ? entry.value : defaultValue;
     }
-
+ 
     public bool HasStoryFlag(string key)
     {
         return ProgressData.storyFlags.Exists(f => f.key == key);
     }
-
+ 
     private void InitializeGameData()
     {
         // 실제 프로젝트에서는 DataManager.Load() 등으로 대체
         ProgressData = new GameProgressData();
-
+ 
         // 예시: 챕터 1은 기본 해금
         ProgressData.chapters.Add(new ChapterProgress
         {
@@ -139,13 +139,13 @@ public class GameManager : MonoBehaviour
             isCleared = false
         });
     }
-
+ 
     public bool IsChapterUnlocked(int chapterId)
     {
         var chapter = ProgressData.chapters.Find(c => c.chapterId == chapterId);
         return chapter != null && chapter.isUnlocked;
     }
-
+ 
     public void UnlockChapter(int chapterId)
     {
         var chapter = ProgressData.chapters.Find(c => c.chapterId == chapterId);
