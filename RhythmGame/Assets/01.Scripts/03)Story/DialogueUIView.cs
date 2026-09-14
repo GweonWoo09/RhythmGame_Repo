@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>대화창 UI 참조</summary>
 [System.Serializable]
 public struct SpeakerData
 {

@@ -68,7 +68,8 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    #region Scene Payload (씬 간 데이터 전달)
+    // 씬 간 데이터 전달
+    #region Scene Payload
     /// <summary>
     /// 예: 곡 선택 씬 -> 리듬게임 플레이 씬으로 넘길 데이터.
     /// 필요한 정보를 이 컨테이너에 담아 SetPayload로 전달, 다음 씬에서 ConsumePayload로 읽는다.
@@ -137,6 +138,7 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
+    // 화면 전환 할때 어두워지는 것 루틴
     #region Load Routine
     private IEnumerator LoadSceneRoutine(SceneType targetScene)
     {

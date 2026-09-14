@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-#region Progress Data
+    #region Progress Data
     [Serializable]
     public class ChapterProgress
     {
