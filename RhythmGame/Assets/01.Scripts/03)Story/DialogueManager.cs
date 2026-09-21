@@ -33,7 +33,7 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager의 payload로 전달받은 경우)
+    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneChanger의 payload로 전달받은 경우)
     /// </summary>
     public void SetDialogSequence(DialogueData sequence, int startIndex = 0)
     {

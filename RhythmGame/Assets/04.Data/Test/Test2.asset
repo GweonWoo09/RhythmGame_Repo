@@ -23,7 +23,7 @@ MonoBehaviour:
       flagKey: 
       storyFlagValue: -1
     - choiceText: "\uB05D\uB0B4\uAE30 "
-      targetIndex: 0
-      targetSequence: {fileID: 0}
+      targetIndex: 3
+      targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
       flagKey: 
       storyFlagValue: -1

@@ -28,10 +28,14 @@ MonoBehaviour:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
       targetSequence: {fileID: 11400000, guid: c431d72f65ebefa49afc3bf33e5bea93, type: 2}
-      flagKey: selectA
+      flagKey: chooseA
       storyFlagValue: 0
     - choiceText: "B\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
       targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
-      flagKey: selectB
+      flagKey: chooseB
       storyFlagValue: 1
+  - speakerIndex: 1
+    speakerName: fdsa
+    dialogText: "\uB300\uD654 \uB05D"
+    choices: []

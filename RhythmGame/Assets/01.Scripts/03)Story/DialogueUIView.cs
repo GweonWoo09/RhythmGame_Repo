@@ -1,8 +1,8 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>대화창 UI 참조</summary>
 [System.Serializable]
 public struct SpeakerData
 {
@@ -22,13 +22,14 @@ public struct ChoiceButtonRef
 }
 
 /// <summary>
-/// DialogueManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 알파, 선택지 버튼)를
+/// DialogManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 알파, 선택지 버튼)를
 /// 갱신하는 역할만 담당한다. 대화 진행/분기 로직은 갖지 않는다.
+/// 대사는 한 글자씩 타이핑되는 효과로 출력된다.
 /// </summary>
 public class DialogueUIView : MonoBehaviour
 {
     [Header("연동할 로직 컴포넌트")]
-    [SerializeField] private DialogueManager DialogueManager;
+    [SerializeField] private DialogueManager dialogManager;
 
     [Header("스피커별 UI 참조 (dialogs의 speakerIndex와 순서 일치)")]
     [SerializeField] private SpeakerData[] speakers;
@@ -40,24 +41,31 @@ public class DialogueUIView : MonoBehaviour
     [SerializeField] private GameObject choicePanelRoot;
     [SerializeField] private ChoiceButtonRef[] choiceButtons; // 최대 선택지 개수만큼 씬에 미리 배치
 
+    [Header("타이핑 효과")]
+    [Tooltip("한 글자를 출력하는 간격 (초)")]
+    [SerializeField] private float charInterval = 0.03f;
+
     private int _activeSpeakerIndex = -1;
+    private Coroutine _typingCoroutine;
+    private bool _isTyping = false;
+    private string _currentFullText = "";
 
     private void OnEnable()
     {
-        if (DialogueManager == null) return;
+        if (dialogManager == null) return;
 
-        DialogueManager.OnDialogUpdated += HandleDialogUpdated;
-        DialogueManager.OnChoicesPresented += HandleChoicesPresented;
-        DialogueManager.OnDialogEnd += HandleDialogEnd;
+        dialogManager.OnDialogUpdated += HandleDialogUpdated;
+        dialogManager.OnChoicesPresented += HandleChoicesPresented;
+        dialogManager.OnDialogEnd += HandleDialogEnd;
     }
 
     private void OnDisable()
     {
-        if (DialogueManager == null) return;
+        if (dialogManager == null) return;
 
-        DialogueManager.OnDialogUpdated -= HandleDialogUpdated;
-        DialogueManager.OnChoicesPresented -= HandleChoicesPresented;
-        DialogueManager.OnDialogEnd -= HandleDialogEnd;
+        dialogManager.OnDialogUpdated -= HandleDialogUpdated;
+        dialogManager.OnChoicesPresented -= HandleChoicesPresented;
+        dialogManager.OnDialogEnd -= HandleDialogEnd;
     }
 
     private void Start()
@@ -75,12 +83,20 @@ public class DialogueUIView : MonoBehaviour
 
     private void Update()
     {
-        // 선택지 대기 중에는 Space로 진행하지 않는다 (AdvanceDialog 쪽에서도 막히지만 이중 방지)
-        if (DialogueManager.IsWaitingForChoice) return;
+        // 선택지 대기 중에는 Space로 아무것도 하지 않는다
+        if (dialogManager.IsWaitingForChoice) return;
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            DialogueManager.AdvanceDialog();
+            if (_isTyping)
+            {
+                // 타이핑 중이면 한 번에 완성 (스킵)
+                SkipTyping();
+            }
+            else
+            {
+                dialogManager.AdvanceDialog();
+            }
         }
     }
 
@@ -109,7 +125,51 @@ public class DialogueUIView : MonoBehaviour
         var speaker = speakers[speakerIndex];
         SetActiveObject(speaker, true);
         speaker.textName.text = speakerName;
-        speaker.textDialogue.text = dialogText;
+
+        StartTyping(speaker.textDialogue, dialogText);
+    }
+
+    private void StartTyping(TextMeshProUGUI textComponent, string fullText)
+    {
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+        }
+
+        _currentFullText = fullText;
+        _typingCoroutine = StartCoroutine(TypeTextRoutine(textComponent, fullText));
+    }
+
+    private IEnumerator TypeTextRoutine(TextMeshProUGUI textComponent, string fullText)
+    {
+        _isTyping = true;
+        textComponent.text = "";
+
+        foreach (char c in fullText)
+        {
+            textComponent.text += c;
+            yield return new WaitForSeconds(charInterval);
+        }
+
+        _isTyping = false;
+        _typingCoroutine = null;
+    }
+
+    /// <summary>Space로 스킵했을 때, 타이핑 중이던 텍스트를 즉시 전체 출력으로 완성</summary>
+    private void SkipTyping()
+    {
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+        }
+
+        _isTyping = false;
+
+        if (_activeSpeakerIndex != -1)
+        {
+            speakers[_activeSpeakerIndex].textDialogue.text = _currentFullText;
+        }
     }
 
     private void HandleChoicesPresented(DialogChoice[] choices)
@@ -127,7 +187,7 @@ public class DialogueUIView : MonoBehaviour
                 choiceButtons[i].label.text = choices[i].choiceText;
 
                 choiceButtons[i].button.onClick.RemoveAllListeners();
-                choiceButtons[i].button.onClick.AddListener(() => DialogueManager.SelectChoice(choiceIndex));
+                choiceButtons[i].button.onClick.AddListener(() => dialogManager.SelectChoice(choiceIndex));
             }
             else
             {
@@ -138,6 +198,13 @@ public class DialogueUIView : MonoBehaviour
 
     private void HandleDialogEnd()
     {
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+            _isTyping = false;
+        }
+
         // 대화 종료: 모든 화자 UI를 정리하고 대화창을 닫는다
         foreach (var speaker in speakers)
         {
