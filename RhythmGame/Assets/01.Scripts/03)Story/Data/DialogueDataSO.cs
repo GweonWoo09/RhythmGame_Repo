@@ -5,7 +5,7 @@ using UnityEngine;
 /// 씬에 종속되지 않으므로 여러 씬/챕터에서 재사용하거나 기획자가 독립적으로 관리 가능.
 /// </summary>
 [CreateAssetMenu(fileName = "NewdialogData", menuName = "Dialog/Dialog Sequence")]
-public class DialogueData : ScriptableObject
+public class DialogueDataSO : ScriptableObject
 {
     [Tooltip("이 대화 시퀀스에 포함된 대사 목록 (순서대로 재생)")]
     public DialogLine[] lines;
@@ -18,9 +18,15 @@ public class DialogueData : ScriptableObject
 [System.Serializable]
 public struct DialogLine
 {
-    public int speakerIndex;
-    public string speakerName;
- 
+    [Tooltip("이 대사를 말하는 캐릭터 데이터")]
+    public SpeakerDataSO speaker;
+
+    [Tooltip("speaker.expressions 중 어떤 표정을 보여줄지. SpeakerDataSO의 expressionName과 일치해야 함. 예: \"Happy\"")]
+    public string expressionName;
+
+    [Tooltip("화면 어느 위치(슬롯)에 표시할지. DialogUIView의 speakerSlots 인덱스와 대응.")]
+    public int screenSlot;
+
     [TextArea(1, 3)]
     public string dialogText;
 
@@ -42,7 +48,7 @@ public struct DialogChoice
     public int targetIndex;
  
     [Tooltip("이 값이 지정되면 다른 대화 시퀀스(예: 다른 스토리 분기)로 전환한다.")]
-    public DialogueData targetSequence;
+    public DialogueDataSO targetSequence;
  
     [Tooltip("이 선택을 기록할 플래그 키. 비워두면 플래그를 남기지 않음. 예: \"chapter2_helpedA\"")]
     public string flagKey;

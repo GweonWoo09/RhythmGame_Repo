@@ -4,19 +4,19 @@ using UnityEngine;
 /// <summary>
 /// 대화 진행 로직만 담당한다. 실제 UI(Image, Text)는 건드리지 않고
 /// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogUIView가 담당.
-/// 대사 데이터는 DialogueData 에셋으로부터 받아온다.
+/// 대사 데이터는 DialogueDataSO 에셋으로부터 받아온다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
-    [Tooltip("재생할 대화 시퀀스 에셋 (DialogueData)")]
-    [SerializeField] private DialogueData dialogSequence;
+    [Tooltip("재생할 대화 시퀀스 에셋 (DialogueDataSO)")]
+    [SerializeField] private DialogueDataSO dialogSequence;
 
     private int currentDialogIndex = -1;
     private bool isFinished = false;
     private bool isWaitingForChoice = false;
 
-    /// <summary>새 대사가 표시될 때: (스피커 인덱스, 스피커 이름, 대사 텍스트)</summary>
-    public event Action<int, string, string> OnDialogUpdated;
+    /// <summary>새 대사가 표시될 때: (화면 슬롯, 화자 데이터, 표정 이름, 대사 텍스트)</summary>
+    public event Action<int, SpeakerDataSO, string, string> OnDialogUpdated;
 
     /// <summary>현재 줄이 선택지를 가지고 있을 때 발행. UI는 이 배열로 버튼을 그린다.</summary>
     public event Action<DialogChoice[]> OnChoicesPresented;
@@ -33,9 +33,9 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneChanger의 payload로 전달받은 경우)
+    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager의 payload로 전달받은 경우)
     /// </summary>
-    public void SetDialogSequence(DialogueData sequence, int startIndex = 0)
+    public void SetDialogSequence(DialogueDataSO sequence, int startIndex = 0)
     {
         dialogSequence = sequence;
         currentDialogIndex = -1;
@@ -99,11 +99,10 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowDialog(int index)
     {
-
         currentDialogIndex = index;
 
         var line = dialogSequence.lines[index];
-        OnDialogUpdated?.Invoke(line.speakerIndex, line.speakerName, line.dialogText);
+        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, line.dialogText);
 
         if (line.choices != null && line.choices.Length > 0)
         {

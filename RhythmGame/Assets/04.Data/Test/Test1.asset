@@ -21,6 +21,11 @@ MonoBehaviour:
     speakerName: asdf
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6542"
     choices: []
+  - speakerIndex: 0
+    speakerName: asdf
+    dialogText: test test test test test test test test test test test test test
+      test test test test
+    choices: []
   - speakerIndex: 1
     speakerName: fdsa
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
