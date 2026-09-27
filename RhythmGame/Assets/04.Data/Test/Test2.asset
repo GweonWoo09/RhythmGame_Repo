@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Test2
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   lines:
-  - speakerIndex: 0
-    speakerName: asdf
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: "A\uB97C \uACE8\uB790\uC2B5\uB2C8\uB2E4. "
     choices:
     - choiceText: "\uB3CC\uC544\uAC00\uAE30"
-      targetIndex: 2
+      targetIndex: 3
       targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
       flagKey: 
       storyFlagValue: -1

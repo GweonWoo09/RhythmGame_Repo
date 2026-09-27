@@ -15,4 +15,4 @@ MonoBehaviour:
   speakerName: asdf
   expressions:
   - expressionName: aaa
-    sprite: {fileID: 0}
+    sprite: {fileID: 4490979803305836677, guid: 169209ddad7f3814bae7dadfaaabaef9, type: 3}

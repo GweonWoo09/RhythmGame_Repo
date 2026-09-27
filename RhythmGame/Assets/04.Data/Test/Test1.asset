@@ -13,21 +13,26 @@ MonoBehaviour:
   m_Name: Test1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   lines:
-  - speakerIndex: 0
-    speakerName: asdf
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6541"
     choices: []
-  - speakerIndex: 0
-    speakerName: asdf
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6542"
     choices: []
-  - speakerIndex: 0
-    speakerName: asdf
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: test test test test test test test test test test test test test
-      test test test test
+      test test test test test test test test test test test test test test test
+      test test test test test test
     choices: []
-  - speakerIndex: 1
-    speakerName: fdsa
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
     choices:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
@@ -40,7 +45,8 @@ MonoBehaviour:
       targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
       flagKey: chooseB
       storyFlagValue: 1
-  - speakerIndex: 1
-    speakerName: fdsa
+  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+    expressionName: aaa
+    screenSlot: 0
     dialogText: "\uB300\uD654 \uB05D"
     choices: []
