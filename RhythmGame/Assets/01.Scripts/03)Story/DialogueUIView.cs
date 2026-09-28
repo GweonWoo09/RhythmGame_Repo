@@ -53,7 +53,7 @@ public class DialogueUIView : MonoBehaviour
     [Header("오토 모드")]
     [SerializeField] private Button autoButton;
     [Tooltip("타이핑이 끝난 뒤 자동으로 다음 대사로 넘어가기까지의 대기 시간 (초)")]
-    [SerializeField] private float autoAdvanceDelay = 5f;
+    [SerializeField] private float autoAdvanceDelay = 3f;
     [Tooltip("오토 모드가 켜졌을 때 표시할 오브젝트 (버튼 강조 표시 등, 선택)")]
     [SerializeField] private GameObject autoModeIndicator;
 

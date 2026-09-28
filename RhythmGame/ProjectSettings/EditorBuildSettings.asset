@@ -30,7 +30,7 @@ EditorBuildSettings:
     path: Assets/00.Scenes/7.CutScene.unity
     guid: 037629582b035c147ba8f990298adbda
   - enabled: 1
-    path: Assets/00.Scenes/8.Setting.unity
+    path: Assets/00.Scenes/8.Settings.unity
     guid: 37ec0cd57669e60408b1e6efaccfccc9
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
