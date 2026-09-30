@@ -53,8 +53,8 @@ public class SceneChanger : MonoBehaviour
     [Header("Scene Name 매핑 (Inspector에서 등록)")]
     [SerializeField] private SceneEntry[] sceneEntries;
 
-    public SceneType CurrentScene { get; private set; } = SceneType.Title;
-    public SceneType PreviousScene { get; private set; } = SceneType.Title;
+    public SceneType CurrentScene { get; private set; } = SceneType.Loading;
+    public SceneType PreviousScene { get; private set; } = SceneType.Loading;
 
     private string GetSceneName(SceneType type)
     {
@@ -138,7 +138,7 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    // 화면 전환 할때 어두워지는 것 루틴
+    // 화면 전환 페이드 루틴
     #region Load Routine
     private IEnumerator LoadSceneRoutine(SceneType targetScene)
     {

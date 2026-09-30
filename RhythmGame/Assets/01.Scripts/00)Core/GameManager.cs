@@ -9,6 +9,7 @@ using UnityEngine;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    // 싱글톤
     #region Singleton
     public static GameManager Instance { get; private set; }
 
@@ -27,9 +28,11 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    // 게임 상태 설정
     #region Game State
     public enum GameState
     {
+        Loading,
         Title,
         Lobby,
         Playing,
@@ -38,7 +41,7 @@ public class GameManager : MonoBehaviour
         GameOver
     }
 
-    public GameState CurrentState { get; private set; } = GameState.Title;
+    public GameState CurrentState { get; private set; } = GameState.Loading;
 
     /// <summary>상태가 바뀔 때 UIManager, SoundManager 등이 구독</summary>
     public event Action<GameState, GameState> OnGameStateChanged; // (이전 상태, 새 상태)
@@ -57,6 +60,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    // 챕터, 곡 진행도 데이터 관리
     #region Progress Data
     [Serializable]
     public class ChapterProgress
@@ -165,6 +169,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    // 결과창 기록 표시 
     #region Play Result Handling
     [Serializable]
     public class PlayResult
@@ -239,6 +244,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    // 데이처 저장, 불러오기
     #region Save / Load
     /// <summary>
     /// 실제 파일 입출력은 DataManager에 위임하고,
@@ -255,6 +261,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    // 인게임 일시중지, 재개
     #region Pause / Resume
     public void PauseGame()
     {

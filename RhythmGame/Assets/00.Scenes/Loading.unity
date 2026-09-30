@@ -562,7 +562,7 @@ MonoBehaviour:
   - type: 8
     sceneName: Settings
   fadeDuration: 0.4
-  fadeCanvasGroup: {fileID: 0}
+  fadeCanvasGroup: {fileID: 6284694209892765867, guid: fe9e21a5759496c4899cb6c2025874cb, type: 3}
 --- !u!114 &1114774116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,6 +595,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 898375783}
+  - {fileID: 1067498179}
   - {fileID: 717528822}
   - {fileID: 1114774117}
-  - {fileID: 1067498179}
