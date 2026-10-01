@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class SoundManager : MonoBehaviour
+public class AudioManager : MonoBehaviour
 {
     // ΩÃ±€≈Ê
     #region Singleton
-    public static SoundManager Instance { get; private set; }
+    public static AudioManager Instance { get; private set; }
 
     private void Awake()
     {
@@ -19,6 +19,8 @@ public class SoundManager : MonoBehaviour
     }
     #endregion
 
+    
+
     void Start()
     {
         
@@ -28,5 +30,10 @@ public class SoundManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void PlayBGM()
+    {
+
     }
 }

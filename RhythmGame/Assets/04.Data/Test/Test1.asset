@@ -30,21 +30,21 @@ MonoBehaviour:
       test test test test test test test test test test test test test test test
       test test test test test test
     choices: []
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
+  - speaker: {fileID: 11400000, guid: ba313aa8279b95d448e9a41dbf131ee3, type: 2}
     expressionName: aaa
-    screenSlot: 0
+    screenSlot: 1
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
     choices:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
       targetSequence: {fileID: 11400000, guid: c431d72f65ebefa49afc3bf33e5bea93, type: 2}
       flagKey: chooseA
-      storyFlagValue: 0
+      storyFlagValue: 1
     - choiceText: "B\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
       targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
       flagKey: chooseB
-      storyFlagValue: 1
+      storyFlagValue: 2
   - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
     expressionName: aaa
     screenSlot: 0

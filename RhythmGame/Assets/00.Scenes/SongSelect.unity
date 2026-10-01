@@ -643,6 +643,7 @@ GameObject:
   - component: {fileID: 571836629}
   - component: {fileID: 571836628}
   - component: {fileID: 571836627}
+  - component: {fileID: 571836630}
   m_Layer: 5
   m_Name: StartBtn
   m_TagString: Untagged
@@ -752,6 +753,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 571836625}
   m_CullTransparentMesh: 1
+--- !u!114 &571836630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 571836625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96e45fbcc632aa640b33e63e020ae910, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionButton
+  targetScene: 0
+  sendPayload: 0
+  chapterId: 0
+  songId: 
+  difficulty: 
 --- !u!1 &617483055
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,7 +827,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: 'Start
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
