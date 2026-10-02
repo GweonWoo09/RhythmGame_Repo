@@ -3,8 +3,8 @@ using UnityEngine;
 
 /// <summary>
 /// 대화 진행 로직만 담당한다. 실제 UI(Image, Text)는 건드리지 않고
-/// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogUIView가 담당.
-/// 대사 데이터는 DialogueDataSO 에셋으로부터 받아온다.
+/// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogueUIView가 담당.
+/// 대사 데이터는 DialogueDataSO 에셋으로부터 받아오며, BGM 전환은 AudioManager에 위임한다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
@@ -28,12 +28,13 @@ public class DialogueManager : MonoBehaviour
     {
         if (HasLines())
         {
+            PlaySequenceBGM();
             ShowDialog(0);
         }
     }
 
     /// <summary>
-    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneManager의 payload로 전달받은 경우)
+    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneChanger의 payload로 전달받은 경우)
     /// </summary>
     public void SetDialogSequence(DialogueDataSO sequence, int startIndex = 0)
     {
@@ -44,6 +45,7 @@ public class DialogueManager : MonoBehaviour
 
         if (HasLines())
         {
+            PlaySequenceBGM();
             ShowDialog(startIndex);
         }
     }
@@ -87,7 +89,7 @@ public class DialogueManager : MonoBehaviour
 
         if (choice.targetSequence != null)
         {
-            // 다른 시퀀스(챕터 분기)로 전환
+            // 다른 시퀀스(챕터 분기)로 전환 (BGM도 새 시퀀스 기준으로 교체됨)
             SetDialogSequence(choice.targetSequence, choice.targetIndex);
         }
         else
@@ -102,12 +104,28 @@ public class DialogueManager : MonoBehaviour
         currentDialogIndex = index;
 
         var line = dialogSequence.lines[index];
+
+        // 이 줄에서 BGM을 바꾸도록 지정되어 있으면 교체
+        if (line.bgmOverride != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(line.bgmOverride);
+        }
+
         OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, line.dialogText);
 
         if (line.choices != null && line.choices.Length > 0)
         {
             isWaitingForChoice = true;
             OnChoicesPresented?.Invoke(line.choices);
+        }
+    }
+
+    /// <summary>시퀀스 진입 시 기본 BGM 재생 (지정 안 됐으면 기존 BGM 유지)</summary>
+    private void PlaySequenceBGM()
+    {
+        if (dialogSequence.bgm != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(dialogSequence.bgm);
         }
     }
 

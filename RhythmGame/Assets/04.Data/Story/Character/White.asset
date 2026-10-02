@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cefbb4a7067e51498b21ec868be1469, type: 3}
+  m_Name: White
+  m_EditorClassIdentifier: Assembly-CSharp::SpeakerDataSO
+  speakerName: asdf
+  expressions:
+  - expressionName: Default
+    sprite: {fileID: -7986079646100348125, guid: b7d73afa59a6d26438d117b421211806, type: 3}
+  - expressionName: Happy
+    sprite: {fileID: 2396433562708700885, guid: 4f118c7ef88c64c4fb75286cb1779a17, type: 3}
+  - expressionName: Curious
+    sprite: {fileID: -8718171972514745010, guid: 4f85a29a9cadfd64eae9846d90e00109, type: 3}
+  - expressionName: Resigned
+    sprite: {fileID: -1581534463163335926, guid: d5522fc716f8e2e438b525662d61181b, type: 3}
+  - expressionName: Resolving
+    sprite: {fileID: -343606145013638765, guid: 03e87800f102390419867d33fe37075a, type: 3}
+  - expressionName: Shocked
+    sprite: {fileID: -3030812485475791561, guid: 4836e5676517d83478f32d1f55394216, type: 3}
+  - expressionName: Angry
+    sprite: {fileID: -4069132561234296158, guid: 0f1a4ede97b455d4e8ca0f4d5986d880, type: 3}

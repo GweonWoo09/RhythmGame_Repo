@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cefbb4a7067e51498b21ec868be1469, type: 3}
+  m_Name: Black
+  m_EditorClassIdentifier: Assembly-CSharp::SpeakerDataSO
+  speakerName: asdf
+  expressions:
+  - expressionName: Default
+    sprite: {fileID: 5024491450356528421, guid: 367c10992634e6a4d8fe8a4709076678, type: 3}
+  - expressionName: Happy
+    sprite: {fileID: 2127389512643872915, guid: 1c6ad3cda320ef9448be74cb44b0fbef, type: 3}
+  - expressionName: Troubled
+    sprite: {fileID: -7474423754653402845, guid: b5171a414bca0d5438e2d9d87b080b99, type: 3}
+  - expressionName: aaa
+    sprite: {fileID: 5939971688685093291, guid: 67799feb3847dd74b8b1349fb084d477, type: 3}
+  - expressionName: Sad
+    sprite: {fileID: -855298285791758126, guid: 046503ee9f5c2a54ba29a0a5c09f8f3f, type: 3}
+  - expressionName: Cry
+    sprite: {fileID: 6937817954938267909, guid: 654b0750c44a1e340b81aee35d7078c4, type: 3}
+  - expressionName: Angry
+    sprite: {fileID: 5939971688685093291, guid: 67799feb3847dd74b8b1349fb084d477, type: 3}

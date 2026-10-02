@@ -10,20 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54fa979028e1cb341b87d19d7fe968cc, type: 3}
-  m_Name: Test2
+  m_Name: Test3
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  bgm: {fileID: 0}
   lines:
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
-    expressionName: aaa
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Default
     screenSlot: 0
-    dialogText: "A\uB97C \uACE8\uB790\uC2B5\uB2C8\uB2E4. "
+    dialogText: "B\uB97C \uACE8\uB790\uC2B5\uB2C8\uB2E4. "
+    bgmOverride: {fileID: 0}
     choices:
     - choiceText: "\uB3CC\uC544\uAC00\uAE30"
       targetIndex: 3
       targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
       flagKey: 
       storyFlagValue: 0
-    - choiceText: "\uB05D\uB0B4\uAE30 "
+    - choiceText: "\uB05D\uB0B4\uAE30"
       targetIndex: 4
       targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
       flagKey: 

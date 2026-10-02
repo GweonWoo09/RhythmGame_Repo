@@ -34,11 +34,11 @@ public class SceneChanger : MonoBehaviour
         Loading,
         Title,
         Lobby,
-        ChapterSelect,
         SongSelect,
+        ChapterSelect,
         InGame,
         Result,
-        CutScene,
+        Story,
         Settings
     }
 

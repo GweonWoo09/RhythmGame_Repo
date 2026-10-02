@@ -12,28 +12,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54fa979028e1cb341b87d19d7fe968cc, type: 3}
   m_Name: Test1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  bgm: {fileID: 0}
   lines:
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
-    expressionName: aaa
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Default
     screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6541"
+    bgmOverride: {fileID: 0}
     choices: []
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
-    expressionName: aaa
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Default
     screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6542"
+    bgmOverride: {fileID: 0}
     choices: []
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
-    expressionName: aaa
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Default
     screenSlot: 0
     dialogText: test test test test test test test test test test test test test
       test test test test test test test test test test test test test test test
       test test test test test test
+    bgmOverride: {fileID: 0}
     choices: []
-  - speaker: {fileID: 11400000, guid: ba313aa8279b95d448e9a41dbf131ee3, type: 2}
-    expressionName: aaa
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Default
     screenSlot: 1
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
+    bgmOverride: {fileID: 0}
     choices:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
@@ -45,8 +50,9 @@ MonoBehaviour:
       targetSequence: {fileID: 11400000, guid: 11d96bc55a2156b46a79e8f4a240835a, type: 2}
       flagKey: chooseB
       storyFlagValue: 2
-  - speaker: {fileID: 11400000, guid: e3cfc86187c9ddc4a8826d17a15340ca, type: 2}
-    expressionName: aaa
-    screenSlot: 0
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Default
+    screenSlot: 1
     dialogText: "\uB300\uD654 \uB05D"
+    bgmOverride: {fileID: 0}
     choices: []
