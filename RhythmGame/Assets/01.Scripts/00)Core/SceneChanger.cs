@@ -4,13 +4,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 씬 전환만을 책임지는 싱글톤 매니저.
-/// "이동해도 되는지"(챕터 해금 등)는 GameManager가 판단하고,
-/// 이 클래스는 실제 로드/페이드/로딩화면 처리만 담당한다.
+/// 씬 전환만을 책임지는 싱글톤 매니저. 실제 페이드 연출은 ScreenFader에,
+/// BGM 전환은 AudioManager에 위임하고, 이 클래스는 "언제 무엇을 할지" 순서만 조율한다.
+/// (이전 이름: GameSceneManager / SceneManager)
 /// </summary>
 public class SceneChanger : MonoBehaviour
 {
-    // 싱글톤
     #region Singleton
     public static SceneChanger Instance { get; private set; }
 
@@ -27,52 +26,52 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    // 씬 종류 매핑
     #region Scene Type
     public enum SceneType
     {
         Loading,
         Title,
         Lobby,
-        SongSelect,
         ChapterSelect,
-        InGame,
+        SongSelect,
+        RhythmPlay,
         Result,
         Story,
         Settings
     }
 
-    /// <summary>SceneType과 실제 빌드 씬 이름 매핑 (Build Settings에 등록된 이름과 일치시킬 것)</summary>
+    /// <summary>SceneType과 실제 빌드 씬 이름, 그리고 그 씬 진입 시 재생할 BGM 매핑</summary>
     [Serializable]
     public struct SceneEntry
     {
         public SceneType type;
         public string sceneName;
+
+        [Tooltip("이 씬에 진입할 때 재생할 BGM. 비워두면 기존 BGM을 그대로 유지한다 (예: 스토리 씬처럼 DialogueDataSO가 BGM을 따로 관리하는 경우).")]
+        public AudioClip bgm;
     }
 
-    [Header("Scene Name 매핑 (Inspector에서 등록)")]
+    [Header("Scene 매핑 (Inspector에서 등록)")]
     [SerializeField] private SceneEntry[] sceneEntries;
 
-    public SceneType CurrentScene { get; private set; } = SceneType.Loading;
-    public SceneType PreviousScene { get; private set; } = SceneType.Loading;
+    public SceneType CurrentScene { get; private set; } = SceneType.Title;
+    public SceneType PreviousScene { get; private set; } = SceneType.Title;
 
-    private string GetSceneName(SceneType type)
+    private SceneEntry? FindEntry(SceneType type)
     {
         foreach (var entry in sceneEntries)
         {
-            if (entry.type == type) return entry.sceneName;
+            if (entry.type == type) return entry;
         }
 
-        Debug.LogError($"[SceneChanger] '{type}'에 대한 씬 이름이 등록되지 않았습니다.");
+        Debug.LogError($"[SceneChanger] '{type}'에 대한 씬 정보가 등록되지 않았습니다.");
         return null;
     }
     #endregion
 
-    // 씬 간 데이터 전달
-    #region Scene Payload
+    #region Scene Payload (씬 간 데이터 전달)
     /// <summary>
     /// 예: 곡 선택 씬 -> 리듬게임 플레이 씬으로 넘길 데이터.
-    /// 필요한 정보를 이 컨테이너에 담아 SetPayload로 전달, 다음 씬에서 ConsumePayload로 읽는다.
     /// </summary>
     public class ScenePayload
     {
@@ -97,23 +96,17 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    // 진행도 데이터 로드 및 씬 트랜지션
     #region Load / Transition Events
-    /// <summary>로딩 진행률 (0~1)을 UI(로딩바)가 구독</summary>
     public event Action<float> OnLoadProgress;
-
-    /// <summary>씬 로드 시작/완료 시 다른 매니저(사운드, UI 등)가 구독</summary>
     public event Action<SceneType> OnSceneLoadStart;
     public event Action<SceneType> OnSceneLoadComplete;
 
     [Header("트랜지션 설정")]
     [SerializeField] private float fadeDuration = 0.4f;
-    [SerializeField] private CanvasGroup fadeCanvasGroup; // 검은 화면 페이드용 (Inspector에서 연결)
 
     private bool _isLoading = false;
     #endregion
 
-    // 씬 불러오기 API
     #region Public API
     public void LoadScene(SceneType targetScene, ScenePayload payload = null)
     {
@@ -138,21 +131,23 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    // 화면 전환 페이드 루틴
     #region Load Routine
     private IEnumerator LoadSceneRoutine(SceneType targetScene)
     {
-        string sceneName = GetSceneName(targetScene);
-        if (string.IsNullOrEmpty(sceneName)) yield break;
+        var entry = FindEntry(targetScene);
+        if (entry == null) yield break;
 
         _isLoading = true;
         OnSceneLoadStart?.Invoke(targetScene);
 
-        // 1. 페이드 아웃 (화면을 검게)
-        yield return Fade(0f, 1f);
+        // 1. 화면을 가린다 (ScreenFader에 위임)
+        if (ScreenFader.Instance != null)
+        {
+            yield return ScreenFader.Instance.FadeOut(fadeDuration);
+        }
 
-        // 2. 비동기 로드
-        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+        // 2. 비동기 씬 로드
+        AsyncOperation op = SceneManager.LoadSceneAsync(entry.Value.sceneName);
         op.allowSceneActivation = false;
 
         while (op.progress < 0.9f)
@@ -169,29 +164,20 @@ public class SceneChanger : MonoBehaviour
         PreviousScene = CurrentScene;
         CurrentScene = targetScene;
 
-        // 3. 페이드 인 (화면을 다시 밝게)
-        yield return Fade(1f, 0f);
+        // 3. 화면이 가려진 동안 BGM 교체 (화면이 검은 상태라 끊김이 티 나지 않는다)
+        if (entry.Value.bgm != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(entry.Value.bgm);
+        }
+
+        // 4. 화면을 다시 걷어낸다
+        if (ScreenFader.Instance != null)
+        {
+            yield return ScreenFader.Instance.FadeIn(fadeDuration);
+        }
 
         _isLoading = false;
         OnSceneLoadComplete?.Invoke(targetScene);
-    }
-
-    private IEnumerator Fade(float from, float to)
-    {
-        if (fadeCanvasGroup == null) yield break;
-
-        float elapsed = 0f;
-        fadeCanvasGroup.blocksRaycasts = true;
-
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            fadeCanvasGroup.alpha = Mathf.Lerp(from, to, elapsed / fadeDuration);
-            yield return null;
-        }
-
-        fadeCanvasGroup.alpha = to;
-        fadeCanvasGroup.blocksRaycasts = (to > 0f);
     }
     #endregion
 }

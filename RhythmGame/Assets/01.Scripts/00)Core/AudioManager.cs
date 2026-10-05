@@ -52,8 +52,9 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     public void PlayBGM(AudioClip clip, bool loop = true, float fadeDuration = -1f)
     {
-        if (clip == null) return;
         if (_currentBgmClip == clip && bgmSource.isPlaying) return;
+
+        if (clip == null) return;
 
         if (fadeDuration < 0f) fadeDuration = defaultFadeDuration;
 

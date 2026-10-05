@@ -18,7 +18,7 @@ MonoBehaviour:
     expressionName: Default
     screenSlot: 0
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uB300\uD6541"
-    bgmOverride: {fileID: 0}
+    bgmOverride: {fileID: 8300000, guid: c87be3ab975a5e24a8a13497b294250b, type: 3}
     choices: []
   - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
     expressionName: Default
