@@ -38,7 +38,7 @@ MonoBehaviour:
     expressionName: Default
     screenSlot: 1
     dialogText: "\uD14C\uC2A4\uD2B8\uC6A9 \uC120\uD0DD\uC9C0"
-    bgmOverride: {fileID: 0}
+    bgmOverride: {fileID: 8300000, guid: e31c5785b016ca24ba48ed03dd13ac1a, type: 3}
     choices:
     - choiceText: "A\uB97C \uACE0\uB974\uAE30 "
       targetIndex: 0
