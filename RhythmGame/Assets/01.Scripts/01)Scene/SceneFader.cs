@@ -55,6 +55,7 @@ public class ScreenFader : MonoBehaviour
     }
     #endregion
 
+    [Header("씬 이동시 화면 어두워짐/밝아짐")]
     [Tooltip("화면 전체를 덮는 검은 패널 등에 붙은 CanvasGroup")]
     [SerializeField] private CanvasGroup fadeCanvasGroup;
 
