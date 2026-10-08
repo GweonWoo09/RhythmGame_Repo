@@ -11,22 +11,78 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54fa979028e1cb341b87d19d7fe968cc, type: 3}
   m_Name: Test2
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueDataSO
   bgm: {fileID: 0}
   lines:
   - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
     expressionName: Default
     screenSlot: 0
-    dialogText: "A\uB97C \uACE8\uB790\uC2B5\uB2C8\uB2E4. "
+    dialogText: Default
+    bgmOverride: {fileID: 8300000, guid: c87be3ab975a5e24a8a13497b294250b, type: 3}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Happy
+    screenSlot: 0
+    dialogText: Happy
     bgmOverride: {fileID: 0}
-    choices:
-    - choiceText: "\uB3CC\uC544\uAC00\uAE30"
-      targetIndex: 3
-      targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
-      flagKey: 
-      storyFlagValue: 0
-    - choiceText: "\uB05D\uB0B4\uAE30 "
-      targetIndex: 4
-      targetSequence: {fileID: 11400000, guid: 311115b72a2c88c4b8104c95689d0714, type: 2}
-      flagKey: 
-      storyFlagValue: 0
+    choices: []
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Curious
+    screenSlot: 0
+    dialogText: Curious
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Shocked
+    screenSlot: 0
+    dialogText: Shocked
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+    expressionName: Angry
+    screenSlot: 0
+    dialogText: Angry
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Default
+    screenSlot: 1
+    dialogText: Default
+    bgmOverride: {fileID: 8300000, guid: e31c5785b016ca24ba48ed03dd13ac1a, type: 3}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Happy
+    screenSlot: 1
+    dialogText: Happy
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Troubled
+    screenSlot: 1
+    dialogText: Troubled
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: aaa
+    screenSlot: 1
+    dialogText: aaa
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Sad
+    screenSlot: 1
+    dialogText: Sad
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Cry
+    screenSlot: 1
+    dialogText: Cry
+    bgmOverride: {fileID: 0}
+    choices: []
+  - speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+    expressionName: Angry
+    screenSlot: 1
+    dialogText: Angry
+    bgmOverride: {fileID: 0}
+    choices: []

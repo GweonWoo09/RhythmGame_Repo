@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 54fa979028e1cb341b87d19d7fe968cc, type: 3}
-  m_Name: Test3
+  m_Name: Test1-2
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   bgm: {fileID: 0}
   lines:

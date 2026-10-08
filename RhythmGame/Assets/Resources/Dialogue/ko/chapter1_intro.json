@@ -1,0 +1,38 @@
+{
+  "bgm": "Audio/BGM/calm_morning",
+  "lines": [
+    {
+      "speakerId": "yuna",
+      "expression": "Normal",
+      "screenSlot": 0,
+      "text": "오늘도 연습하러 온 거야?"
+    },
+    {
+      "speakerId": "yuna",
+      "expression": "Happy",
+      "screenSlot": 0,
+      "text": "마침 잘 왔어. 새 곡을 같이 맞춰보자!",
+      "choices": [
+        {
+          "text": "좋아, 바로 시작하자",
+          "targetIndex": 2,
+          "flagKey": "ch1_eager",
+          "flagValue": 1
+        },
+        {
+          "text": "잠깐만, 먼저 쉬고 싶어",
+          "targetSequenceId": "chapter1_rest",
+          "targetIndex": 0,
+          "flagKey": "ch1_eager",
+          "flagValue": 0
+        }
+      ]
+    },
+    {
+      "speakerId": "yuna",
+      "expression": "Happy",
+      "screenSlot": 0,
+      "text": "좋아! 그럼 바로 시작할게.\n준비됐지?"
+    }
+  ]
+}

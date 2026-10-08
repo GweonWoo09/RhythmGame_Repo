@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 하나의 대화 시퀀스(챕터, 컷씬 등)를 담는 데이터 에셋.
 /// Project 창에서 우클릭 -> Create -> Dialog -> Dialogue Sequence 로 생성.
+/// (이전 이름: DialogSequenceSO)
 /// </summary>
 [CreateAssetMenu(fileName = "NewDialogueSequence", menuName = "Dialog/Dialogue Sequence")]
 public class DialogueDataSO : ScriptableObject
@@ -54,6 +55,9 @@ public struct DialogChoice
 
     [Tooltip("이 값이 지정되면 다른 대화 시퀀스(예: 다른 스토리 분기)로 전환한다.")]
     public DialogueDataSO targetSequence;
+
+    [Tooltip("JSON으로 관리하는 시퀀스로 분기할 때 사용하는 파일 이름(확장자 제외). targetSequence가 비어있을 때만 쓰인다.")]
+    public string targetSequenceId;
 
     [Tooltip("이 선택을 기록할 플래그 키. 비워두면 플래그를 남기지 않음. 예: \"chapter2_helpedA\"")]
     public string flagKey;

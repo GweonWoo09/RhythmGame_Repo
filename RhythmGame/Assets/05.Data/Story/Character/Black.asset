@@ -27,4 +27,4 @@ MonoBehaviour:
   - expressionName: Cry
     sprite: {fileID: 6937817954938267909, guid: 654b0750c44a1e340b81aee35d7078c4, type: 3}
   - expressionName: Angry
-    sprite: {fileID: 5939971688685093291, guid: 67799feb3847dd74b8b1349fb084d477, type: 3}
+    sprite: {fileID: -7880802256771021485, guid: b906cd2a885e7fc42bd9548af6124b9c, type: 3}

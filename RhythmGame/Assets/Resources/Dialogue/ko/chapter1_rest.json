@@ -1,0 +1,16 @@
+{
+  "lines": [
+    {
+      "speakerId": "yuna",
+      "expression": "Normal",
+      "screenSlot": 0,
+      "text": "그래, 무리하는 것보단 낫지. 잠깐 쉬었다 가자."
+    },
+    {
+      "speakerId": "yuna",
+      "expression": "Happy",
+      "screenSlot": 0,
+      "text": "준비되면 말해줘!"
+    }
+  ]
+}

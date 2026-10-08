@@ -5,11 +5,15 @@ using UnityEngine;
 /// 대화 진행 로직만 담당한다. 실제 UI(Image, Text)는 건드리지 않고
 /// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogueUIView가 담당.
 /// 대사 데이터는 DialogueDataSO 에셋으로부터 받아오며, BGM 전환은 AudioManager에 위임한다.
+/// (이전 이름: DialogManager)
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
     [Tooltip("재생할 대화 시퀀스 에셋 (DialogueDataSO)")]
     [SerializeField] private DialogueDataSO dialogSequence;
+
+    [Tooltip("dialogSequence가 비어있을 때 JSON(Resources/Dialogue/{언어}/{ID}.json)에서 불러올 시퀀스 ID")]
+    [SerializeField] private string startSequenceId;
 
     private int currentDialogIndex = -1;
     private bool isFinished = false;
@@ -26,6 +30,11 @@ public class DialogueManager : MonoBehaviour
 
     private void Start()
     {
+        if (dialogSequence == null && !string.IsNullOrEmpty(startSequenceId))
+        {
+            dialogSequence = DialogueJsonLoader.Load(startSequenceId);
+        }
+
         if (HasLines())
         {
             PlaySequenceBGM();
@@ -80,6 +89,20 @@ public class DialogueManager : MonoBehaviour
         if (choiceIndex < 0 || choiceIndex >= currentLine.choices.Length) return;
 
         var choice = currentLine.choices[choiceIndex];
+
+        // 다른 시퀀스로 분기하는 선택지라면, 상태를 바꾸기 전에 대상 시퀀스를 먼저 확보한다.
+        // (직접 참조가 없고 ID만 있으면 JSON에서 로드)
+        DialogueDataSO nextSequence = choice.targetSequence;
+        if (nextSequence == null && !string.IsNullOrEmpty(choice.targetSequenceId))
+        {
+            nextSequence = DialogueJsonLoader.Load(choice.targetSequenceId);
+            if (nextSequence == null)
+            {
+                // 로드 실패 시 선택 대기 상태를 유지해서 엉뚱한 줄로 넘어가지 않게 한다
+                return;
+            }
+        }
+
         isWaitingForChoice = false;
 
         if (!string.IsNullOrEmpty(choice.flagKey) && GameManager.Instance != null)
@@ -87,10 +110,10 @@ public class DialogueManager : MonoBehaviour
             GameManager.Instance.SetStoryFlag(choice.flagKey, choice.storyFlagValue);
         }
 
-        if (choice.targetSequence != null)
+        if (nextSequence != null)
         {
             // 다른 시퀀스(챕터 분기)로 전환 (BGM도 새 시퀀스 기준으로 교체됨)
-            SetDialogSequence(choice.targetSequence, choice.targetIndex);
+            SetDialogSequence(nextSequence, choice.targetIndex);
         }
         else
         {
@@ -126,6 +149,16 @@ public class DialogueManager : MonoBehaviour
         if (dialogSequence.bgm != null && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlayBGM(dialogSequence.bgm);
+        }
+    }
+
+    /// <summary>JSON 파일(Resources/Dialogue/{언어}/{sequenceId}.json)을 불러와 바로 재생</summary>
+    public void LoadSequenceFromJson(string sequenceId, int startIndex = 0)
+    {
+        var sequence = DialogueJsonLoader.Load(sequenceId);
+        if (sequence != null)
+        {
+            SetDialogSequence(sequence, startIndex);
         }
     }
 
