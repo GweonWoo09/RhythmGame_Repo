@@ -600,16 +600,16 @@ MonoBehaviour:
     bgm: {fileID: 0}
   - type: 1
     sceneName: 01.Title
-    bgm: {fileID: 0}
+    bgm: {fileID: 8300000, guid: caf867a6ae7e58d4b9e89c3144badb58, type: 3}
   - type: 2
     sceneName: 02.Lobby
-    bgm: {fileID: 0}
+    bgm: {fileID: 8300000, guid: caf867a6ae7e58d4b9e89c3144badb58, type: 3}
   - type: 4
     sceneName: 03.SongSelect
     bgm: {fileID: 0}
   - type: 3
     sceneName: 04.ChapterSelect
-    bgm: {fileID: 0}
+    bgm: {fileID: 8300000, guid: caf867a6ae7e58d4b9e89c3144badb58, type: 3}
   - type: 5
     sceneName: 05.InGame
     bgm: {fileID: 0}
@@ -631,7 +631,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 929835590}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1253,7 +1253,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1816038047}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
