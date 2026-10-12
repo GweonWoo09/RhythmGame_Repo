@@ -23,6 +23,8 @@ namespace RhythmGameStarter
         [NonSerialized] public bool inUse;
         [NonSerialized] public bool inInteraction;
         [NonSerialized] public bool alreadyMissed;
+        // [수정] 판정이 끝난 노트인지 (성공/미스 모두). 같은 노트를 두 번 판정하지 않기 위함
+        [NonSerialized] public bool judged;
         [NonSerialized] public float noteLength;
         [NonSerialized] public float noteTime;
 
@@ -98,6 +100,7 @@ namespace RhythmGameStarter
             inUse = false;
             inInteraction = false;
             alreadyMissed = false;
+            judged = false; // [수정]
             parentTrack = null;
             ResetNoteLength();
         }
@@ -129,12 +132,8 @@ namespace RhythmGameStarter
         {
             if (col.tag == "LineArea")
             {
-                //The note is still under long press, dont break the combo
-                if (action == NoteAction.LongPress && inInteraction)
-                    return;
-
-                alreadyMissed = true;
-                songManager.comboSystem.BreakCombo();
+                // [수정] 미스 판정은 NoteArea.CheckMissedNotes()에서 시간(ms) 기준으로 처리.
+                // 충돌체 기준 미스는 판정 범위와 맞지 않아서 사용하지 않음
             }
         }
     }

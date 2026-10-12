@@ -23,11 +23,21 @@ namespace RhythmGameStarter
 
         private SongManager songManager;
 
+        // [수정] 판정 범위(ms)를 가져오기 위함
+        private StatsSystem statsSystem;
+
+        // [수정] 롱노트를 누른 순간의 곡 시간 (롱노트 판정은 누른 타이밍 기준)
+        private float longNoteDownSongTime;
+
+        // [수정] 미스 기준 시간(초)
+        private float MissWindow => statsSystem.MissWindowMs / 1000f;
+
         void Start()
         {
             track = GetComponentInParent<Track>();
             effect = GetComponentInParent<TapEffectPool>();
             songManager = GetComponentInParent<SongManager>();
+            statsSystem = songManager.GetComponent<StatsSystem>(); // [수정]
             _camera = Camera.main;
         }
 
@@ -163,6 +173,8 @@ namespace RhythmGameStarter
                 return;
             }
 
+            CheckMissedNotes(); // [수정] 시간이 지난 노트를 미스 처리
+
             if (currentNote || (currentNote && keyboardInputHandler))
             {
                 switch (currentNote.action)
@@ -176,7 +188,7 @@ namespace RhythmGameStarter
                             {
                                 // print("noteFinished");
 
-                                AddCombo(currentNote, touchDownNotePosition);
+                                AddCombo(currentNote, longNoteDownSongTime); // [수정] 누른 타이밍으로 판정
 
                                 longNoteDetecter.OnTouchUp();
                                 longNoteDetecter = null;
@@ -192,11 +204,12 @@ namespace RhythmGameStarter
                             if (longNoteDetecter.exitedLineArea)
                             {
                                 // print("noteFinished");
-                                AddCombo(currentNote, touchDownNotePosition);
+                                AddCombo(currentNote, longNoteDownSongTime); // [수정]
                             }
                             else
                             {
                                 // print("noteFailed");
+                                currentNote.judged = true; // [수정] 일찍 뗀 롱노트는 미스 1회만
                                 songManager.comboSystem.BreakCombo();
                             }
 
@@ -249,7 +262,7 @@ namespace RhythmGameStarter
                             if (addCombo)
                             {
                                 PlayHitSound(currentNote);
-                                AddCombo(currentNote, touchDownNotePosition);
+                                AddCombo(currentNote, longNoteDownSongTime); // [수정] 누른 타이밍으로 판정
 
                                 EmitEffectIfNeeded();
 
@@ -288,7 +301,7 @@ namespace RhythmGameStarter
                 OnInteractionBegin.Invoke();
             }
 
-            var note = notesInRange.FirstOrDefault();
+            var note = FindJudgeableNote(); // [수정] 충돌체 대신 시간 기준으로 판정할 노트 선택
 
             //// Handling Recording mode
             if (NoteRecorder.INSTANCE && NoteRecorder.INSTANCE.IsRecording)
@@ -313,7 +326,7 @@ namespace RhythmGameStarter
                         EmitEffectIfNeeded();
 
                         PlayHitSound(note);
-                        AddCombo(note, note.transform.position);
+                        AddCombo(note, songManager.songPosition); // [수정] 누른 순간의 곡 시간으로 판정
 
                         KillNote(note);
 
@@ -328,6 +341,7 @@ namespace RhythmGameStarter
                         note.inInteraction = true;
 
                         touchDownNotePosition = note.transform.position;
+                        longNoteDownSongTime = songManager.songPosition; // [수정]
 
                         longNoteDetecter = note.GetNoteDetecter();
                         longNoteDetecter.OnTouchDown();
@@ -349,6 +363,7 @@ namespace RhythmGameStarter
                         note.inInteraction = true;
 
                         touchDownNotePosition = note.transform.position;
+                        longNoteDownSongTime = songManager.songPosition; // [수정]
                         break;
                 }
             }
@@ -363,12 +378,50 @@ namespace RhythmGameStarter
             }
         }
 
-        private void AddCombo(Note note, Vector3 touchDownPosition)
+        // [수정] 거리 대신 시간 차이(ms)로 판정
+        private void AddCombo(Note note, float inputSongTime)
         {
-            var noteLocalPositionInTrack = note.transform.parent.parent.InverseTransformPoint(touchDownPosition);
-            var diff = track.lineArea.localPosition.y - noteLocalPositionInTrack.y;
-            songManager.comboSystem.AddCombo(1, Mathf.Abs(diff), note.score);
+            note.judged = true;
+            var diffMs = Mathf.Abs(inputSongTime - note.noteTime) * 1000f;
+            songManager.comboSystem.AddCombo(1, diffMs, note.score);
             songManager.trackManager.onNoteTriggered.Invoke(note);
+        }
+
+        // [수정] 이 레인에서 판정 범위 안에 있는, 아직 판정 안 된 가장 이른 노트
+        // 범위보다 일찍 누르면 null (입력 무시)
+        private Note FindJudgeableNote()
+        {
+            Note earliest = null;
+            foreach (var note in track.runtimeNote)
+            {
+                if (!note || !note.inUse || note.judged || note.inInteraction) continue;
+
+                var diff = note.noteTime - songManager.songPosition;
+                if (diff > MissWindow || diff < -MissWindow) continue;
+
+                if (earliest == null || note.noteTime < earliest.noteTime)
+                    earliest = note;
+            }
+            return earliest;
+        }
+
+        // [수정] 판정 범위를 넘어 지나간 노트를 미스 처리
+        private void CheckMissedNotes()
+        {
+            if (songManager.songPaused) return;
+
+            foreach (var note in track.runtimeNote)
+            {
+                if (!note || !note.inUse || note.judged || note.inInteraction) continue;
+                if (note == currentNote) continue; // 처리 중인 롱노트는 뗄 때 판정
+
+                if (songManager.songPosition - note.noteTime > MissWindow)
+                {
+                    note.judged = true;
+                    note.alreadyMissed = true;
+                    songManager.comboSystem.BreakCombo();
+                }
+            }
         }
 
         private void KillNoteAnimation(Note note)

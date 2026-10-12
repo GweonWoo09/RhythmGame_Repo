@@ -1,9 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
-
+/*hwanginchang 10/09 start
+ 
+ 
+ 
+ */
 namespace RhythmGameStarter
 {
     /// <summary>
@@ -80,6 +84,22 @@ namespace RhythmGameStarter
         public int bpm;
 
         public float speedModifier = 1;
+
+        // [수정] 시작 딜레이: 음악 시작부터 첫 박자(격자 1번 칸)까지의 시간(초)
+        [Tooltip("음악 시작부터 첫 박자까지의 시간(초)")]
+        public float startDelay;
+
+        // [수정] 박자 -> 곡 시간(초). 시작 딜레이 포함
+        public float BeatToTime(float beat)
+        {
+            return startDelay + beat * 60f / bpm;
+        }
+
+        // [수정] 곡 시간(초) -> 박자. 시작 딜레이 제외
+        public float TimeToBeat(float time)
+        {
+            return (time - startDelay) * bpm / 60f;
+        }
 
         // Custom Mapping Support
         public MidiTrackMapping customMidiMapping;

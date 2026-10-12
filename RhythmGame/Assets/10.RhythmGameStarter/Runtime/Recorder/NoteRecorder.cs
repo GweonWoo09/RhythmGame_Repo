@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
@@ -319,7 +319,7 @@ namespace RhythmGameStarter
                 clonedSongItem.notes = new List<SongItem.MidiNote>();
                 foreach (var noteEventData in currentRecord.allNotes)
                 {
-                    var beat = noteEventData.startTime * currentRecord.songItem.bpm / 60;
+                    var beat = currentRecord.songItem.TimeToBeat(noteEventData.startTime); // [수정] 시작 딜레이 제외
                     var beatLength = noteEventData.duration * currentRecord.songItem.bpm / 60;
 
                     var beatIndex = SongItem.RoundToNearestBeat(beat);
@@ -361,7 +361,7 @@ namespace RhythmGameStarter
                         beatLengthIndex = beatLengthIndex,
 
                         //in seconds
-                        time = 60f / currentRecord.songItem.bpm * beatIndex,
+                        time = currentRecord.songItem.BeatToTime(beatIndex), // [수정] 시작 딜레이 포함
                         noteLength = 60f / currentRecord.songItem.bpm * beatLengthIndex,
                     });
                 }
