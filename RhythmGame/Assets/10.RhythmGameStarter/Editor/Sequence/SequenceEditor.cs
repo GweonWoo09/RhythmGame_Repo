@@ -123,6 +123,11 @@ namespace RhythmGameStarter
 
         private bool lockToPlayHead = true;
 
+        // 미리듣기 배속 (채보 확인용)
+        private static float[] playbackSpeedScale = new float[] { 0.2f, 0.5f, 0.75f, 1f };
+        private static string[] playbackSpeedScaleDisplay = Array.ConvertAll(playbackSpeedScale, item => item + "x");
+        private int _playbackSpeedSelected = 3;
+
         //Default is root octave
         private int paintOctaveSelected = 0;
         private int paintBeatLengthSelected = 0;
@@ -131,7 +136,7 @@ namespace RhythmGameStarter
 
         #endregion
 
-        private static float[] beatLengthScale = new float[] { 0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 3.5f, 4f };
+        private static float[] beatLengthScale = new float[] { 0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 3.5f, 4f, 4.5f, 5f, 5.5f, 6f, 6.5f, 7, 7.5f, 8 };
         private static string[] beatLengthScaleDisplay = Array.ConvertAll(beatLengthScale, item => item.ToString());
 
         //Our scale uses 4 as root octave
@@ -371,6 +376,20 @@ namespace RhythmGameStarter
                 if (shouldDraw)
                 {
                     songItem = EditorGUILayout.ObjectField(songItem, typeof(SongItem), false) as SongItem;
+
+                    // [수정] 시작 딜레이 입력
+                    if (songItem)
+                    {
+                        EditorGUI.BeginChangeCheck();
+                        var newDelay = EditorGUILayout.DelayedFloatField(new GUIContent("Start Delay (sec)", "음악 시작부터 첫 박자까지의 시간(초)"), songItem.startDelay);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            Undo.RecordObject(songItem, "Change Start Delay");
+                            songItem.startDelay = newDelay;
+                            SongItemEditor.UpdateNotesTime(songItem);
+                            EditorUtility.SetDirty(songItem);
+                        }
+                    }
                 }
             }
             using (new EditorGUI.DisabledScope(!songItem))
@@ -470,6 +489,16 @@ namespace RhythmGameStarter
                         {
                             lockToPlayHead = !lockToPlayHead;
                         }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUILayout.Label("Playback Speed", GUILayout.Width(100));
+                            EditorGUI.BeginChangeCheck();
+                            _playbackSpeedSelected = GUILayout.Toolbar(_playbackSpeedSelected, playbackSpeedScaleDisplay);
+                            if (EditorGUI.EndChangeCheck() && previewAudio)
+                            {
+                                previewAudio.pitch = playbackSpeedScale[_playbackSpeedSelected];
+                            }
+                        }
                     }
                 }
 
@@ -535,6 +564,7 @@ namespace RhythmGameStarter
                 tempAudio.hideFlags = HideFlags.HideAndDontSave;
                 previewAudio = tempAudio.AddComponent<AudioSource>();
                 previewAudio.clip = songItem.clip;
+                previewAudio.pitch = playbackSpeedScale[_playbackSpeedSelected];
                 previewAudio.Play();
             }
             else
@@ -549,7 +579,7 @@ namespace RhythmGameStarter
 
         private NoteName[] GetNoteNameMapping()
         {
-            if (_stepSizeSelected != 2)
+            if (_numberOfTracksSelected != 2)
                 return noteNameMapping;
             else
                 return noteNameMappingExtract;
@@ -563,7 +593,7 @@ namespace RhythmGameStarter
             var playHeadIndex = -2f;
             if (previewAudio)
             {
-                playHeadIndex = SongItem.RoundToNearestBeat(previewAudio.time * songItem.bpm / 60);
+                playHeadIndex = SongItem.RoundToNearestBeat(songItem.TimeToBeat(previewAudio.time)); // [수정] 시작 딜레이 반영
 
                 //Sync the scroll to the current play head
                 if (lockToPlayHead && previewAudio.isPlaying)
@@ -618,7 +648,7 @@ namespace RhythmGameStarter
                             {
                                 if (previewAudio)
                                 {
-                                    previewAudio.time = 60f / songItem.bpm * beatIndex;
+                                    previewAudio.time = Mathf.Max(0f, songItem.BeatToTime(beatIndex)); // [수정] 시작 딜레이 반영
                                     Repaint();
 
                                     //We stop the preview first if its playing
@@ -719,7 +749,7 @@ namespace RhythmGameStarter
                         noteName = targetNoteName,
                         noteOctave = octaveScale[paintOctaveSelected],
                         //in seconds
-                        time = 60f / songItem.bpm * beatIndex,
+                        time = songItem.BeatToTime(beatIndex), // [수정] 시작 딜레이 포함
                         noteLength = 60f / songItem.bpm * beatLengthScale[paintBeatLengthSelected],
                     });
                 }

@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using System.IO;
 using System;
 using UnityEngine;
@@ -107,6 +107,17 @@ namespace RhythmGameStarter
                     UpdateNotesTime(songItem);
                     serializedObject.Update();
                 }
+
+                // [수정] 시작 딜레이 입력. 바꾸면 노트 시간을 다시 계산
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.DelayedFloatField(serializedObject.FindProperty("startDelay"), new GUIContent("Start Delay (sec)"));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    UpdateNotesTime(songItem);
+                    serializedObject.Update();
+                }
+
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("speedModifier"));
                 EditorUtils.EndIndent();
             }
@@ -331,7 +342,7 @@ namespace RhythmGameStarter
         {
             foreach (var note in songItem.notes)
             {
-                note.time = 60f / songItem.bpm * note.beatIndex;
+                note.time = songItem.BeatToTime(note.beatIndex); // [수정] 시작 딜레이 포함
                 note.noteLength = 60f / songItem.bpm * note.beatLengthIndex;
             }
         }
