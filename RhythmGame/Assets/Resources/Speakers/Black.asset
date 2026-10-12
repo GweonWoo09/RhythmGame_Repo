@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpeakerDataSO
   speakerName: asdf
   expressions:
-  - expressionName: Default
+  - expressionName: Natural
     sprite: {fileID: 5024491450356528421, guid: 367c10992634e6a4d8fe8a4709076678, type: 3}
-  - expressionName: Happy
+  - expressionName: Joy
     sprite: {fileID: 2127389512643872915, guid: 1c6ad3cda320ef9448be74cb44b0fbef, type: 3}
-  - expressionName: Troubled
+  - expressionName: Irritated
     sprite: {fileID: -7474423754653402845, guid: b5171a414bca0d5438e2d9d87b080b99, type: 3}
-  - expressionName: aaa
+  - expressionName: Annoyed
     sprite: {fileID: 5939971688685093291, guid: 67799feb3847dd74b8b1349fb084d477, type: 3}
-  - expressionName: Sad
+  - expressionName: Confused
     sprite: {fileID: -855298285791758126, guid: 046503ee9f5c2a54ba29a0a5c09f8f3f, type: 3}
   - expressionName: Cry
     sprite: {fileID: 6937817954938267909, guid: 654b0750c44a1e340b81aee35d7078c4, type: 3}

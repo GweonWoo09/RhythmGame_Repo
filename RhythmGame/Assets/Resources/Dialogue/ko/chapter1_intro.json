@@ -3,13 +3,13 @@
   "lines": [
     {
       "speakerId": "Black",
-      "expression": "Default",
+      "expression": "Natural",
       "screenSlot": 1,
       "text": "오늘도 연습하러 온 거야?"
     },
     {
       "speakerId": "Black",
-      "expression": "Happy",
+      "expression": "Joy",
       "screenSlot": 1,
       "text": "마침 잘 왔어. 새 곡을 같이 맞춰보자!",
       "choices": [
@@ -36,7 +36,7 @@
     },
     {
       "speakerId": "Black",
-      "expression": "Happy",
+      "expression": "Joy",
       "screenSlot": 1,
       "text": "좋아! 그럼 바로 시작할게.\n준비됐지?"
     }
