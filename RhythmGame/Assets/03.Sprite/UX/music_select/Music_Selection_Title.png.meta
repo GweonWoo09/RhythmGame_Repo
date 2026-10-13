@@ -134,10 +134,10 @@ TextureImporter:
       name: Music_Selection_Title_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 789
-        width: 107
-        height: 36
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,143 +152,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_1
-      rect:
-        serializedVersion: 2
-        x: 173
-        y: 790
-        width: 18
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f96a4137c62a42160800000000000000
-      internalID: 6999898307511494303
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_2
-      rect:
-        serializedVersion: 2
-        x: 191
-        y: 789
-        width: 34
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2b1ae8c9921616f80800000000000000
-      internalID: -8115098222196776526
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_3
-      rect:
-        serializedVersion: 2
-        x: 235
-        y: 789
-        width: 26
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 18bd445962f6c0400800000000000000
-      internalID: 291730287375997825
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_4
-      rect:
-        serializedVersion: 2
-        x: 259
-        y: 790
-        width: 95
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1e3f59133a16250b0800000000000000
-      internalID: -5741419221404486687
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_5
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 789
-        width: 68
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a86413e57d4f88b90800000000000000
-      internalID: -7239267195162638710
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_Selection_Title_6
-      rect:
-        serializedVersion: 2
-        x: 71
-        y: 769
-        width: 845
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7c0328028ad1568b0800000000000000
-      internalID: -5159685190145920825
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f240330549defdc47b74a070a5e1c222
     internalID: 0
     vertices: []
     indices: 

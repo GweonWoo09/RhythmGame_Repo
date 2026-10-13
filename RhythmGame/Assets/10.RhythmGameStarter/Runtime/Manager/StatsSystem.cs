@@ -49,6 +49,7 @@ namespace RhythmGameStarter
         {
             missed += addMissed;
             onMissedUpdate.Invoke(missed.ToString());
+            onComboStatusUpdate.Invoke("Miss");
             UpdateAccuracyDisplay(); // [수정]
         }
 
