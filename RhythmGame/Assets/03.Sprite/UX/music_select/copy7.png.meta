@@ -119,10 +119,10 @@ TextureImporter:
       name: copy7_0
       rect:
         serializedVersion: 2
-        x: 1066
-        y: 584
-        width: 391
-        height: 7
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,33 +137,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: copy7_1
-      rect:
-        serializedVersion: 2
-        x: 724
-        y: 313
-        width: 720
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 756247ab0546fb7d0800000000000000
-      internalID: -2900489337114974633
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 028e32ec6ec34654d920a6a059aef1ac
     internalID: 0
     vertices: []
     indices: 

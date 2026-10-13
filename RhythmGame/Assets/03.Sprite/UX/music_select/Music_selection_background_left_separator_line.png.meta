@@ -134,10 +134,10 @@ TextureImporter:
       name: Music_selection_background_left_separator_line_0
       rect:
         serializedVersion: 2
-        x: 60
-        y: 701
-        width: 543
-        height: 15
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,143 +152,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_1
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 146
-        width: 92
-        height: 559
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: de714c1b54cf669a0800000000000000
-      internalID: -6240022857409882131
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_2
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 620
-        width: 557
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 91ba307b37c11b1e0800000000000000
-      internalID: -2183933060980692199
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_3
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 542
-        width: 462
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1479bf56f75b157c0800000000000000
-      internalID: -4084283828271868095
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_4
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 463
-        width: 550
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 558832df79e186850800000000000000
-      internalID: 6370375311051425877
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_5
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 385
-        width: 462
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cd03d8b2bc5709c40800000000000000
-      internalID: 5517039058998341852
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Music_selection_background_left_separator_line_6
-      rect:
-        serializedVersion: 2
-        x: 183
-        y: 147
-        width: 541
-        height: 164
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 3b9d39354c0045380800000000000000
-      internalID: -8983554513481508429
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: a8de9417e222c634ebde5c80c36f969e
     internalID: 0
     vertices: []
     indices: 

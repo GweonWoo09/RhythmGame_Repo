@@ -116,10 +116,10 @@ TextureImporter:
       name: Music_Selection_Fade_0
       rect:
         serializedVersion: 2
-        x: 76
-        y: 464
-        width: 465
-        height: 84
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ecb3586259db8204392597b808df7637
     internalID: 0
     vertices: []
     indices: 

@@ -119,42 +119,20 @@ TextureImporter:
       name: Auxiliary_line_0
       rect:
         serializedVersion: 2
-        x: 66
-        y: 702
-        width: 128
-        height: 24
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 093f1af1e61f32660800000000000000
+      spriteID: 0f2d08e6e8e793f4391864ce880a8fc5
       internalID: 7359991671332926352
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Auxiliary_line_1
-      rect:
-        serializedVersion: 2
-        x: 1066
-        y: 584
-        width: 391
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a81f0483b5171da60800000000000000
-      internalID: 7697057874752631178
       vertices: []
       indices: 
       edges: []
@@ -163,7 +141,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 513116b506804214d9d740152b282605
     internalID: 0
     vertices: []
     indices: 

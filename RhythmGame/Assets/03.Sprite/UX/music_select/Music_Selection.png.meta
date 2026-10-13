@@ -116,10 +116,10 @@ TextureImporter:
       name: Music_Selection_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 463
-        width: 499
-        height: 86
+        x: 0
+        y: 0
+        width: 1536
+        height: 864
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 7c060ab2fa0eeb7489ebb5a0b41bb3ca
     internalID: 0
     vertices: []
     indices: 
