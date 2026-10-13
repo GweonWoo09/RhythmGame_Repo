@@ -244,7 +244,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    // 데이처 저장, 불러오기
+    // 데이터 저장, 불러오기
     #region Save / Load
     /// <summary>
     /// 실제 파일 입출력은 DataManager에 위임하고,
@@ -252,12 +252,12 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void SaveGame()
     {
-        // DataManager.Instance.Save(ProgressData);
+        DataManager.Instance.Save(ProgressData);
     }
 
     public void LoadGame()
     {
-        // ProgressData = DataManager.Instance.Load();
+        ProgressData = DataManager.Instance.Load();
     }
     #endregion
 

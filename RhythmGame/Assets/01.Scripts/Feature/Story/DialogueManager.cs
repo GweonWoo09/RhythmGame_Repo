@@ -6,6 +6,10 @@ using UnityEngine;
 /// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogueUIView가 담당.
 /// 대사 데이터는 DialogueDataSO 에셋으로부터 받아오며, BGM 전환은 AudioManager에 위임한다.
 /// (이전 이름: DialogManager)
+///
+/// [수정 내역]
+/// - 대사 인덱스(startIndex / choice.targetIndex) 범위 검증 추가. 잘못된 값이면 에러만 남기고
+///   현재 상태(선택 대기 포함)를 그대로 유지한다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
@@ -43,20 +47,25 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneChanger의 payload로 전달받은 경우)
+    /// 다른 챕터/컷씬의 대화로 교체하고 싶을 때 (예: SceneChanger의 payload로 전달받은 경우).
+    /// 시퀀스가 비어있거나 startIndex가 범위를 벗어나면 에러만 남기고 현재 상태를 바꾸지 않는다.
     /// </summary>
     public void SetDialogSequence(DialogueDataSO sequence, int startIndex = 0)
     {
+        if (!IsValidIndex(sequence, startIndex))
+        {
+            Debug.LogError($"[DialogueManager] 시퀀스를 시작할 수 없습니다. " +
+                           $"'{(sequence != null ? sequence.name : "null")}' 시퀀스에 {startIndex}번 줄이 없습니다.");
+            return;
+        }
+
         dialogSequence = sequence;
         currentDialogIndex = -1;
         isFinished = false;
         isWaitingForChoice = false;
 
-        if (HasLines())
-        {
-            PlaySequenceBGM();
-            ShowDialog(startIndex);
-        }
+        PlaySequenceBGM();
+        ShowDialog(startIndex);
     }
 
     /// <summary>
@@ -86,7 +95,7 @@ public class DialogueManager : MonoBehaviour
         if (!isWaitingForChoice) return;
 
         var currentLine = dialogSequence.lines[currentDialogIndex];
-        if (choiceIndex < 0 || choiceIndex >= currentLine.choices.Length) return;
+        if (currentLine.choices == null || choiceIndex < 0 || choiceIndex >= currentLine.choices.Length) return;
 
         var choice = currentLine.choices[choiceIndex];
 
@@ -101,6 +110,17 @@ public class DialogueManager : MonoBehaviour
                 // 로드 실패 시 선택 대기 상태를 유지해서 엉뚱한 줄로 넘어가지 않게 한다
                 return;
             }
+        }
+
+        // 점프할 대상 시퀀스(다른 시퀀스 or 현재 시퀀스)에 targetIndex가 실제로 존재하는지 검증.
+        // 실패하면 플래그도 기록하지 않고, 선택 대기 상태를 유지한다.
+        DialogueDataSO targetSequence = nextSequence != null ? nextSequence : dialogSequence;
+        if (!IsValidIndex(targetSequence, choice.targetIndex))
+        {
+            Debug.LogError($"[DialogueManager] 선택지 '{choice.choiceText}'의 targetIndex({choice.targetIndex})가 " +
+                           $"'{targetSequence.name}' 시퀀스의 범위를 벗어났습니다. " +
+                           $"(줄 수: {(targetSequence.lines != null ? targetSequence.lines.Length : 0)})");
+            return;
         }
 
         isWaitingForChoice = false;
@@ -174,6 +194,15 @@ public class DialogueManager : MonoBehaviour
     private bool HasLines()
     {
         return dialogSequence != null && dialogSequence.lines != null && dialogSequence.lines.Length > 0;
+    }
+
+    /// <summary>sequence가 존재하고 index가 lines 범위 안인지 확인</summary>
+    private static bool IsValidIndex(DialogueDataSO sequence, int index)
+    {
+        return sequence != null
+               && sequence.lines != null
+               && index >= 0
+               && index < sequence.lines.Length;
     }
 
     public bool IsFinished => isFinished;

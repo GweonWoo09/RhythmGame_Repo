@@ -1,302 +1,408 @@
 using System;
 using System.IO;
-using System.Text;
 using UnityEngine;
 
-/// <summary>
-/// 파일 입출력 전담 클래스. "무엇을 / 언제 저장할지"는 GameManager가 정하고,
-/// 이 클래스는 "어떻게 안전하게 읽고 쓸지"만 책임진다.
-///
-/// - MonoBehaviour가 아닌 static 클래스다. (싱글톤은 전역에서 꼭 필요한 4개만 둔다는 원칙 유지)
-/// - 저장 파일 2개: save.json(진행도) / settings.json(볼륨, 언어 등 기기 설정)
-///   설정을 진행도와 분리해 두면 "새 게임"을 눌러도 볼륨 설정이 초기화되지 않는다.
-/// - 쓰기 도중 앱이 꺼져도 파일이 깨지지 않도록 임시 파일에 먼저 쓰고 교체하며, 직전 저장본을 .bak으로 남긴다.
-/// - 저장 위치: Application.persistentDataPath
-/// </summary>
-public static class DataManager
+#region Save Data Models
+// JsonUtility 규칙: Dictionary / DateTime / 에셋 참조 불가. 필드 이름이 곧 저장 키이므로
+// 이름을 바꾸면 기존 세이브를 읽지 못한다. 필드 추가는 대체로 호환된다.
+
+/// <summary>세이브 슬롯 파일 하나의 최상위 구조</summary>
+[Serializable]
+public class SaveData
 {
-    #region Constants
-    /// <summary>저장 포맷이 바뀔 때마다 올리고, Migrate()에 변환 규칙을 추가한다.</summary>
-    private const int CurrentSaveVersion = 1;
-    private const int CurrentSettingsVersion = 1;
+    public int version = DataManager.CurrentSaveVersion;
+    public string savedAt;   // ISO 8601 문자열 (DateTime은 직렬화되지 않음)
+    public GameManager.GameProgressData progress = new GameManager.GameProgressData();
+}
 
-    private const string SaveFileName = "save.json";
-    private const string SettingsFileName = "settings.json";
-    private const string BackupExt = ".bak";
-    private const string TempExt = ".tmp";
+/// <summary>설정 파일 구조. 진행도와 별도 파일이라 세이브를 지워도 설정은 남는다.</summary>
+[Serializable]
+public class SettingsData
+{
+    public int version = DataManager.CurrentSettingsVersion;
+    public float bgmVolume = 1f;
+    public float sfxVolume = 1f;
+    public string language = "ko";
+}
+#endregion
 
-    private static readonly UTF8Encoding Utf8NoBom = new UTF8Encoding(false);
-    #endregion
+/// <summary>
+/// 저장 데이터 입출력 전담 싱글톤. "어떻게 저장할지"(직렬화, 파일 입출력, 백업, 버전)만 알고,
+/// "무엇을/언제 저장할지"는 GameManager가 결정한다. 게임 규칙(해금, 랭크 등)은 이 클래스에 넣지 않는다.
+///
+/// - 다른 매니저를 호출하지 않는 최하위 계층이다 (GameProgressData 타입만 참조).
+/// - 설정 적용은 직접 하지 않고 OnSettingsChanged 이벤트만 발행한다. AudioManager 등이 구독해서 적용.
+///
+/// 저장 위치: Application.persistentDataPath
+///   save_slot_{n}.json (+ .bak / .corrupt)   진행도
+///   settings.json (+ .bak / .corrupt)        설정
+/// </summary>
+public class DataManager : MonoBehaviour
+{
+    #region Singleton
+    public static DataManager Instance { get; private set; }
 
-    #region Data Models
-    /// <summary>JsonUtility는 최상위에 버전 같은 메타 정보를 함께 두려면 래퍼 클래스가 필요하다.</summary>
-    [Serializable]
-    private class SaveFile
+    // Awake에서는 인스턴스 등록만 한다. 데이터 로드와 다른 매니저 참조는 Start 이후에 한다.
+    private void Awake()
     {
-        public int version;
-        public string savedAt;
-        public GameManager.GameProgressData progress;
-    }
-
-    /// <summary>진행도와 무관한 기기/사용자 설정.</summary>
-    [Serializable]
-    public class SettingsData
-    {
-        public int version = CurrentSettingsVersion;
-        [Range(0f, 1f)] public float bgmVolume = 1f;
-        [Range(0f, 1f)] public float sfxVolume = 1f;
-        public string language = "ko";
-    }
-    #endregion
-
-    #region Paths
-    private static string SavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
-    private static string SettingsPath => Path.Combine(Application.persistentDataPath, SettingsFileName);
-    #endregion
-
-    #region Domain Reload 대응
-    // 에디터에서 "Enter Play Mode Options → Reload Domain 끄기"를 쓰면 static 값이 남아 있으므로 초기화해 준다.
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetStatics()
-    {
-        _settings = null;
-    }
-    #endregion
-
-    // ------------------------------------------------------------------
-    // 진행도 (save.json)
-    // ------------------------------------------------------------------
-    #region Progress Save / Load
-    /// <summary>저장 파일(또는 백업)이 존재하는지. 타이틀의 "이어하기" 버튼 활성화 판단에 사용.</summary>
-    public static bool HasSave()
-    {
-        return File.Exists(SavePath) || File.Exists(SavePath + BackupExt);
-    }
-
-    /// <summary>
-    /// 진행도를 불러온다. 저장 파일이 없거나 본파일·백업 모두 읽을 수 없으면 null.
-    /// (null이면 호출한 쪽에서 새 데이터를 만들어 쓴다)
-    /// </summary>
-    public static GameManager.GameProgressData LoadProgress()
-    {
-        if (TryReadSaveFile(SavePath, out var progress))
-            return progress;
-
-        // 본파일이 없거나 손상된 경우 직전 저장본으로 복구 시도
-        if (File.Exists(SavePath))
-            Debug.LogWarning("[DataManager] 저장 파일을 읽지 못했습니다. 백업 파일로 복구를 시도합니다.");
-
-        if (TryReadSaveFile(SavePath + BackupExt, out progress))
+        if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[DataManager] 백업 파일에서 진행도를 복구했습니다.");
-            return progress;
+            Destroy(gameObject);
+            return;
         }
 
-        return null;
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+    #endregion
+
+    [Header("세이브 슬롯")]
+    [Tooltip("사용 가능한 슬롯 수. 슬롯 번호는 0 ~ (slotCount-1). 슬롯 1개만 쓰려면 1로 두고 항상 slot 0을 사용.")]
+    [SerializeField] private int slotCount = 3;
+
+    public int SlotCount => slotCount;
+
+    #region Constants
+    public const int CurrentSaveVersion = 1;
+    public const int CurrentSettingsVersion = 1;
+
+    private const string SettingsFileName = "settings.json";
+    private const string TempExt = ".tmp";
+    private const string BackupExt = ".bak";
+    private const string CorruptExt = ".corrupt";
+    #endregion
+
+    #region Settings (state / event)
+    private SettingsData _settings;
+
+    /// <summary>
+    /// 현재 설정. 아직 로드 전이면 이 시점에 읽어온다 (구독자가 Start 순서와 무관하게 값을 얻을 수 있다).
+    /// 반환된 객체를 직접 수정하지 말고, 바꾼 뒤 SaveSettings로 저장할 것.
+    /// </summary>
+    public SettingsData Settings
+    {
+        get
+        {
+            if (_settings == null) _settings = ReadSettingsFromDisk();
+            return _settings;
+        }
     }
 
-    /// <summary>진행도를 저장한다. 성공 여부를 반환.</summary>
-    public static bool SaveProgress(GameManager.GameProgressData progress)
+    /// <summary>설정이 로드되거나 저장(변경)됐을 때 발행. AudioManager 등이 구독해서 적용한다.</summary>
+    public event Action<SettingsData> OnSettingsChanged;
+
+    private void Start()
     {
-        if (progress == null)
+        // 부팅 시 한 번 읽고 구독자에게 알린다
+        LoadSettings();
+    }
+    #endregion
+
+    #region Progress (Save / Load)
+    /// <summary>진행도를 슬롯 파일에 저장한다. 성공 여부 반환.</summary>
+    public bool Save(GameManager.GameProgressData data, int slot = 0)
+    {
+        if (data == null)
         {
             Debug.LogError("[DataManager] 저장할 진행도 데이터가 null입니다.");
             return false;
         }
 
-        var file = new SaveFile
+        if (!IsValidSlot(slot)) return false;
+
+        var save = new SaveData
         {
             version = CurrentSaveVersion,
-            savedAt = DateTime.UtcNow.ToString("o"),
-            progress = progress
+            savedAt = DateTime.Now.ToString("s"),
+            progress = data
         };
 
-        return TryWriteAtomic(SavePath, JsonUtility.ToJson(file, true));
+        string json = JsonUtility.ToJson(save, true);
+        return WriteSafely(GetSlotPath(slot), json, IsValidSaveJson);
     }
 
-    /// <summary>"새 게임" 시작 시 호출. 본파일·백업·임시 파일을 모두 지운다. (설정 파일은 유지)</summary>
-    public static void DeleteSave()
+    /// <summary>
+    /// 슬롯에서 진행도를 읽는다. 본 파일이 손상되면 .bak을 시도한다.
+    /// 파일이 없거나 둘 다 읽을 수 없으면 null (호출한 쪽이 새 게임으로 처리).
+    /// </summary>
+    public GameManager.GameProgressData Load(int slot = 0)
     {
-        TryDelete(SavePath);
-        TryDelete(SavePath + BackupExt);
-        TryDelete(SavePath + TempExt);
+        if (!IsValidSlot(slot)) return null;
+
+        string path = GetSlotPath(slot);
+
+        if (TryReadSave(path, out var data))
+        {
+            return data.progress;
+        }
+
+        if (File.Exists(path))
+        {
+            // 읽을 수 없는 본 파일은 덮어쓰이기 전에 따로 보관한다
+            PreserveCorrupt(path);
+        }
+
+        if (TryReadSave(path + BackupExt, out data))
+        {
+            Debug.LogWarning($"[DataManager] 슬롯 {slot} 본 파일을 읽지 못해 백업(.bak)에서 복구했습니다.");
+            return data.progress;
+        }
+
+        return null;
     }
 
-    private static bool TryReadSaveFile(string path, out GameManager.GameProgressData progress)
+    /// <summary>이어하기 버튼 활성화 판단용. 본 파일 또는 백업이 있으면 true.</summary>
+    public bool HasSave(int slot = 0)
     {
-        progress = null;
+        if (!IsValidSlot(slot)) return false;
 
-        if (!TryReadJson(path, out SaveFile file) || file == null || file.progress == null)
+        string path = GetSlotPath(slot);
+        return File.Exists(path) || File.Exists(path + BackupExt);
+    }
+
+    /// <summary>슬롯의 저장 파일(본 파일, 백업, 보관본)을 모두 삭제한다.</summary>
+    public bool DeleteSave(int slot = 0)
+    {
+        if (!IsValidSlot(slot)) return false;
+
+        string path = GetSlotPath(slot);
+
+        try
+        {
+            DeleteIfExists(path);
+            DeleteIfExists(path + BackupExt);
+            DeleteIfExists(path + TempExt);
+            DeleteIfExists(path + CorruptExt);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[DataManager] 슬롯 {slot} 삭제 실패: {e.Message}");
             return false;
-
-        if (file.version > CurrentSaveVersion)
-        {
-            // 더 새로운 버전의 게임에서 만든 파일. 읽을 수 있는 만큼만 읽는다.
-            Debug.LogWarning($"[DataManager] 저장 파일 버전({file.version})이 현재 버전({CurrentSaveVersion})보다 높습니다.");
         }
-        else
+    }
+
+    private bool TryReadSave(string path, out SaveData data)
+    {
+        data = null;
+
+        string json = ReadTextOrNull(path);
+        if (json == null) return false;
+
+        return TryParseSave(json, out data);
+    }
+
+    private static bool TryParseSave(string json, out SaveData data)
+    {
+        data = null;
+        if (string.IsNullOrWhiteSpace(json)) return false;
+
+        try
         {
-            Migrate(file);
+            data = JsonUtility.FromJson<SaveData>(json);
+        }
+        catch (Exception)
+        {
+            return false;
         }
 
-        Sanitize(file.progress);
-        progress = file.progress;
+        if (data == null || data.progress == null) return false;
+
+        if (data.version > CurrentSaveVersion)
+        {
+            // 더 새로운 빌드가 만든 세이브. 읽기는 시도하되 이 빌드가 모르는 필드는 잃을 수 있다.
+            Debug.LogWarning($"[DataManager] 세이브 버전({data.version})이 현재 빌드({CurrentSaveVersion})보다 높습니다.");
+        }
+
+        MigrateSave(data);
         return true;
     }
 
     /// <summary>
-    /// 구버전 저장 파일을 현재 포맷으로 변환한다.
-    /// 필드를 추가/변경할 때 CurrentSaveVersion을 올리고 아래에 단계를 추가하면 된다.
+    /// 낡은 세이브를 현재 구조로 변환하는 자리. 필드 이름 변경/삭제처럼 호환이 깨지는 변경을 할 때
+    /// version을 올리고 여기에 단계별 변환을 추가한다.
     /// </summary>
-    private static void Migrate(SaveFile file)
+    private static void MigrateSave(SaveData data)
     {
-        // 예시:
-        // if (file.version < 2) { /* v1 → v2 변환 */ file.version = 2; }
-        file.version = CurrentSaveVersion;
+        // 예) if (data.version < 2) { /* v1 → v2 변환 */ data.version = 2; }
+        if (data.progress.chapters == null) data.progress.chapters = new System.Collections.Generic.List<GameManager.ChapterProgress>();
+        if (data.progress.songRecords == null) data.progress.songRecords = new System.Collections.Generic.List<GameManager.SongRecord>();
+        if (data.progress.storyFlags == null) data.progress.storyFlags = new System.Collections.Generic.List<GameManager.StoryFlagEntry>();
     }
 
-    /// <summary>손으로 편집했거나 필드 추가 이전에 만든 파일에서 null이 생기지 않도록 보정.</summary>
-    private static void Sanitize(GameManager.GameProgressData progress)
-    {
-        if (progress.chapters == null)
-            progress.chapters = new System.Collections.Generic.List<GameManager.ChapterProgress>();
-        if (progress.songRecords == null)
-            progress.songRecords = new System.Collections.Generic.List<GameManager.SongRecord>();
-        if (progress.storyFlags == null)
-            progress.storyFlags = new System.Collections.Generic.List<GameManager.StoryFlagEntry>();
-    }
+    private static bool IsValidSaveJson(string json) => TryParseSave(json, out _);
     #endregion
 
-    // ------------------------------------------------------------------
-    // 설정 (settings.json)
-    // ------------------------------------------------------------------
-    #region Settings
-    private static SettingsData _settings;
+    #region Settings (Save / Load)
+    /// <summary>설정 파일을 다시 읽고 OnSettingsChanged를 발행한다. 파일이 없거나 손상되면 기본값.</summary>
+    public SettingsData LoadSettings()
+    {
+        _settings = ReadSettingsFromDisk();
+        OnSettingsChanged?.Invoke(_settings);
+        return _settings;
+    }
 
     /// <summary>
-    /// 현재 설정. 처음 접근할 때 파일에서 자동으로 불러온다.
-    /// 값을 바꾼 뒤 SaveSettings()를 호출해야 파일에 반영된다.
-    /// (슬라이더를 드래그하는 동안 매 프레임 저장하지 않도록, 저장 시점은 호출자가 정한다)
+    /// 설정을 저장하고 OnSettingsChanged를 발행한다.
+    /// 파일 쓰기에 실패해도 메모리의 설정은 바뀌어 이벤트는 발행되며, 성공 여부만 반환한다.
     /// </summary>
-    public static SettingsData Settings
+    public bool SaveSettings(SettingsData data)
     {
-        get
+        if (data == null)
         {
-            if (_settings == null) _settings = LoadSettings();
-            return _settings;
+            Debug.LogError("[DataManager] 저장할 설정 데이터가 null입니다.");
+            return false;
         }
+
+        Sanitize(data);
+        _settings = data;
+
+        bool ok = WriteSafely(GetSettingsPath(), JsonUtility.ToJson(data, true), IsValidSettingsJson);
+
+        OnSettingsChanged?.Invoke(_settings);
+        return ok;
     }
 
-    public static bool SaveSettings()
+    private SettingsData ReadSettingsFromDisk()
     {
-        if (_settings == null) return true; // 한 번도 읽거나 바꾼 적이 없으면 저장할 것이 없다.
+        string path = GetSettingsPath();
 
-        _settings.version = CurrentSettingsVersion;
-        return TryWriteAtomic(SettingsPath, JsonUtility.ToJson(_settings, true));
-    }
+        if (TryReadSettings(path, out var data)) return data;
 
-    private static SettingsData LoadSettings()
-    {
-        if (TryReadJson(SettingsPath, out SettingsData loaded) && loaded != null)
+        if (File.Exists(path))
         {
-            loaded.bgmVolume = Mathf.Clamp01(loaded.bgmVolume);
-            loaded.sfxVolume = Mathf.Clamp01(loaded.sfxVolume);
-            if (string.IsNullOrEmpty(loaded.language)) loaded.language = "ko";
-            return loaded;
+            PreserveCorrupt(path);
+        }
+
+        if (TryReadSettings(path + BackupExt, out data))
+        {
+            Debug.LogWarning("[DataManager] 설정 파일을 읽지 못해 백업(.bak)에서 복구했습니다.");
+            return data;
         }
 
         return new SettingsData();
     }
-    #endregion
 
-    // ------------------------------------------------------------------
-    // 파일 입출력 공통
-    // ------------------------------------------------------------------
-    #region File IO
-    private static bool TryReadJson<T>(string path, out T result) where T : class
+    private bool TryReadSettings(string path, out SettingsData data)
     {
-        result = null;
+        data = null;
+
+        string json = ReadTextOrNull(path);
+        if (json == null) return false;
+
+        return TryParseSettings(json, out data);
+    }
+
+    private static bool TryParseSettings(string json, out SettingsData data)
+    {
+        data = null;
+        if (string.IsNullOrWhiteSpace(json)) return false;
 
         try
         {
-            if (!File.Exists(path)) return false;
-
-            string json = File.ReadAllText(path, Encoding.UTF8);
-            if (string.IsNullOrWhiteSpace(json)) return false;
-
-            result = JsonUtility.FromJson<T>(json);
-            return result != null;
+            data = JsonUtility.FromJson<SettingsData>(json);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Debug.LogError($"[DataManager] 파일 읽기 실패: {path}\n{e.Message}");
             return false;
         }
+
+        if (data == null) return false;
+
+        Sanitize(data);
+        return true;
+    }
+
+    private static bool IsValidSettingsJson(string json) => TryParseSettings(json, out _);
+
+    /// <summary>범위를 벗어난 값이나 빈 값을 안전한 값으로 고친다.</summary>
+    private static void Sanitize(SettingsData data)
+    {
+        data.bgmVolume = Mathf.Clamp01(data.bgmVolume);
+        data.sfxVolume = Mathf.Clamp01(data.sfxVolume);
+
+        if (string.IsNullOrEmpty(data.language)) data.language = "ko";
+    }
+    #endregion
+
+    #region File Helpers
+    private string GetSlotPath(int slot) => Path.Combine(Application.persistentDataPath, $"save_slot_{slot}.json");
+
+    private string GetSettingsPath() => Path.Combine(Application.persistentDataPath, SettingsFileName);
+
+    private bool IsValidSlot(int slot)
+    {
+        if (slot >= 0 && slot < slotCount) return true;
+
+        Debug.LogError($"[DataManager] 잘못된 슬롯 번호입니다: {slot} (사용 가능: 0 ~ {slotCount - 1})");
+        return false;
     }
 
     /// <summary>
-    /// 임시 파일에 먼저 쓴 뒤 본파일과 교체한다.
-    ///   1) path.tmp 에 전체 기록
-    ///   2) 기존 본파일을 path.bak 으로 복사
-    ///   3) 본파일 삭제 후 tmp를 본파일로 이동
-    /// 어느 단계에서 꺼져도 "본파일 또는 백업" 중 하나는 온전하다.
+    /// 쓰기 도중 종료되어도 기존 파일이 깨지지 않도록:
+    /// 1) .tmp에 먼저 쓰고  2) 현재 본 파일이 정상일 때만 .bak으로 한 세대 보관  3) 본 파일 교체  4) .tmp 삭제.
+    /// 현재 본 파일이 손상된 상태라면 .bak을 덮어쓰지 않아 마지막 정상본을 지킨다.
     /// </summary>
-    private static bool TryWriteAtomic(string path, string json)
+    private bool WriteSafely(string path, string json, Func<string, bool> isValidJson)
     {
         string tmpPath = path + TempExt;
         string bakPath = path + BackupExt;
 
         try
         {
-            File.WriteAllText(tmpPath, json, Utf8NoBom);
+            File.WriteAllText(tmpPath, json);
 
             if (File.Exists(path))
             {
-                File.Copy(path, bakPath, true);
-                File.Delete(path);
+                string existing = ReadTextOrNull(path);
+                if (existing != null && isValidJson(existing))
+                {
+                    File.Copy(path, bakPath, true);
+                }
             }
 
-            File.Move(tmpPath, path);
+            File.Copy(tmpPath, path, true);
+            File.Delete(tmpPath);
             return true;
         }
         catch (Exception e)
         {
-            Debug.LogError($"[DataManager] 파일 저장 실패: {path}\n{e.Message}");
+            Debug.LogError($"[DataManager] 저장 실패 ({Path.GetFileName(path)}): {e.Message}");
             return false;
         }
     }
 
-    private static void TryDelete(string path)
+    /// <summary>파일이 없거나 읽기 실패 시 null</summary>
+    private static string ReadTextOrNull(string path)
     {
         try
         {
-            if (File.Exists(path)) File.Delete(path);
+            return File.Exists(path) ? File.ReadAllText(path) : null;
         }
         catch (Exception e)
         {
-            Debug.LogError($"[DataManager] 파일 삭제 실패: {path}\n{e.Message}");
+            Debug.LogError($"[DataManager] 읽기 실패 ({Path.GetFileName(path)}): {e.Message}");
+            return null;
         }
     }
-    #endregion
 
-#if UNITY_EDITOR
-    #region Editor Utilities
-    [UnityEditor.MenuItem("Tools/Save Data/Open Save Folder")]
-    private static void OpenSaveFolder()
+    /// <summary>읽을 수 없는 파일을 .corrupt로 복사해 남겨둔다 (복구 여지). 이전 보관본은 덮어쓴다.</summary>
+    private static void PreserveCorrupt(string path)
     {
-        UnityEditor.EditorUtility.RevealInFinder(Application.persistentDataPath);
-    }
-
-    [UnityEditor.MenuItem("Tools/Save Data/Delete Save File")]
-    private static void DeleteSaveFromMenu()
-    {
-        if (UnityEditor.EditorUtility.DisplayDialog("저장 데이터 삭제",
-                "진행도 저장 파일(save.json, 백업 포함)을 삭제할까요?\n설정 파일은 유지됩니다.", "삭제", "취소"))
+        try
         {
-            DeleteSave();
-            Debug.Log("[DataManager] 저장 파일을 삭제했습니다.");
+            File.Copy(path, path + CorruptExt, true);
+            Debug.LogWarning($"[DataManager] 손상된 파일을 보관했습니다: {Path.GetFileName(path)}{CorruptExt}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[DataManager] 손상 파일 보관 실패: {e.Message}");
         }
     }
+
+    private static void DeleteIfExists(string path)
+    {
+        if (File.Exists(path)) File.Delete(path);
+    }
     #endregion
-#endif
 }

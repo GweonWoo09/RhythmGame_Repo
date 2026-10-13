@@ -831,7 +831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ComponentVersion: 3
+  m_ComponentVersion: 2
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
@@ -1627,37 +1627,57 @@ PrefabInstance:
       propertyPath: m_Name
       value: RhythmCore
       objectReference: {fileID: 0}
+    - target: {fileID: 2812891354770858997, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: midiTracksMapping
+      value: 
+      objectReference: {fileID: 11400000, guid: d26d9e2f1780f894bbbba85eb8820a08, type: 2}
+    - target: {fileID: 2812891354770858997, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: notePrefabMapping
+      value: 
+      objectReference: {fileID: 11400000, guid: 367580fe7135f564d97283fee746742f, type: 2}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.size
-      value: 4
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: levels.values.Array.data[0].name
+      value: "\uC815\uD655"
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[1].name
-      value: Great
+      value: "\uC88B\uC74C"
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[2].name
-      value: Ok
+      value: "\uBCF4\uD1B5"
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[3].name
       value: Bad
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: levels.values.Array.data[0].threshold
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[1].threshold
-      value: 1
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[2].threshold
-      value: 2
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[3].threshold
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
-      propertyPath: levels.values.Array.data[2].scorePrecentage
+      propertyPath: levels.values.Array.data[1].scorePrecentage
       value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: levels.values.Array.data[2].scorePrecentage
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.data[3].scorePrecentage
@@ -1675,6 +1695,26 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 519420033}
+    - target: {fileID: 6570265792833841976, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: defaultSong
+      value: 
+      objectReference: {fileID: 11400000, guid: b1059eb983a849c4daa73dc72c47b08c, type: 2}
+    - target: {fileID: 8973612405871675903, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[0]'
+      value: d
+      objectReference: {fileID: 0}
+    - target: {fileID: 8973612405871675903, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[1]'
+      value: f
+      objectReference: {fileID: 0}
+    - target: {fileID: 8973612405871675903, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[2]'
+      value: j
+      objectReference: {fileID: 0}
+    - target: {fileID: 8973612405871675903, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[3]'
+      value: k
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

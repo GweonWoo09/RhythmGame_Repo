@@ -30,6 +30,7 @@ public struct ChoiceButtonRef
 /// DialogueManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 알파, 선택지 버튼)를
 /// 갱신하는 역할만 담당한다. 대화 진행/분기 로직은 갖지 않는다.
 /// 캐릭터 이름/표정 스프라이트는 SpeakerDataSO에서 가져오고, 여기서는 "화면 어느 슬롯에 그릴지"만 관리한다.
+/// 오토 모드: 타이핑이 끝난 뒤 지정된 시간이 지나면 자동으로 다음 대사로 진행한다.
 /// </summary>
 public class DialogueUIView : MonoBehaviour
 {
@@ -53,7 +54,7 @@ public class DialogueUIView : MonoBehaviour
     [Header("오토 모드")]
     [SerializeField] private Button autoButton;
     [Tooltip("타이핑이 끝난 뒤 자동으로 다음 대사로 넘어가기까지의 대기 시간 (초)")]
-    [SerializeField] private float autoAdvanceDelay = 3f;
+    [SerializeField] private float autoAdvanceDelay = 2f;
     [Tooltip("오토 모드가 켜졌을 때 표시할 오브젝트 (버튼 강조 표시 등, 선택)")]
     [SerializeField] private GameObject autoModeIndicator;
 
@@ -62,28 +63,13 @@ public class DialogueUIView : MonoBehaviour
     private bool _isTyping = false;
     private string _currentFullText = "";
 
+    // 타이핑이 끝나기를 기다리는 선택지 (타이핑 중에는 버튼을 띄우지 않는다)
+    private DialogChoice[] _pendingChoices;
+
     private bool _isAutoMode = false;
     private Coroutine _autoAdvanceCoroutine;
 
-    private void OnEnable()
-    {
-        if (dialogueManager == null) return;
-
-        dialogueManager.OnDialogUpdated += HandleDialogUpdated;
-        dialogueManager.OnChoicesPresented += HandleChoicesPresented;
-        dialogueManager.OnDialogEnd += HandleDialogEnd;
-    }
-
-    private void OnDisable()
-    {
-        if (dialogueManager == null) return;
-
-        dialogueManager.OnDialogUpdated -= HandleDialogUpdated;
-        dialogueManager.OnChoicesPresented -= HandleChoicesPresented;
-        dialogueManager.OnDialogEnd -= HandleDialogEnd;
-    }
-
-    private void Start()
+    private void Awake()
     {
         foreach (var slot in speakerSlots)
         {
@@ -103,29 +89,52 @@ public class DialogueUIView : MonoBehaviour
         SetAutoModeIndicator(false);
     }
 
-    private void Update()
+    private void OnDestroy()
     {
-        // 선택지 대기 중에는 Space로 아무것도 하지 않는다
-        if (dialogueManager.IsWaitingForChoice) return;
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (autoButton != null)
         {
-            if (_isTyping)
-            {
-                SkipTyping();
-            }
-            else
-            {
-                // 플레이어가 직접 넘겼으니 진행 중이던 오토 타이머는 취소
-                CancelAutoAdvance();
-                dialogueManager.AdvanceDialog();
-            }
+            autoButton.onClick.RemoveListener(ToggleAutoMode);
         }
     }
 
-    /// <summary>
-    /// 오토 모드: 타이핑이 끝난 뒤 지정된 시간이 지나면 자동으로 다음 대사로 진행한다.
-    /// </summary>
+    private void OnEnable()
+    {
+        if (dialogueManager == null) return;
+
+        dialogueManager.OnDialogUpdated += HandleDialogUpdated;
+        dialogueManager.OnChoicesPresented += HandleChoicesPresented;
+        dialogueManager.OnDialogEnd += HandleDialogEnd;
+    }
+
+    private void OnDisable()
+    {
+        if (dialogueManager == null) return;
+
+        dialogueManager.OnDialogUpdated -= HandleDialogUpdated;
+        dialogueManager.OnChoicesPresented -= HandleChoicesPresented;
+        dialogueManager.OnDialogEnd -= HandleDialogEnd;
+    }
+
+    private void Update()
+    {
+        if (dialogueManager == null) return;
+        if (!Input.GetKeyDown(KeyCode.Space)) return;
+
+        // 타이핑 중이면 선택지 줄이든 일반 줄이든 항상 스킵 가능
+        if (_isTyping)
+        {
+            SkipTyping();
+            return;
+        }
+
+        // 타이핑이 끝난 뒤 선택지 대기 중이면 Space로는 진행하지 않는다 (버튼으로만 진행)
+        if (dialogueManager.IsWaitingForChoice) return;
+
+        // 플레이어가 직접 넘겼으니 진행 중이던 오토 타이머는 취소
+        CancelAutoAdvance();
+        dialogueManager.AdvanceDialog();
+    }
+
     #region Auto Mode
     private void ToggleAutoMode()
     {
@@ -183,7 +192,10 @@ public class DialogueUIView : MonoBehaviour
     {
         CancelAutoAdvance();
 
-        // 새 대사가 나오면 이전 선택지 패널은 닫아둔다
+        // 새 대사가 나오면 이전 선택지는 모두 정리한다
+        _pendingChoices = null;
+        StopTyping();
+
         if (choicePanelRoot != null)
         {
             choicePanelRoot.SetActive(false);
@@ -218,15 +230,24 @@ public class DialogueUIView : MonoBehaviour
         StartTyping(slot.textDialogue, dialogText);
     }
 
+    #region Typing
     private void StartTyping(TextMeshProUGUI textComponent, string fullText)
+    {
+        StopTyping();
+
+        _currentFullText = fullText;
+        _typingCoroutine = StartCoroutine(TypeTextRoutine(textComponent, fullText));
+    }
+
+    private void StopTyping()
     {
         if (_typingCoroutine != null)
         {
             StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
         }
 
-        _currentFullText = fullText;
-        _typingCoroutine = StartCoroutine(TypeTextRoutine(textComponent, fullText));
+        _isTyping = false;
     }
 
     private IEnumerator TypeTextRoutine(TextMeshProUGUI textComponent, string fullText)
@@ -243,41 +264,61 @@ public class DialogueUIView : MonoBehaviour
         _isTyping = false;
         _typingCoroutine = null;
 
-        // 타이핑이 끝난 시점부터 오토 진행 카운트 시작
-        if (_isAutoMode && !dialogueManager.IsWaitingForChoice)
-        {
-            StartAutoAdvanceTimer();
-        }
+        OnTypingFinished();
     }
 
     /// <summary>Space로 스킵했을 때, 타이핑 중이던 텍스트를 즉시 전체 출력으로 완성</summary>
     private void SkipTyping()
     {
-        if (_typingCoroutine != null)
-        {
-            StopCoroutine(_typingCoroutine);
-            _typingCoroutine = null;
-        }
-
-        _isTyping = false;
+        StopTyping();
 
         if (_activeSlotIndex != -1)
         {
             speakerSlots[_activeSlotIndex].textDialogue.text = _currentFullText;
         }
 
-        // 스킵도 "다 읽었다"고 보고 오토 타이머 시작
+        OnTypingFinished();
+    }
+
+    /// <summary>
+    /// 타이핑이 끝난 시점(자연 종료 / 스킵 공통)에 해야 할 일.
+    /// 선택지가 대기 중이면 버튼을 띄우고, 아니면 오토 모드 타이머를 시작한다.
+    /// </summary>
+    private void OnTypingFinished()
+    {
+        if (_pendingChoices != null)
+        {
+            ShowPendingChoices();
+            return;
+        }
+
         if (_isAutoMode && !dialogueManager.IsWaitingForChoice)
         {
             StartAutoAdvanceTimer();
         }
     }
+    #endregion
 
+    #region Choices
     private void HandleChoicesPresented(DialogChoice[] choices)
     {
         CancelAutoAdvance();
 
-        if (choicePanelRoot == null || choiceButtons == null) return;
+        _pendingChoices = choices;
+
+        // 대사가 아직 타이핑 중이면 끝날 때까지 기다렸다가 띄운다 (OnTypingFinished에서 처리)
+        if (!_isTyping)
+        {
+            ShowPendingChoices();
+        }
+    }
+
+    private void ShowPendingChoices()
+    {
+        var choices = _pendingChoices;
+        _pendingChoices = null;
+
+        if (choices == null || choicePanelRoot == null || choiceButtons == null) return;
 
         choicePanelRoot.SetActive(true);
 
@@ -302,17 +343,13 @@ public class DialogueUIView : MonoBehaviour
             }
         }
     }
+    #endregion
 
     private void HandleDialogEnd()
     {
         CancelAutoAdvance();
-
-        if (_typingCoroutine != null)
-        {
-            StopCoroutine(_typingCoroutine);
-            _typingCoroutine = null;
-            _isTyping = false;
-        }
+        StopTyping();
+        _pendingChoices = null;
 
         // 대화 종료: 모든 슬롯 UI를 정리하고 대화창을 닫는다
         foreach (var slot in speakerSlots)
