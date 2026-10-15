@@ -167,6 +167,25 @@ public class GameManager : MonoBehaviour
             chapter.isUnlocked = true;
         }
     }
+
+    public void MarkChapterCleared(int chapterId)
+    {
+        var chapter = ProgressData.chapters.Find(c => c.chapterId == chapterId);
+        if (chapter == null)
+        {
+            ProgressData.chapters.Add(new ChapterProgress
+            {
+                chapterId = chapterId,
+                isUnlocked = true,
+                isCleared = true
+            });
+        }
+        else
+        {
+            chapter.isUnlocked = true;
+            chapter.isCleared = true;
+        }
+    }
     #endregion
 
     // 결과창 기록 표시 
