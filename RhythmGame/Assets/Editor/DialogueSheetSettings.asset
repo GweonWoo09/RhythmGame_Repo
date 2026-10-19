@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59c546ad6a204a0439500baeac7f07f5, type: 3}
+  m_Name: DialogueSheetSettings
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::DialogueSheetSettings
+  spreadsheet: https://docs.google.com/spreadsheets/d/1WMUEVJA-aW-_LydPOSBEZ3coNVFzCroiFtE-cQLtnf4/edit?gid=1104722791#gid=1104722791
+  linesGid: 1104722791
+  metaGid: 229393742
+  outputRoot: Assets/Resources/Dialogue
+  speakerResourcesPath: Speakers
