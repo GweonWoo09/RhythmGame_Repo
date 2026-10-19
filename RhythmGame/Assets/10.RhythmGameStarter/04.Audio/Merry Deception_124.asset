@@ -17,13 +17,49 @@ MonoBehaviour:
   author: 
   bpm: 124
   speedModifier: 1
-  startDelay: 0.355
+  startDelay: 0.3335
   customMidiMapping: {fileID: 0}
   customPrefabMapping: {fileID: 0}
   metadata:
     values: []
   useCurrentBpmMidiImport: 0
-  notes: []
+  notes:
+  - noteName: 0
+    noteOctave: 4
+    time: 0.3335
+    noteLength: 0.24193548
+    beatIndex: 0
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 0.45446774
+    noteLength: 0.24193548
+    beatIndex: 0.25
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 1.7851129
+    noteLength: 0.24193548
+    beatIndex: 3
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 2.2689838
+    noteLength: 0.24193548
+    beatIndex: 4
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 2.3899517
+    noteLength: 0.24193548
+    beatIndex: 4.25
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 1.1802742
+    noteLength: 0.24193548
+    beatIndex: 1.75
+    beatLengthIndex: 0.5
   useGenerator: 0
   runtimeGenerate: 0
   generator: {fileID: 0}

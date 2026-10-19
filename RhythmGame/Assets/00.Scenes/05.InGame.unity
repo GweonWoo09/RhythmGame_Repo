@@ -906,7 +906,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0.7529412}
+  m_Color: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 0.98039216}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2023,7 +2023,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 502088009115265190, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.1
+      value: 1.34
       objectReference: {fileID: 0}
     - target: {fileID: 502088009115265190, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2141,6 +2141,10 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 519420033}
+    - target: {fileID: 6570265792833841976, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: defaultSong
+      value: 
+      objectReference: {fileID: 11400000, guid: 594c4139cbc68d3419586c7580089597, type: 2}
     - target: {fileID: 6570265792833841976, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: playOnAwake
       value: 1

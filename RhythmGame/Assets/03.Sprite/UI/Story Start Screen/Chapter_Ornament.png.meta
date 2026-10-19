@@ -1,0 +1,624 @@
+fileFormatVersion: 2
+guid: 5a46a8f3e65ef894f9d2f991ffabc346
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3317041220233023453
+    second: Chapter_Ornament_0
+  - first:
+      213: 8977650078803179094
+    second: Chapter_Ornament_1
+  - first:
+      213: 2897367282947760694
+    second: Chapter_Ornament_2
+  - first:
+      213: -2859428852063908893
+    second: Chapter_Ornament_3
+  - first:
+      213: 5299028198336568880
+    second: Chapter_Ornament_4
+  - first:
+      213: -3118922522452442948
+    second: Chapter_Ornament_5
+  - first:
+      213: 133610214107724353
+    second: Chapter_Ornament_6
+  - first:
+      213: -4795621254575164894
+    second: Chapter_Ornament_7
+  - first:
+      213: -8967066454029333107
+    second: Chapter_Ornament_8
+  - first:
+      213: -4741939099641556209
+    second: Chapter_Ornament_9
+  - first:
+      213: -4702222271417146394
+    second: Chapter_Ornament_10
+  - first:
+      213: 1695382897930412350
+    second: Chapter_Ornament_11
+  - first:
+      213: 5437950695365481957
+    second: Chapter_Ornament_12
+  - first:
+      213: -8390699472480506560
+    second: Chapter_Ornament_13
+  - first:
+      213: -3910935153837761390
+    second: Chapter_Ornament_14
+  - first:
+      213: -3465595230915344924
+    second: Chapter_Ornament_15
+  - first:
+      213: -5828564277911696443
+    second: Chapter_Ornament_16
+  - first:
+      213: 6687258433413824302
+    second: Chapter_Ornament_17
+  - first:
+      213: 8746086019323184880
+    second: Chapter_Ornament_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Chapter_Ornament_0
+      rect:
+        serializedVersion: 2
+        x: 632
+        y: 711
+        width: 112
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddf41555a6f780e20800000000000000
+      internalID: 3317041220233023453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_1
+      rect:
+        serializedVersion: 2
+        x: 729
+        y: 700
+        width: 71
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65632d85e25079c70800000000000000
+      internalID: 8977650078803179094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_2
+      rect:
+        serializedVersion: 2
+        x: 795
+        y: 709
+        width: 117
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 632a0f36134853820800000000000000
+      internalID: 2897367282947760694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_3
+      rect:
+        serializedVersion: 2
+        x: 484
+        y: 669
+        width: 154
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3eb4a34eb944158d0800000000000000
+      internalID: -2859428852063908893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_4
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 669
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03e11a8221ee98940800000000000000
+      internalID: 5299028198336568880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_5
+      rect:
+        serializedVersion: 2
+        x: 869
+        y: 683
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb0c1479d7c57b4d0800000000000000
+      internalID: -3118922522452442948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_6
+      rect:
+        serializedVersion: 2
+        x: 887
+        y: 669
+        width: 100
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14a314628cdaad100800000000000000
+      internalID: 133610214107724353
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_7
+      rect:
+        serializedVersion: 2
+        x: 903
+        y: 669
+        width: 149
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 222fbb390e7827db0800000000000000
+      internalID: -4795621254575164894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_8
+      rect:
+        serializedVersion: 2
+        x: 1029
+        y: 691
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8d8242d1949e8380800000000000000
+      internalID: -8967066454029333107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_9
+      rect:
+        serializedVersion: 2
+        x: 989
+        y: 669
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f035453438f313eb0800000000000000
+      internalID: -4741939099641556209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_10
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 484
+        width: 201
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e32041f1c95ebeb0800000000000000
+      internalID: -4702222271417146394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_11
+      rect:
+        serializedVersion: 2
+        x: 716
+        y: 484
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e312a6d53c5378710800000000000000
+      internalID: 1695382897930412350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_12
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 484
+        width: 23
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e5195f885b777b40800000000000000
+      internalID: 5437950695365481957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_13
+      rect:
+        serializedVersion: 2
+        x: 736
+        y: 488
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04dedbd194f3e8b80800000000000000
+      internalID: -8390699472480506560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_14
+      rect:
+        serializedVersion: 2
+        x: 752
+        y: 357
+        width: 123
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29c99e7d23199b9c0800000000000000
+      internalID: -3910935153837761390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_15
+      rect:
+        serializedVersion: 2
+        x: 785
+        y: 473
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e5c00ebf7bb7efc0800000000000000
+      internalID: -3465595230915344924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_16
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 484
+        width: 27
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cbca889ba7cc1fa0800000000000000
+      internalID: -5828564277911696443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_17
+      rect:
+        serializedVersion: 2
+        x: 827
+        y: 485
+        width: 206
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2fbdd45d1aedcc50800000000000000
+      internalID: 6687258433413824302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Chapter_Ornament_18
+      rect:
+        serializedVersion: 2
+        x: 753
+        y: 447
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f6c4c455e6506970800000000000000
+      internalID: 8746086019323184880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Chapter_Ornament_0: 3317041220233023453
+      Chapter_Ornament_1: 8977650078803179094
+      Chapter_Ornament_10: -4702222271417146394
+      Chapter_Ornament_11: 1695382897930412350
+      Chapter_Ornament_12: 5437950695365481957
+      Chapter_Ornament_13: -8390699472480506560
+      Chapter_Ornament_14: -3910935153837761390
+      Chapter_Ornament_15: -3465595230915344924
+      Chapter_Ornament_16: -5828564277911696443
+      Chapter_Ornament_17: 6687258433413824302
+      Chapter_Ornament_18: 8746086019323184880
+      Chapter_Ornament_2: 2897367282947760694
+      Chapter_Ornament_3: -2859428852063908893
+      Chapter_Ornament_4: 5299028198336568880
+      Chapter_Ornament_5: -3118922522452442948
+      Chapter_Ornament_6: 133610214107724353
+      Chapter_Ornament_7: -4795621254575164894
+      Chapter_Ornament_8: -8967066454029333107
+      Chapter_Ornament_9: -4741939099641556209
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
