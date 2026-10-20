@@ -119,4 +119,12 @@ public class ScreenFader : MonoBehaviour
             fadeCanvasGroup.gameObject.SetActive(false);
         }
     }
+
+    /// <summary>진행 중인 페이드와 무관하게 즉시 화면을 걷어낸다 (전환 실패 복구용)</summary>
+    public void ClearImmediate()
+    {
+        if (fadeCanvasGroup == null) return;
+        fadeCanvasGroup.alpha = 0f;
+        fadeCanvasGroup.blocksRaycasts = false;
+    }
 }

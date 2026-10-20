@@ -84,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -2
   m_MaskInteraction: 2
-  m_Sprite: {fileID: -2321016978629411421, guid: 6c7a9e36bfd2187498271e9b71e0d541, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 5d552bdebc42b534eb96152b0762cf5b, type: 3}
+  m_Color: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
@@ -183,11 +183,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2967977533123260783, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7445755137858656757, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8039747320999360517, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: m_MaskInteraction

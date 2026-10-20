@@ -185,6 +185,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4560550535946044873, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4690848459396792502, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7445755137858656757, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -195,7 +203,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8397699897526961635, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: m_Name
-      value: Note Long
+      value: Note_Long_Ingame
       objectReference: {fileID: 0}
     - target: {fileID: 8397699897526961636, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
       propertyPath: action
