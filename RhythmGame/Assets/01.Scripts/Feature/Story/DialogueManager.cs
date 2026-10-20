@@ -380,5 +380,5 @@ public class DialogueManager : MonoBehaviour
     public int ChapterId => dialogSequence != null ? dialogSequence.chapterId : 0;
 
     /// <summary>현재(마지막) 시퀀스의 종료 후 동작. SceneTransitionDialogueEnd가 읽는다.</summary>
-    public DialogueEndAction EndAction => dialogSequence != null ? dialogSequence.onEnd : default;
+    public DialogueEndAction EndAction => dialogSequence != null ? dialogSequence.onEnd : default(DialogueEndAction);
 }

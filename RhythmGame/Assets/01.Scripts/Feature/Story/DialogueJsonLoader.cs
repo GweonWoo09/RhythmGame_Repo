@@ -205,7 +205,7 @@ public static class DialogueJsonLoader
 
     private static DialogueEndAction ConvertEnd(DialogueEndJson src)
     {
-        if (src == null) return default;
+        if (src == null) return default(DialogueEndAction);
 
         return new DialogueEndAction
         {
