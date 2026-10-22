@@ -1,0 +1,15 @@
+{
+  "_generated": "Generated from Google Sheet by DialogueSheetImporter. Do not edit by hand.",
+  "chapterId": 1,
+  "bgm": "Audio/BGM/Moonlight Waltz",
+  "cast": [ { "speakerId": "White", "slot": 0 }, { "speakerId": "Black", "slot": 1 } ],
+  "onEnd": { "scene": "SongSelect" },
+  "lines": [
+    { "speakerId": "Black", "expression": "Natural", "screenSlot": 1, "text": "오늘도 연습하러 온 거야?" },
+    { "speakerId": "Black", "expression": "Joy", "screenSlot": 1, "text": "마침 잘 왔어. 새 곡을 같이 맞춰보자!", "choices": [ { "text": "연습한다", "goto": "practice", "setFlags": [ "ch1_eager=1" ] }, { "text": "잠시 쉰다", "goto": "rest", "setFlags": [ "ch1_eager=0" ] } ] },
+    { "id": "practice", "speakerId": "White", "expression": "Happy", "screenSlot": 0, "text": "좋아, 바로 시작하자", "goto": "ready" },
+    { "id": "rest", "speakerId": "Black", "expression": "Natural", "screenSlot": 1, "text": "그래, 잠깐 쉬었다 가자." },
+    { "id": "ready", "if": "ch1_eager==1", "speakerId": "Black", "expression": "Joy", "screenSlot": 1, "text": "좋아! 그럼 바로 시작할게.\n준비됐지?" },
+    { "if": "ch1_eager==0", "speakerId": "Black", "expression": "Natural", "screenSlot": 1, "text": "충분히 쉬었으면, 이제 시작해볼까?" }
+  ]
+}
