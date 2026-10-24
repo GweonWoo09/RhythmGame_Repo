@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59c546ad6a204a0439500baeac7f07f5, type: 3}
   m_Name: DialogueSheetSettings
   m_EditorClassIdentifier: Assembly-CSharp-Editor::DialogueSheetSettings
-  spreadsheet: https://docs.google.com/spreadsheets/d/1ezyxmmyfVqImqpPnDAgV22WG7C2AQvU6WDQRQhbhQsE/edit?gid=947143360#gid=947143360
-  linesGid: 947143360
-  metaGid: 454749240
+  spreadsheet: https://docs.google.com/spreadsheets/d/1ezyxmmyfVqImqpPnDAgV22WG7C2AQvU6WDQRQhbhQsE/edit?gid=1490790440#gid=1490790440
+  linesGid: 1490790440
+  metaGid: 1869451697
   outputRoot: Assets/Resources/Dialogue
   speakerResourcesPath: Speakers

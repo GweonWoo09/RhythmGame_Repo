@@ -749,31 +749,31 @@ MonoBehaviour:
     sceneName: 00.Loading
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 2
+  - type: 1
     sceneName: 01.Lobby
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 4
+  - type: 3
     sceneName: 02.SongSelect
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 3
+  - type: 2
     sceneName: 03.ChapterSelect
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 5
+  - type: 4
     sceneName: 04.InGame
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 6
+  - type: 5
     sceneName: 05.Result
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 7
+  - type: 6
     sceneName: 06.Story
     bgm: {fileID: 0}
     excludeFromHistory: 0
-  - type: 8
+  - type: 7
     sceneName: 07.Settings
     bgm: {fileID: 0}
     excludeFromHistory: 0
@@ -965,7 +965,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0.000015258789}
+  m_AnchoredPosition: {x: 0.000061035156, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1127799310
