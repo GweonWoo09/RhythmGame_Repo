@@ -2058,7 +2058,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea1b1cddf3f873d4983ae5dec2ad2d99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionDialogueEnd
-  targetScene: 3
+  targetScene: 2
   sendPayload: 0
   chapterId: 0
   songId: 

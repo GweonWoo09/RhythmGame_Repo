@@ -613,7 +613,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e45fbcc632aa640b33e63e020ae910, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionButton
-  targetScene: 3
+  targetScene: 2
   sendPayload: 0
   chapterId: 0
   songId: 
@@ -1152,7 +1152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e45fbcc632aa640b33e63e020ae910, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionButton
-  targetScene: 3
+  targetScene: 2
   sendPayload: 0
   chapterId: 0
   songId: 
@@ -1616,7 +1616,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e45fbcc632aa640b33e63e020ae910, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionButton
-  targetScene: 4
+  targetScene: 3
   sendPayload: 0
   chapterId: 0
   songId: 

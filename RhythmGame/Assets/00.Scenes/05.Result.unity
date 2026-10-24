@@ -615,6 +615,7 @@ GameObject:
   m_Component:
   - component: {fileID: 363352806}
   - component: {fileID: 363352807}
+  - component: {fileID: 363352808}
   m_Layer: 0
   m_Name: ResultTexts
   m_TagString: Untagged
@@ -673,6 +674,20 @@ MonoBehaviour:
   good: {fileID: 285535575}
   bad: {fileID: 245562296}
   miss: {fileID: 204300175}
+--- !u!114 &363352808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 363352805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 399fdcac65dcc694288ebae980068560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResultKeyController
+  retryKey: 286
+  exitKey: 13
 --- !u!1 &475409142
 GameObject:
   m_ObjectHideFlags: 0
