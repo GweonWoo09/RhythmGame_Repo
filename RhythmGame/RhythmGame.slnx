@@ -1,6 +1,0 @@
-﻿<Solution>
-  <Project Path="com.bennykok.rgs.editor.csproj" />
-  <Project Path="com.bennykok.rgs.runtime.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
-</Solution>

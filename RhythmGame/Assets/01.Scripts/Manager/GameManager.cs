@@ -247,7 +247,7 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.Result);
     }
 
-    private string CalculateRank(float accuracy)
+    public string CalculateRank(float accuracy)
     {
         if (accuracy >= 95f) return "S";
         if (accuracy >= 90f) return "A";

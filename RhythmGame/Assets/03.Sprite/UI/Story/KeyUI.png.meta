@@ -115,10 +115,10 @@ TextureImporter:
       name: KeyUI_0
       rect:
         serializedVersion: 2
-        x: 68
-        y: 29
-        width: 59
-        height: 54
+        x: 0
+        y: 0
+        width: 1920
+        height: 1080
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,99 +133,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: KeyUI_1
-      rect:
-        serializedVersion: 2
-        x: 233
-        y: 30
-        width: 100
-        height: 54
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2abcd27b33ffbbce0800000000000000
-      internalID: -1388235462532019294
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: KeyUI_2
-      rect:
-        serializedVersion: 2
-        x: 1418
-        y: 30
-        width: 76
-        height: 54
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ec84827a4b54030e0800000000000000
-      internalID: -2292255568130717490
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: KeyUI_3
-      rect:
-        serializedVersion: 2
-        x: 1594
-        y: 31
-        width: 59
-        height: 54
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: da7206126399212b0800000000000000
-      internalID: -5615257327610353747
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: KeyUI_4
-      rect:
-        serializedVersion: 2
-        x: 1719
-        y: 31
-        width: 86
-        height: 54
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b5d92144d9a8126a0800000000000000
-      internalID: -6475742381125493413
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: be0c32921640cd545aa23f5621dc800c
     internalID: 0
     vertices: []
     indices: 

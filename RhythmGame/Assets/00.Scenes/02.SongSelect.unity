@@ -1221,6 +1221,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388210063}
   m_CullTransparentMesh: 1
+--- !u!1 &448758616
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 448758618}
+  - component: {fileID: 448758617}
+  m_Layer: 0
+  m_Name: SongSelectController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &448758617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448758616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ab94b0f198b1f44bbea9bc131a9f738, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongSelectController
+  songs:
+  - {fileID: 11400000, guid: 975e57d9816d6674a9cfe291893dbfd4, type: 2}
+  number: {fileID: 1817901507}
+  title: {fileID: 560993303}
+  composer: {fileID: 211499696}
+  bpm: {fileID: 349362732}
+--- !u!4 &448758618
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448758616}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 761.8662, y: 538.11, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &504641666
 GameObject:
   m_ObjectHideFlags: 0
@@ -5279,3 +5329,4 @@ SceneRoots:
   - {fileID: 374179057}
   - {fileID: 700418877}
   - {fileID: 69975051}
+  - {fileID: 448758618}
