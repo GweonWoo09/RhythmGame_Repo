@@ -17,6 +17,7 @@ using UnityEngine;
 ///    현재 상태(선택 대기 포함)를 그대로 유지한다.
 /// 6) 대화 종료 시 onEnd의 clearChapter/unlockChapter를 GameManager에 반영하고 OnDialogEnd를 발행한다.
 ///    씬 이동은 SceneTransitionDialogueEnd가 EndAction을 읽어 처리한다.
+/// 7) 대사, 이름, 선택지 문구의 {변수}(예: {player})는 표시 직전에 DialogueVariables로 치환한다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
@@ -33,8 +34,15 @@ public class DialogueManager : MonoBehaviour
     // 조건을 통과해 UI로 전달된 선택지 목록. SelectChoice의 인덱스는 이 배열 기준이다.
     private DialogChoice[] _visibleChoices;
 
-    /// <summary>새 대사가 표시될 때: (화면 슬롯, 화자 데이터(null이면 내레이션), 표정 이름, 대사 텍스트)</summary>
+    /// <summary>
+    /// 새 대사가 표시될 때: (화면 슬롯, 화자 데이터(null이면 내레이션), 표정 이름, 대사 텍스트).
+    /// 기존 구독자와의 호환용이며 텍스트는 변수 치환이 끝난 값이다.
+    /// 표시 이름, 스타일까지 필요하면 OnLineShown을 구독한다 (DialogueUIView는 OnLineShown만 쓴다).
+    /// </summary>
     public event Action<int, SpeakerDataSO, string, string> OnDialogUpdated;
+
+    /// <summary>새 대사가 표시될 때, 화면 표시에 필요한 정보를 한 번에 전달한다. (변수 치환 완료)</summary>
+    public event Action<DialogueLineInfo> OnLineShown;
 
     /// <summary>현재 줄이 선택지를 가지고 있을 때 발행. 조건을 통과한 선택지만 담겨 있다.</summary>
     public event Action<DialogChoice[]> OnChoicesPresented;
@@ -203,7 +211,23 @@ public class DialogueManager : MonoBehaviour
         DialogueExpression.ApplyAll(line.setFlags);
         RaiseCommands(line.commands);
 
-        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, line.dialogText);
+        string text = DialogueVariables.Resolve(line.dialogText);
+
+        // 표시 이름: 줄의 displayName > 화자의 speakerName. 둘 다 {변수}를 쓸 수 있다.
+        string rawName = !string.IsNullOrEmpty(line.displayName)
+            ? line.displayName
+            : (line.speaker != null ? line.speaker.speakerName : "");
+
+        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, text);
+        OnLineShown?.Invoke(new DialogueLineInfo
+        {
+            screenSlot = line.screenSlot,
+            speaker = line.speaker,
+            expressionName = line.expressionName,
+            displayName = DialogueVariables.Resolve(rawName),
+            style = line.style,
+            text = text
+        });
 
         if (line.choices != null && line.choices.Length > 0)
         {
@@ -294,7 +318,10 @@ public class DialogueManager : MonoBehaviour
         {
             if (DialogueExpression.Evaluate(choice.condition))
             {
-                visible.Add(choice);
+                // struct 복사본의 문구만 치환한다 (원본 데이터는 그대로)
+                var shown = choice;
+                shown.choiceText = DialogueVariables.Resolve(choice.choiceText);
+                visible.Add(shown);
             }
         }
 
@@ -381,4 +408,26 @@ public class DialogueManager : MonoBehaviour
 
     /// <summary>현재(마지막) 시퀀스의 종료 후 동작. SceneTransitionDialogueEnd가 읽는다.</summary>
     public DialogueEndAction EndAction => dialogSequence != null ? dialogSequence.onEnd : default(DialogueEndAction);
+}
+
+/// <summary>한 줄을 화면에 표시하는 데 필요한 정보. DialogueManager.OnLineShown으로 전달된다.</summary>
+public struct DialogueLineInfo
+{
+    /// <summary>화면 위치 슬롯 (0=Left, 1=Right, 2=Center)</summary>
+    public int screenSlot;
+
+    /// <summary>화자. null이면 내레이션(화자 없는 줄)</summary>
+    public SpeakerDataSO speaker;
+
+    /// <summary>표정 이름. 비어 있으면 첫 번째(기본) 표정</summary>
+    public string expressionName;
+
+    /// <summary>화면에 표시할 이름 ({변수} 치환 완료). 줄의 displayName이 있으면 그것, 없으면 speaker.speakerName</summary>
+    public string displayName;
+
+    /// <summary>대사 표시 방식 이름 (thought, shout, whisper ...). 비어 있으면 일반 대사</summary>
+    public string style;
+
+    /// <summary>대사 텍스트 ({변수} 치환 완료)</summary>
+    public string text;
 }

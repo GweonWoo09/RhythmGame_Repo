@@ -112,6 +112,12 @@ public struct DialogLine
     [Tooltip("화면 어느 위치(슬롯)에 표시할지. DialogueUIView의 speakerSlots 인덱스와 대응.")]
     public int screenSlot;
 
+    [Tooltip("이 줄에서만 화자 이름 대신 보여줄 이름. 예: \"???\". {player} 같은 변수를 쓸 수 있다. 비우면 speaker.speakerName.")]
+    public string displayName;
+
+    [Tooltip("대사 표시 방식의 이름. 예: thought(속마음), shout(외침), whisper(속삭임). DialogueUIView의 textStyles에서 정의한다. 비우면 일반 대사.")]
+    public string style;
+
     [TextArea(1, 3)]
     public string dialogText;
 

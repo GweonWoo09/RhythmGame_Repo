@@ -6,19 +6,25 @@ using UnityEngine.UI;
 
 /// <summary>
 /// DialogueManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 밝기, 선택지 버튼)를
-/// 갱신하는 역할만 담당한다. 대화 진행/분기 로직은 갖지 않는다.
-/// 캐릭터 이름/표정 스프라이트는 SpeakerDataSO에서 가져오고, 여기서는 "화면 어느 슬롯에 그릴지"만 관리한다.
+/// 갱신하는 역할을 담당한다.
+/// 캐릭터 이름/표정 스프라이트는 SpeakerDataSO에서 가져오고, 여기서는 "화면 어느 위치에 그릴지"만 관리한다.
 /// 오토 모드: 타이핑이 끝난 뒤 지정된 시간이 지나면 자동으로 다음 대사로 진행한다.
 ///
-/// [이전 수정 유지]
-/// - UI 초기화는 Awake에서 한다 (DialogueManager.Start와의 실행 순서 문제 방지).
-/// - 선택지 줄에서도 Space로 타이핑 스킵 가능, 선택지 버튼은 타이핑이 끝난 뒤 표시.
+/// [위치 슬롯]  speakerSlots 배열은 [0]=Left(왼쪽), [1]=Right(오른쪽), [2]=Center(가운데) 순서로 구성한다.
+///             (DialogueSlots 참고. 가운데 슬롯이 필요 없으면 요소를 2개만 둬도 된다.)
 ///
-/// [v2 추가]
-/// - 무대(cast): 시퀀스의 cast에 등록된 인물은 계속 화면에 서 있고, 말하는 슬롯만 밝게(Bright),
-///   나머지는 어둡게(Dim) 보인다. cast에 없는 슬롯은 말할 때만 보인다(기존 방식).
-/// - 내레이션: speaker가 없는 줄은 narrationBoxRoot/narrationText에 표시한다. 슬롯의 말풍선은 모두 끈다.
-/// - 명령 "hide:{슬롯}": 해당 슬롯 인물을 무대에서 내린다 (다시 말하면 기존 방식대로 나타난다).
+/// [무대(cast)] 시퀀스의 cast에 등록된 인물은 계속 화면에 서 있고, 말하는 슬롯만 밝게(Bright), 나머지는 어둡게(Dim).
+///             cast에 없는 슬롯은 말할 때만 보인다. 연출 명령으로 도중에 넣고 뺄 수 있다.
+///               hide:left            해당 슬롯 인물을 내린다
+///               show:right           해당 슬롯 인물을 무대에 올린다 (그 슬롯의 현재 스프라이트 그대로)
+///               show:right:Red:Happy 인물(speakerId)과 표정까지 지정해서 올린다 (표정 생략 가능)
+///
+/// [대사 스타일] DialogLine.style 이름에 맞춰 글꼴 스타일/색을 적용한다.
+///             textStyles에 정의한 것이 우선이고, 없으면 기본 제공: thought(기울임), shout(굵게), whisper(기울임+흐리게).
+///
+/// [표시 이름]  DialogueLineInfo.displayName(변수 치환 완료)을 이름칸에 그대로 쓴다.
+/// [표정]      expression이 비어 있으면 경고 없이 첫 번째 표정을 쓴다.
+/// [내레이션]  speaker가 없는 줄은 narrationBoxRoot/narrationText에 표시한다.
 /// </summary>
 public class DialogueUIView : MonoBehaviour
 {
@@ -27,7 +33,7 @@ public class DialogueUIView : MonoBehaviour
     [Header("연동할 로직 컴포넌트")]
     [SerializeField] private DialogueManager dialogueManager;
 
-    [Header("화면 슬롯 (위치별 UI 참조, DialogLine.screenSlot 인덱스와 대응)")]
+    [Header("화면 슬롯: [0]=Left, [1]=Right, [2]=Center 순서 (DialogLine.screenSlot 인덱스와 대응)")]
     [SerializeField] private SpeakerSlotUI[] speakerSlots;
 
     [Header("무대(cast) 연출")]
@@ -37,6 +43,10 @@ public class DialogueUIView : MonoBehaviour
     [Header("내레이션 (화자 없는 대사). 연결하지 않으면 내레이션 줄은 표시되지 않는다.")]
     [SerializeField] private GameObject narrationBoxRoot;
     [SerializeField] private TextMeshProUGUI narrationText;
+
+    [Header("대사 스타일 (DialogLine.style 이름과 연결)")]
+    [Tooltip("여기에 정의한 이름이 우선한다. 없는 이름은 기본 제공(thought, shout, whisper)을 쓴다.")]
+    [SerializeField] private DialogueTextStyle[] textStyles;
 
     [Header("대화 종료 시 활성화/비활성화할 오브젝트 (선택)")]
     [SerializeField] private GameObject dialogBoxRoot;
@@ -59,13 +69,18 @@ public class DialogueUIView : MonoBehaviour
     // 현재 말하는 슬롯 (-1: 내레이션 또는 아직 없음)
     private int _speakingSlot = -1;
 
-    // 무대에 서 있는 슬롯들 (cast 등록 인물)
+    // 무대에 서 있는 슬롯들 (cast 등록 인물 + show 명령으로 올린 인물)
     private readonly HashSet<int> _castSlots = new HashSet<int>();
 
     private Coroutine _typingCoroutine;
     private TextMeshProUGUI _typingTarget;
     private bool _isTyping = false;
     private string _currentFullText = "";
+
+    // 스타일 적용 전의 원래 글꼴 스타일/색 (스타일 없는 줄에서 되돌리기 위해 기억)
+    private readonly Dictionary<TextMeshProUGUI, FontStyles> _defaultFontStyles = new Dictionary<TextMeshProUGUI, FontStyles>();
+    private readonly Dictionary<TextMeshProUGUI, Color> _defaultColors = new Dictionary<TextMeshProUGUI, Color>();
+    private readonly HashSet<string> _warnedStyles = new HashSet<string>();
 
     // 타이핑이 끝나기를 기다리는 선택지 (타이핑 중에는 버튼을 띄우지 않는다)
     private DialogChoice[] _pendingChoices;
@@ -79,9 +94,12 @@ public class DialogueUIView : MonoBehaviour
     {
         foreach (var slot in speakerSlots)
         {
+            CaptureTextDefaults(slot.textDialogue);
             SetPortraitState(slot, PortraitState.Hidden);
             SetDialogBoxActive(slot, false);
         }
+
+        CaptureTextDefaults(narrationText);
 
         if (choicePanelRoot != null)
         {
@@ -113,7 +131,7 @@ public class DialogueUIView : MonoBehaviour
     {
         if (dialogueManager == null) return;
 
-        dialogueManager.OnDialogUpdated += HandleDialogUpdated;
+        dialogueManager.OnLineShown += HandleLineShown;
         dialogueManager.OnChoicesPresented += HandleChoicesPresented;
         dialogueManager.OnDialogEnd += HandleDialogEnd;
         dialogueManager.OnCastUpdated += HandleCastUpdated;
@@ -124,7 +142,7 @@ public class DialogueUIView : MonoBehaviour
     {
         if (dialogueManager == null) return;
 
-        dialogueManager.OnDialogUpdated -= HandleDialogUpdated;
+        dialogueManager.OnLineShown -= HandleLineShown;
         dialogueManager.OnChoicesPresented -= HandleChoicesPresented;
         dialogueManager.OnDialogEnd -= HandleDialogEnd;
         dialogueManager.OnCastUpdated -= HandleCastUpdated;
@@ -224,7 +242,7 @@ public class DialogueUIView : MonoBehaviour
         {
             if (!IsValidSlot(member.slot))
             {
-                Debug.LogWarning($"[DialogueUIView] cast의 slot({member.slot})이 speakerSlots 범위를 벗어났습니다.");
+                Debug.LogWarning($"[DialogueUIView] cast의 {SlotWarning(member.slot)}");
                 continue;
             }
 
@@ -237,24 +255,67 @@ public class DialogueUIView : MonoBehaviour
         RefreshPortraits();
     }
 
-    /// <summary>줄에 적힌 명령 중 화면 표시와 관련된 것만 처리한다. 나머지(bg, sfx 등)는 다른 구독자 몫.</summary>
+    /// <summary>줄에 적힌 명령 중 화면 표시와 관련된 것(show, hide)만 처리한다. 나머지(bg, sfx 등)는 다른 구독자 몫.</summary>
     private void HandleCommand(string name, string arg)
     {
-        if (name == "hide")
+        switch (name)
         {
-            if (int.TryParse(arg, out int slotIndex) && IsValidSlot(slotIndex))
-            {
-                _castSlots.Remove(slotIndex);
-                RefreshPortraits();
-            }
-            else
-            {
-                Debug.LogWarning($"[DialogueUIView] 'hide' 명령의 인자가 올바른 슬롯 번호가 아닙니다: '{arg}'");
-            }
+            case "hide":
+                HandleHideCommand(arg);
+                break;
+
+            case "show":
+                HandleShowCommand(arg);
+                break;
         }
     }
 
-    /// <summary>현재 말하는 슬롯 / cast / 그 외에 따라 모든 초상화의 상태를 다시 맞춘다.</summary>
+    private void HandleHideCommand(string arg)
+    {
+        int slotIndex;
+        if (!DialogueSlots.TryParse(arg, out slotIndex) || !IsValidSlot(slotIndex))
+        {
+            Debug.LogWarning($"[DialogueUIView] 'hide:{arg}' 명령의 슬롯을 해석할 수 없습니다. (예: hide:left)");
+            return;
+        }
+
+        _castSlots.Remove(slotIndex);
+        RefreshPortraits();
+    }
+
+    /// <summary>show:슬롯  또는  show:슬롯:speakerId[:expression]</summary>
+    private void HandleShowCommand(string arg)
+    {
+        string[] parts = arg.Split(':');
+
+        int slotIndex;
+        if (!DialogueSlots.TryParse(parts[0], out slotIndex) || !IsValidSlot(slotIndex))
+        {
+            Debug.LogWarning($"[DialogueUIView] 'show:{arg}' 명령의 슬롯을 해석할 수 없습니다. (예: show:right)");
+            return;
+        }
+
+        if (parts.Length >= 2 && parts[1].Trim().Length > 0)
+        {
+            string speakerId = parts[1].Trim();
+            SpeakerDataSO speaker = DialogueJsonLoader.FindSpeaker(speakerId);
+
+            if (speaker == null)
+            {
+                Debug.LogWarning($"[DialogueUIView] 'show:{arg}' 명령의 speaker '{speakerId}' 에셋을 찾을 수 없습니다.");
+            }
+            else
+            {
+                string expression = parts.Length >= 3 ? parts[2].Trim() : "";
+                speakerSlots[slotIndex].characterPortrait.sprite = GetPortraitSprite(speaker, expression);
+            }
+        }
+
+        _castSlots.Add(slotIndex);
+        RefreshPortraits();
+    }
+
+    /// <summary>현재 말하는 슬롯 / 무대에 선 슬롯 / 그 외에 따라 모든 초상화의 상태를 다시 맞춘다.</summary>
     private void RefreshPortraits()
     {
         for (int i = 0; i < speakerSlots.Length; i++)
@@ -270,7 +331,7 @@ public class DialogueUIView : MonoBehaviour
     }
     #endregion
 
-    private void HandleDialogUpdated(int screenSlot, SpeakerDataSO speaker, string expressionName, string dialogText)
+    private void HandleLineShown(DialogueLineInfo info)
     {
         CancelAutoAdvance();
 
@@ -284,15 +345,15 @@ public class DialogueUIView : MonoBehaviour
         }
 
         // 화자가 없으면 내레이션
-        if (speaker == null)
+        if (info.speaker == null)
         {
-            ShowNarration(dialogText);
+            ShowNarration(info.text, info.style);
             return;
         }
 
-        if (!IsValidSlot(screenSlot))
+        if (!IsValidSlot(info.screenSlot))
         {
-            Debug.LogWarning($"[DialogueUIView] screenSlot({screenSlot})이 speakerSlots 배열 범위를 벗어났습니다.");
+            Debug.LogWarning($"[DialogueUIView] 대사의 {SlotWarning(info.screenSlot)}");
             return;
         }
 
@@ -304,20 +365,21 @@ public class DialogueUIView : MonoBehaviour
         // 말풍선은 말하는 슬롯 것만 켠다
         for (int i = 0; i < speakerSlots.Length; i++)
         {
-            SetDialogBoxActive(speakerSlots[i], i == screenSlot);
+            SetDialogBoxActive(speakerSlots[i], i == info.screenSlot);
         }
 
-        _speakingSlot = screenSlot;
+        _speakingSlot = info.screenSlot;
         RefreshPortraits();
 
-        var slot = speakerSlots[screenSlot];
-        slot.textName.text = speaker.speakerName;
-        slot.characterPortrait.sprite = speaker.GetSprite(expressionName);
+        var slot = speakerSlots[info.screenSlot];
+        slot.textName.text = info.displayName;
+        slot.characterPortrait.sprite = GetPortraitSprite(info.speaker, info.expressionName);
 
-        StartTyping(slot.textDialogue, dialogText);
+        ApplyTextStyle(slot.textDialogue, info.style);
+        StartTyping(slot.textDialogue, info.text);
     }
 
-    private void ShowNarration(string text)
+    private void ShowNarration(string text, string styleName)
     {
         if (narrationText == null)
         {
@@ -339,8 +401,91 @@ public class DialogueUIView : MonoBehaviour
         _speakingSlot = -1;
         RefreshPortraits();
 
+        ApplyTextStyle(narrationText, styleName);
         StartTyping(narrationText, text);
     }
+
+    #region Text Style
+    private void CaptureTextDefaults(TextMeshProUGUI target)
+    {
+        if (target == null || _defaultFontStyles.ContainsKey(target)) return;
+
+        _defaultFontStyles[target] = target.fontStyle;
+        _defaultColors[target] = target.color;
+    }
+
+    /// <summary>스타일 이름에 맞춰 글꼴 스타일/색을 적용한다. 이름이 비어 있으면 원래 모습으로 되돌린다.</summary>
+    private void ApplyTextStyle(TextMeshProUGUI target, string styleName)
+    {
+        if (target == null) return;
+
+        CaptureTextDefaults(target);
+
+        FontStyles baseFontStyle = _defaultFontStyles[target];
+        target.fontStyle = baseFontStyle;
+        target.color = _defaultColors[target];
+
+        if (string.IsNullOrEmpty(styleName)) return;
+
+        DialogueTextStyle style;
+        if (!TryGetStyle(styleName, out style))
+        {
+            if (_warnedStyles.Add(styleName))
+            {
+                Debug.LogWarning($"[DialogueUIView] 알 수 없는 대사 스타일 '{styleName}'입니다. " +
+                                 "textStyles에 정의하거나 기본 제공(thought, shout, whisper)을 쓰세요.");
+            }
+            return;
+        }
+
+        target.fontStyle = baseFontStyle | style.fontStyle;
+
+        if (style.overrideColor)
+        {
+            target.color = style.color;
+        }
+    }
+
+    private bool TryGetStyle(string styleName, out DialogueTextStyle style)
+    {
+        if (textStyles != null)
+        {
+            foreach (var candidate in textStyles)
+            {
+                if (candidate.name == styleName)
+                {
+                    style = candidate;
+                    return true;
+                }
+            }
+        }
+
+        // 기본 제공 스타일
+        switch (styleName)
+        {
+            case "thought":
+                style = new DialogueTextStyle { name = styleName, fontStyle = FontStyles.Italic };
+                return true;
+
+            case "shout":
+                style = new DialogueTextStyle { name = styleName, fontStyle = FontStyles.Bold };
+                return true;
+
+            case "whisper":
+                style = new DialogueTextStyle
+                {
+                    name = styleName,
+                    fontStyle = FontStyles.Italic,
+                    overrideColor = true,
+                    color = new Color(0.75f, 0.75f, 0.75f, 1f)
+                };
+                return true;
+        }
+
+        style = default(DialogueTextStyle);
+        return false;
+    }
+    #endregion
 
     #region Typing
     private void StartTyping(TextMeshProUGUI textComponent, string fullText)
@@ -502,6 +647,12 @@ public class DialogueUIView : MonoBehaviour
         return speakerSlots != null && slotIndex >= 0 && slotIndex < speakerSlots.Length;
     }
 
+    private string SlotWarning(int slotIndex)
+    {
+        return $"슬롯 {DialogueSlots.Describe(slotIndex)}에 해당하는 speakerSlots 요소가 없습니다. " +
+               $"speakerSlots는 [0]=Left, [1]=Right, [2]=Center 순서로 구성해야 합니다. (현재 {(speakerSlots != null ? speakerSlots.Length : 0)}개)";
+    }
+
     /// <summary>말풍선(이름, 대사, 배경)의 표시 여부. 캐릭터 초상화는 건드리지 않는다.</summary>
     private void SetDialogBoxActive(SpeakerSlotUI slot, bool active)
     {
@@ -567,4 +718,20 @@ public struct ChoiceButtonRef
     public GameObject root;   // 버튼 전체를 감싸는 오브젝트 (활성/비활성 제어용)
     public Button button;
     public TextMeshProUGUI label;
+}
+
+/// <summary>대사 스타일 한 가지. DialogLine.style의 이름과 연결된다.</summary>
+[System.Serializable]
+public struct DialogueTextStyle
+{
+    [Tooltip("DialogLine.style에 적는 이름. 예: thought")]
+    public string name;
+
+    [Tooltip("적용할 글꼴 스타일 (기본 글꼴 스타일에 더해진다)")]
+    public FontStyles fontStyle;
+
+    [Tooltip("체크하면 아래 색으로 대사 글자색을 바꾼다")]
+    public bool overrideColor;
+
+    public Color color;
 }

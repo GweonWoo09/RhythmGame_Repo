@@ -448,8 +448,9 @@ MonoBehaviour:
     textDialogue: {fileID: 779694079}
     dialogImage: {fileID: 1324114876}
   dimTint: {r: 0.55, g: 0.55, b: 0.55, a: 1}
-  narrationBoxRoot: {fileID: 0}
-  narrationText: {fileID: 0}
+  narrationBoxRoot: {fileID: 1324114874}
+  narrationText: {fileID: 779694079}
+  textStyles: []
   dialogBoxRoot: {fileID: 664460374}
   choicePanelRoot: {fileID: 1130912140}
   choiceButtons:
@@ -457,8 +458,8 @@ MonoBehaviour:
     button: {fileID: 786263089}
     label: {fileID: 203301304}
   - root: {fileID: 1130912140}
-    button: {fileID: 1807802308}
-    label: {fileID: 1405528657}
+    button: {fileID: 1247181688}
+    label: {fileID: 517143743}
   charInterval: 0.03
   autoButton: {fileID: 119585838}
   autoAdvanceDelay: 3
@@ -1705,7 +1706,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2029,7 +2030,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogManager
   dialogSequence: {fileID: 0}
-  startSequenceId: chapter1_intro
+  startSequenceId: tutorial
 --- !u!4 &1392145939
 Transform:
   m_ObjectHideFlags: 0
@@ -2062,7 +2063,7 @@ MonoBehaviour:
   chapterId: 0
   songId: 
   difficulty: 
-  dialogueManager: {fileID: 0}
+  dialogueManager: {fileID: 1392145938}
 --- !u!1 &1405528655
 GameObject:
   m_ObjectHideFlags: 0
@@ -2447,8 +2448,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1536292554}
-  - {fileID: 1713041364}
   - {fileID: 2000030195}
+  - {fileID: 1713041364}
   m_Father: {fileID: 664460375}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -2605,7 +2606,7 @@ GameObject:
   - component: {fileID: 1713041366}
   - component: {fileID: 1713041365}
   m_Layer: 5
-  m_Name: Character2
+  m_Name: Character3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2761,7 +2762,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1807802307
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2915,7 +2916,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3089,7 +3090,7 @@ GameObject:
   - component: {fileID: 2000030197}
   - component: {fileID: 2000030196}
   m_Layer: 5
-  m_Name: Character3
+  m_Name: Character2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -47,7 +47,9 @@ public class DialogueLineJson
     public string @if;            // 조건식. 거짓이면 이 줄 건너뜀
     public string speakerId;      // 비우면 내레이션. Resources/Speakers/{speakerId}
     public string expression;     // SpeakerDataSO.expressions 의 expressionName
-    public int screenSlot;
+    public int screenSlot;        // 0=Left, 1=Right, 2=Center
+    public string name;           // 이 줄에서만 쓸 표시 이름 (예: "???"). 비우면 SpeakerDataSO.speakerName
+    public string style;          // 대사 표시 방식 (thought, shout, whisper ...)
     public string text;
     public string bgmOverride;    // 이 줄부터 BGM 교체 (Resources 경로, 비우면 유지)
     public string[] setFlags;     // 예: ["ch1_eager=1", "affinity+=1"]
@@ -171,6 +173,8 @@ public static class DialogueJsonLoader
                 speaker = LoadSpeaker(src.speakerId, $"{sequenceId}의 {i}번 줄"),
                 expressionName = src.expression,
                 screenSlot = src.screenSlot,
+                displayName = src.name,
+                style = src.style,
                 dialogText = src.text,
                 bgmOverride = LoadAudio(src.bgmOverride),
                 setFlags = NullIfEmpty(src.setFlags),
@@ -261,6 +265,13 @@ public static class DialogueJsonLoader
     private static T[] NullIfEmpty<T>(T[] array)
     {
         return (array == null || array.Length == 0) ? null : array;
+    }
+
+    /// <summary>speakerId에 해당하는 SpeakerDataSO를 찾는다. 없으면 null (경고 없음). 연출 명령(show) 등에서 쓴다.</summary>
+    public static SpeakerDataSO FindSpeaker(string speakerId)
+    {
+        if (string.IsNullOrEmpty(speakerId)) return null;
+        return Resources.Load<SpeakerDataSO>($"{SpeakerRoot}/{speakerId}");
     }
 
     /// <summary>speakerId가 비어있으면 내레이션(화자 없음)으로 보고 null을 반환한다 (경고 없음).</summary>

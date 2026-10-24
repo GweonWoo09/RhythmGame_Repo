@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// 변환기가 에셋/파일 존재 여부를 물어볼 때 쓰는 창구.
@@ -37,18 +38,29 @@ public sealed class SheetConvertResult
 /// 구글 시트(CSV 두 장: lines 탭, meta 탭)를 대사 JSON(v2 스키마)으로 변환한다.
 /// 오류가 하나라도 있으면 Files는 비어 있고, 오류는 "[탭 N행] (시퀀스) 메시지" 형태로 모두 모아서 돌려준다.
 ///
-/// [lines 탭 열]  sequence | id | type | speaker | expression | slot | text_{언어} ... | if | goto |
-///                target_sequence | setFlags | commands | bgm
+/// [lines 탭 열]
+///   sequence | id | type | speaker | expression | slot | name | style | text_{언어} ... |
+///   if | goto | target_sequence | setFlags | commands | bgm | memo
+///
 ///   type = line / choice / branch / comment
 ///   - line   : 대사 한 줄. speaker가 비어 있으면 내레이션.
 ///   - choice : 바로 위 line 행에 붙는 선택지. 텍스트는 text_{언어} 열.
+///              speaker를 적으면 "에코": 선택지를 고른 뒤 그 화자가 같은 문구를 말하는 줄을 자동으로 만든다.
+///              이때 expression / slot / name / style 칸은 그 에코 줄에 적용된다. (target_sequence와는 함께 쓸 수 없음)
 ///   - branch : 바로 위 line 행에 붙는 조건부 이동 (if, goto).
 ///   - comment: 무시 (sequence 칸이 # 로 시작해도 무시).
-///   setFlags / commands 는 한 칸에 여러 개를 ; 또는 줄바꿈으로 구분한다.
 ///
-/// [meta 탭 열]   sequence | key | value
+///   slot  = left / right / center (또는 왼쪽 / 오른쪽 / 가운데) 또는 0 이상의 번호. 비우면 meta의 cast 위치를 쓴다.
+///   name  = 이 줄에서만 화자 이름 대신 보여줄 이름 (예: ???). {player} 같은 변수 사용 가능.
+///   style = 대사 표시 방식 (thought, shout, whisper ...).
+///   expression = 비우면 기본(첫 번째) 표정.
+///   memo  = 작업 메모. 임포터는 읽지 않는다.
+///   setFlags / commands 는 한 칸에 여러 개를 ; 또는 줄바꿈으로 구분한다.
+///   commands = hide:슬롯 / show:슬롯 / show:슬롯:speakerId[:expression] / (그 밖의 이름:인자는 그대로 전달)
+///
+/// [meta 탭 열]   sequence | key | value | (memo)
 ///   key = bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty
-///   cast 값 예: "White:0;Black:1"  또는 "White:0:Happy;Black:1" (speakerId:slot[:expression])
+///   cast 값 예: "White:left;Black:right"  또는 "White:left:Happy;Black:2" (speakerId:slot[:expression])
 ///
 /// Unity API에 의존하지 않는다.
 /// </summary>
@@ -60,21 +72,25 @@ public static class DialogueSheetConverter
     private const string ColSpeaker = "speaker";
     private const string ColExpression = "expression";
     private const string ColSlot = "slot";
+    private const string ColName = "name";
+    private const string ColStyle = "style";
     private const string ColIf = "if";
     private const string ColGoto = "goto";
     private const string ColTargetSequence = "target_sequence";
     private const string ColSetFlags = "setflags";
     private const string ColCommands = "commands";
     private const string ColBgm = "bgm";
+    private const string ColMemo = "memo";
     private const string TextPrefix = "text_";
 
     private const string EndLabel = "end";
+    private const string EchoIdPrefix = "echo_r";
     private const string GeneratedNote = "Generated from Google Sheet by DialogueSheetImporter. Do not edit by hand.";
 
     private static readonly HashSet<string> KnownColumns = new HashSet<string>
     {
-        ColSequence, ColId, ColType, ColSpeaker, ColExpression, ColSlot, ColIf, ColGoto,
-        ColTargetSequence, ColSetFlags, ColCommands, ColBgm
+        ColSequence, ColId, ColType, ColSpeaker, ColExpression, ColSlot, ColName, ColStyle, ColIf, ColGoto,
+        ColTargetSequence, ColSetFlags, ColCommands, ColBgm, ColMemo
     };
 
     private static readonly HashSet<string> KnownMetaKeys = new HashSet<string>
@@ -82,6 +98,12 @@ public static class DialogueSheetConverter
         "bgm", "chapterid", "cast",
         "onend.scene", "onend.clearchapter", "onend.unlockchapter", "onend.songid", "onend.difficulty"
     };
+
+    // DialogueUIView가 기본으로 제공하는 스타일 이름 / DialogueVariables가 기본으로 제공하는 변수 이름
+    private static readonly HashSet<string> BuiltInStyles = new HashSet<string> { "thought", "shout", "whisper" };
+    private static readonly HashSet<string> BuiltInVariables = new HashSet<string> { "player" };
+
+    private static readonly Regex BracePair = new Regex(@"\{([^{}]*)\}");
 
     #region Models
     private sealed class SheetRow
@@ -130,6 +152,9 @@ public static class DialogueSheetConverter
         public string TargetSequence;
         public string[] SetFlags;
         public Dictionary<string, string> Texts = new Dictionary<string, string>();
+
+        /// <summary>speaker가 적힌 choice 행이면 만들어지는 에코 줄 (선택 직후 그 화자가 선택 문구를 말한다)</summary>
+        public LineModel Echo;
     }
 
     private sealed class LineModel
@@ -141,6 +166,8 @@ public static class DialogueSheetConverter
         public string Expression;
         public string SlotText;
         public int Slot;
+        public string DisplayName;
+        public string Style;
         public string Goto;
         public string Bgm;
         public string[] SetFlags;
@@ -156,6 +183,7 @@ public static class DialogueSheetConverter
         public List<LineModel> Lines = new List<LineModel>();
         public Dictionary<string, MetaEntry> Meta = new Dictionary<string, MetaEntry>();
         public HashSet<string> Ids = new HashSet<string>();
+        public int BlankExpressionCount;
 
         // meta 해석 결과
         public List<CastModel> Cast = new List<CastModel>();
@@ -338,8 +366,8 @@ public static class DialogueSheetConverter
                         AddError(result, "lines", row.Number, sequenceName, "choice 행 위에 line 행이 없습니다. 선택지는 바로 위 line 행에 붙습니다.");
                         break;
                     }
-                    WarnIfIgnoredColumns(row, sequenceName, "choice", result);
-                    sequence.Lines[sequence.Lines.Count - 1].Choices.Add(ReadChoice(row, languages));
+                    WarnIgnoredColumns(row, sequenceName, "choice", result);
+                    sequence.Lines[sequence.Lines.Count - 1].Choices.Add(ReadChoice(row, sequenceName, languages, result));
                     break;
 
                 case "branch":
@@ -348,7 +376,7 @@ public static class DialogueSheetConverter
                         AddError(result, "lines", row.Number, sequenceName, "branch 행 위에 line 행이 없습니다. branch는 바로 위 line 행에 붙습니다.");
                         break;
                     }
-                    WarnIfIgnoredColumns(row, sequenceName, "branch", result);
+                    WarnIgnoredColumns(row, sequenceName, "branch", result);
                     sequence.Lines[sequence.Lines.Count - 1].Branches.Add(new BranchModel
                     {
                         Row = row,
@@ -378,6 +406,8 @@ public static class DialogueSheetConverter
             Speaker = row.Get(ColSpeaker),
             Expression = row.Get(ColExpression),
             SlotText = row.Get(ColSlot),
+            DisplayName = row.Get(ColName),
+            Style = row.Get(ColStyle),
             Goto = row.Get(ColGoto),
             Bgm = row.Get(ColBgm),
             SetFlags = SplitList(row.Get(ColSetFlags)),
@@ -392,7 +422,7 @@ public static class DialogueSheetConverter
         return line;
     }
 
-    private static ChoiceModel ReadChoice(SheetRow row, List<string> languages)
+    private static ChoiceModel ReadChoice(SheetRow row, string sequenceName, List<string> languages, SheetConvertResult result)
     {
         var choice = new ChoiceModel
         {
@@ -408,16 +438,52 @@ public static class DialogueSheetConverter
             choice.Texts[language] = row.Get(TextPrefix + language);
         }
 
+        string speaker = row.Get(ColSpeaker);
+
+        if (speaker.Length > 0)
+        {
+            // 에코 줄: 선택 직후 이 화자가 선택지와 같은 문구를 말한다. 선택 문구는 text 열과 공유한다.
+            choice.Echo = new LineModel
+            {
+                Row = row,
+                Id = EchoIdPrefix + row.Number.ToString(CultureInfo.InvariantCulture),
+                Condition = "",
+                Speaker = speaker,
+                Expression = row.Get(ColExpression),
+                SlotText = row.Get(ColSlot),
+                DisplayName = row.Get(ColName),
+                Style = row.Get(ColStyle),
+                Goto = choice.Goto,
+                Bgm = "",
+                Texts = choice.Texts
+            };
+        }
+        else if (row.Get(ColExpression).Length > 0 || row.Get(ColSlot).Length > 0
+                 || row.Get(ColName).Length > 0 || row.Get(ColStyle).Length > 0)
+        {
+            AddWarning(result, "lines", row.Number, sequenceName,
+                "choice 행의 expression / slot / name / style은 speaker가 있을 때(에코 줄)만 쓰입니다. speaker가 비어 있어 무시합니다.");
+        }
+
         return choice;
     }
 
-    private static void WarnIfIgnoredColumns(SheetRow row, string sequenceName, string type, SheetConvertResult result)
+    private static void WarnIgnoredColumns(SheetRow row, string sequenceName, string type, SheetConvertResult result)
     {
-        if (row.Get(ColId).Length > 0 || row.Get(ColSpeaker).Length > 0 || row.Get(ColExpression).Length > 0
-            || row.Get(ColSlot).Length > 0 || row.Get(ColCommands).Length > 0 || row.Get(ColBgm).Length > 0)
+        string[] columns = type == "choice"
+            ? new[] { ColId, ColCommands, ColBgm }
+            : new[] { ColId, ColSpeaker, ColExpression, ColSlot, ColName, ColStyle, ColCommands, ColBgm };
+
+        var ignored = new List<string>();
+        foreach (string column in columns)
+        {
+            if (row.Get(column).Length > 0) ignored.Add(column);
+        }
+
+        if (ignored.Count > 0)
         {
             AddWarning(result, "lines", row.Number, sequenceName,
-                $"{type} 행에서는 id / speaker / expression / slot / commands / bgm 칸을 쓰지 않습니다. (무시됨)");
+                $"{type} 행에서는 {string.Join(" / ", ignored.ToArray())} 칸을 쓰지 않습니다. (무시됨)");
         }
     }
 
@@ -476,19 +542,30 @@ public static class DialogueSheetConverter
     {
         foreach (LineModel line in sequence.Lines)
         {
-            if (line.Id.Length == 0) continue;
+            if (line.Id.Length > 0)
+            {
+                if (!IsValidName(line.Id))
+                {
+                    AddError(result, "lines", line.Row.Number, sequence.Name, $"id '{line.Id}'는 영문/숫자/-/_ 만 쓸 수 있습니다.");
+                }
+                else if (line.Id == EndLabel)
+                {
+                    AddError(result, "lines", line.Row.Number, sequence.Name, $"'{EndLabel}'는 예약어라 id로 쓸 수 없습니다. (goto에서 '대화 종료'를 뜻합니다)");
+                }
+                else if (!sequence.Ids.Add(line.Id))
+                {
+                    AddError(result, "lines", line.Row.Number, sequence.Name, $"id '{line.Id}'가 중복됩니다.");
+                }
+            }
 
-            if (!IsValidName(line.Id))
+            // 에코 줄의 자동 id가 직접 적은 id와 겹치지 않는지 확인
+            foreach (ChoiceModel choice in line.Choices)
             {
-                AddError(result, "lines", line.Row.Number, sequence.Name, $"id '{line.Id}'는 영문/숫자/-/_ 만 쓸 수 있습니다.");
-            }
-            else if (line.Id == EndLabel)
-            {
-                AddError(result, "lines", line.Row.Number, sequence.Name, $"'{EndLabel}'는 예약어라 id로 쓸 수 없습니다. (goto에서 '대화 종료'를 뜻합니다)");
-            }
-            else if (!sequence.Ids.Add(line.Id))
-            {
-                AddError(result, "lines", line.Row.Number, sequence.Name, $"id '{line.Id}'가 중복됩니다.");
+                if (choice.Echo != null && !sequence.Ids.Add(choice.Echo.Id))
+                {
+                    AddError(result, "lines", choice.Row.Number, sequence.Name,
+                        $"id '{choice.Echo.Id}'가 에코 줄에 자동으로 붙는 id와 겹칩니다. (이 id는 직접 쓰지 마세요)");
+                }
             }
         }
     }
@@ -530,6 +607,11 @@ public static class DialogueSheetConverter
             {
                 ValidateChoice(sequence, choice, sequences, defaultLanguage, env, result);
             }
+        }
+
+        if (sequence.BlankExpressionCount > 0)
+        {
+            result.Infos.Add($"[{sequence.Name}] expression이 비어 있는 {sequence.BlankExpressionCount}곳은 기본 표정(첫 번째 표정)으로 표시됩니다.");
         }
     }
 
@@ -597,14 +679,14 @@ public static class DialogueSheetConverter
         foreach (string item in items)
         {
             string[] parts = item.Split(':');
-            int slot;
+            int slot = -1;
 
             if (parts.Length < 2 || parts.Length > 3
                 || parts[0].Trim().Length == 0
-                || !TryParseNonNegative(parts[1].Trim(), out slot))
+                || !DialogueSlots.TryParse(parts[1], out slot))
             {
                 AddError(result, "meta", entry.Row, sequence.Name,
-                    $"cast 항목 '{item}'의 형식이 올바르지 않습니다. 'speakerId:slot' 또는 'speakerId:slot:expression' (예: White:0;Black:1)");
+                    $"cast 항목 '{item}'의 형식이 올바르지 않습니다. 'speakerId:slot' 또는 'speakerId:slot:expression' (slot은 left/right/center 또는 번호. 예: White:left;Black:right)");
                 continue;
             }
 
@@ -625,7 +707,7 @@ public static class DialogueSheetConverter
 
             if (!usedSlots.Add(slot))
             {
-                AddError(result, "meta", entry.Row, sequence.Name, $"cast에서 slot {slot}이(가) 두 번 쓰였습니다.");
+                AddError(result, "meta", entry.Row, sequence.Name, $"cast에서 슬롯 {DialogueSlots.Describe(slot)}이(가) 두 번 쓰였습니다.");
                 continue;
             }
 
@@ -649,6 +731,13 @@ public static class DialogueSheetConverter
             AddError(result, "lines", row, sequence.Name, $"text_{defaultLanguage} 칸이 비어 있습니다.");
         }
 
+        foreach (KeyValuePair<string, string> text in line.Texts)
+        {
+            CheckPlaceholders(text.Value, row, sequence.Name, result);
+        }
+
+        CheckPlaceholders(line.DisplayName, row, sequence.Name, result);
+        CheckStyle(line.Style, row, sequence.Name, result);
         CheckCondition(line.Condition, row, sequence.Name, result);
         CheckAssignments(line.SetFlags, row, sequence.Name, result);
 
@@ -666,13 +755,14 @@ public static class DialogueSheetConverter
         {
             foreach (string command in line.Commands)
             {
-                CheckCommand(command, row, sequence.Name, result);
+                CheckCommand(command, row, sequence.Name, env, result);
             }
         }
 
         ValidateSpeaker(sequence, line, env, result);
     }
 
+    /// <summary>화자, 표정, 슬롯을 검사하고 슬롯 번호를 확정한다. (line과 에코 줄 공통)</summary>
     private static void ValidateSpeaker(SequenceModel sequence, LineModel line, IDialogueSheetEnvironment env, SheetConvertResult result)
     {
         int row = line.Row.Number;
@@ -680,9 +770,9 @@ public static class DialogueSheetConverter
         // 내레이션 (speaker 없음)
         if (line.Speaker.Length == 0)
         {
-            if (line.Expression.Length > 0 || line.SlotText.Length > 0)
+            if (line.Expression.Length > 0 || line.SlotText.Length > 0 || line.DisplayName.Length > 0)
             {
-                AddWarning(result, "lines", row, sequence.Name, "speaker가 없는 줄(내레이션)에서는 expression / slot을 쓰지 않습니다. (무시됨)");
+                AddWarning(result, "lines", row, sequence.Name, "speaker가 없는 줄(내레이션)에서는 expression / slot / name을 쓰지 않습니다. (무시됨)");
             }
             return;
         }
@@ -695,7 +785,7 @@ public static class DialogueSheetConverter
 
         if (line.Expression.Length == 0)
         {
-            AddWarning(result, "lines", row, sequence.Name, $"'{line.Speaker}'의 expression이 비어 있어 기본 표정이 쓰입니다.");
+            sequence.BlankExpressionCount++; // 기본 표정을 쓴다 (경고 대신 시퀀스별로 한 줄 요약)
         }
         else if (speakerExists && !env.SpeakerHasExpression(line.Speaker, line.Expression))
         {
@@ -706,8 +796,8 @@ public static class DialogueSheetConverter
         if (line.SlotText.Length > 0)
         {
             int slot;
-            if (TryParseNonNegative(line.SlotText, out slot)) line.Slot = slot;
-            else AddError(result, "lines", row, sequence.Name, $"slot '{line.SlotText}'는 0 이상의 정수여야 합니다.");
+            if (DialogueSlots.TryParse(line.SlotText, out slot)) line.Slot = slot;
+            else AddError(result, "lines", row, sequence.Name, $"slot '{line.SlotText}'를 해석할 수 없습니다. (left / right / center 또는 0 이상의 번호)");
         }
         else
         {
@@ -727,12 +817,30 @@ public static class DialogueSheetConverter
             AddError(result, "lines", row, sequence.Name, $"선택지의 text_{defaultLanguage} 칸이 비어 있습니다.");
         }
 
+        foreach (KeyValuePair<string, string> text in choice.Texts)
+        {
+            CheckPlaceholders(text.Value, row, sequence.Name, result);
+        }
+
         CheckCondition(choice.Condition, row, sequence.Name, result);
         CheckAssignments(choice.SetFlags, row, sequence.Name, result);
+
+        if (choice.Echo != null)
+        {
+            ValidateSpeaker(sequence, choice.Echo, env, result);
+            CheckPlaceholders(choice.Echo.DisplayName, row, sequence.Name, result);
+            CheckStyle(choice.Echo.Style, row, sequence.Name, result);
+        }
 
         // 다른 시퀀스로 분기
         if (choice.TargetSequence.Length > 0)
         {
+            if (choice.Echo != null)
+            {
+                AddError(result, "lines", row, sequence.Name,
+                    "speaker(에코 줄)는 같은 시퀀스 안으로 이동하는 선택지에서만 쓸 수 있습니다. target_sequence를 쓰려면 speaker를 비우세요.");
+            }
+
             if (!IsValidName(choice.TargetSequence))
             {
                 AddError(result, "lines", row, sequence.Name, $"target_sequence '{choice.TargetSequence}'는 영문/숫자/-/_ 만 쓸 수 있습니다.");
@@ -804,7 +912,51 @@ public static class DialogueSheetConverter
         }
     }
 
-    private static void CheckCommand(string command, int row, string sequenceName, SheetConvertResult result)
+    private static void CheckStyle(string style, int row, string sequenceName, SheetConvertResult result)
+    {
+        if (string.IsNullOrEmpty(style)) return;
+
+        if (!IsValidName(style))
+        {
+            AddError(result, "lines", row, sequenceName, $"style '{style}'는 영문/숫자/-/_ 만 쓸 수 있습니다.");
+        }
+        else if (!BuiltInStyles.Contains(style))
+        {
+            AddWarning(result, "lines", row, sequenceName,
+                $"style '{style}'는 기본 제공 스타일(thought, shout, whisper)이 아닙니다. DialogueUIView의 textStyles에 같은 이름으로 정의되어 있어야 합니다.");
+        }
+    }
+
+    /// <summary>텍스트 안의 {변수} 문법을 검사한다. 모든 문제는 경고다 (화면에 그대로 보일 뿐 진행은 막지 않는다).</summary>
+    private static void CheckPlaceholders(string text, int row, string sequenceName, SheetConvertResult result)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        if (text.IndexOf('{') < 0 && text.IndexOf('}') < 0) return;
+
+        string rest = BracePair.Replace(text, match =>
+        {
+            string key = match.Groups[1].Value;
+
+            if (!IsValidName(key) || key.IndexOf('-') >= 0)
+            {
+                AddWarning(result, "lines", row, sequenceName, $"변수 '{{{key}}}'의 이름이 올바르지 않습니다. (영문/숫자/_ 만 가능)");
+            }
+            else if (!BuiltInVariables.Contains(key))
+            {
+                AddWarning(result, "lines", row, sequenceName,
+                    $"변수 '{{{key}}}'는 기본 변수가 아닙니다. 코드에서 DialogueVariables.Set(\"{key}\", ...)로 등록하지 않으면 그대로 표시됩니다. (기본 제공: {{player}})");
+            }
+
+            return "";
+        });
+
+        if (rest.IndexOf('{') >= 0 || rest.IndexOf('}') >= 0)
+        {
+            AddWarning(result, "lines", row, sequenceName, "짝이 맞지 않는 { } 가 있습니다. 변수는 {player} 처럼 중괄호로 감싸야 합니다.");
+        }
+    }
+
+    private static void CheckCommand(string command, int row, string sequenceName, IDialogueSheetEnvironment env, SheetConvertResult result)
     {
         int colon = command.IndexOf(':');
         string name = (colon < 0 ? command : command.Substring(0, colon)).Trim();
@@ -817,9 +969,38 @@ public static class DialogueSheetConverter
         }
 
         int slot;
-        if (name == "hide" && !TryParseNonNegative(arg, out slot))
+
+        if (name == "hide")
         {
-            AddError(result, "lines", row, sequenceName, $"hide 명령에는 슬롯 번호가 필요합니다. (예: hide:0) 입력값: '{command}'");
+            if (!DialogueSlots.TryParse(arg, out slot))
+            {
+                AddError(result, "lines", row, sequenceName, $"hide 명령에는 슬롯(left / right / center 또는 번호)이 필요합니다. (예: hide:left) 입력값: '{command}'");
+            }
+        }
+        else if (name == "show")
+        {
+            string[] parts = arg.Split(':');
+
+            if (!DialogueSlots.TryParse(parts[0], out slot) || parts.Length > 3)
+            {
+                AddError(result, "lines", row, sequenceName,
+                    $"show 명령 형식이 올바르지 않습니다. show:슬롯 또는 show:슬롯:speakerId[:expression] (예: show:right) 입력값: '{command}'");
+                return;
+            }
+
+            if (parts.Length >= 2 && parts[1].Trim().Length > 0)
+            {
+                string speaker = parts[1].Trim();
+
+                if (!env.SpeakerExists(speaker))
+                {
+                    AddError(result, "lines", row, sequenceName, $"show 명령의 speaker '{speaker}' 에셋을 찾을 수 없습니다.");
+                }
+                else if (parts.Length == 3 && parts[2].Trim().Length > 0 && !env.SpeakerHasExpression(speaker, parts[2].Trim()))
+                {
+                    AddError(result, "lines", row, sequenceName, $"show 명령의 '{speaker}'에는 표정 '{parts[2].Trim()}'이(가) 없습니다.");
+                }
+            }
         }
     }
     #endregion
@@ -911,18 +1092,44 @@ public static class DialogueSheetConverter
         if (!string.IsNullOrEmpty(sequence.EndDifficulty)) end.Add(Prop("difficulty", Str(sequence.EndDifficulty)));
         if (end.Count > 0) top.Add(Prop("onEnd", Obj(end)));
 
-        // 대사 한 줄 = JSON 한 줄. git diff에서 시트의 한 행 변경이 한 줄 변경으로 보인다.
-        var lineJsons = new List<string>();
+        // 에코 줄은 시퀀스 맨 끝에 모아 둔다. 원래 줄들이 우연히 에코 줄로 흘러들어가지 않도록,
+        // 에코 줄이 있으면 마지막 줄에 goto "end"를 명시한다.
+        bool hasEcho = false;
         foreach (LineModel line in sequence.Lines)
         {
-            lineJsons.Add(BuildLineJson(line, language, defaultLanguage, fallbackRows));
+            foreach (ChoiceModel choice in line.Choices)
+            {
+                if (choice.Echo != null) hasEcho = true;
+            }
         }
+
+        // 대사 한 줄 = JSON 한 줄. git diff에서 시트의 한 행 변경이 한 줄 변경으로 보인다.
+        var lineJsons = new List<string>();
+        var echoJsons = new List<string>();
+
+        for (int i = 0; i < sequence.Lines.Count; i++)
+        {
+            LineModel line = sequence.Lines[i];
+            bool forceEnd = hasEcho && i == sequence.Lines.Count - 1 && line.Goto.Length == 0;
+
+            lineJsons.Add(BuildLineJson(line, language, defaultLanguage, fallbackRows, forceEnd));
+
+            foreach (ChoiceModel choice in line.Choices)
+            {
+                if (choice.Echo != null)
+                {
+                    echoJsons.Add(BuildLineJson(choice.Echo, language, defaultLanguage, fallbackRows, false));
+                }
+            }
+        }
+
+        lineJsons.AddRange(echoJsons);
         top.Add("\"lines\": [\n    " + string.Join(",\n    ", lineJsons.ToArray()) + "\n  ]");
 
         return "{\n  " + string.Join(",\n  ", top.ToArray()) + "\n}\n";
     }
 
-    private static string BuildLineJson(LineModel line, string language, string defaultLanguage, List<int> fallbackRows)
+    private static string BuildLineJson(LineModel line, string language, string defaultLanguage, List<int> fallbackRows, bool forceGotoEnd)
     {
         var m = new List<string>();
 
@@ -934,7 +1141,10 @@ public static class DialogueSheetConverter
             m.Add(Prop("speakerId", Str(line.Speaker)));
             if (line.Expression.Length > 0) m.Add(Prop("expression", Str(line.Expression)));
             m.Add(Prop("screenSlot", Num(line.Slot)));
+            if (line.DisplayName.Length > 0) m.Add(Prop("name", Str(line.DisplayName)));
         }
+
+        if (line.Style.Length > 0) m.Add(Prop("style", Str(line.Style)));
 
         m.Add(Prop("text", Str(PickText(line.Texts, language, defaultLanguage, line.Row.Number, fallbackRows))));
 
@@ -955,7 +1165,8 @@ public static class DialogueSheetConverter
             m.Add(Prop("branch", Arr(branches)));
         }
 
-        if (line.Goto.Length > 0) m.Add(Prop("goto", Str(line.Goto)));
+        string gotoValue = line.Goto.Length > 0 ? line.Goto : (forceGotoEnd ? EndLabel : "");
+        if (gotoValue.Length > 0) m.Add(Prop("goto", Str(gotoValue)));
 
         if (line.Choices.Count > 0)
         {
@@ -965,7 +1176,11 @@ public static class DialogueSheetConverter
                 var c = new List<string>();
                 c.Add(Prop("text", Str(PickText(choice.Texts, language, defaultLanguage, choice.Row.Number, fallbackRows))));
                 if (choice.Condition.Length > 0) c.Add(Prop("if", Str(choice.Condition)));
-                if (choice.Goto.Length > 0) c.Add(Prop("goto", Str(choice.Goto)));
+
+                // 에코 줄이 있으면 먼저 에코 줄로 가고, 에코 줄이 원래 목적지로 이어준다
+                string target = choice.Echo != null ? choice.Echo.Id : choice.Goto;
+                if (target.Length > 0) c.Add(Prop("goto", Str(target)));
+
                 if (choice.TargetSequence.Length > 0) c.Add(Prop("targetSequenceId", Str(choice.TargetSequence)));
                 if (choice.SetFlags != null) c.Add(Prop("setFlags", StrArr(choice.SetFlags)));
                 choices.Add(Obj(c));
@@ -982,7 +1197,7 @@ public static class DialogueSheetConverter
         string text = GetText(texts, language);
         if (text.Length > 0) return text;
 
-        if (language != defaultLanguage) fallbackRows.Add(rowNumber);
+        if (language != defaultLanguage && !fallbackRows.Contains(rowNumber)) fallbackRows.Add(rowNumber);
         return GetText(texts, defaultLanguage);
     }
     #endregion
@@ -1050,7 +1265,7 @@ public static class DialogueSheetConverter
         return int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out value) && value >= 0;
     }
 
-    /// <summary>시퀀스/언어/id 이름은 파일 이름이나 라벨로 쓰이므로 영문, 숫자, '-', '_' 만 허용한다.</summary>
+    /// <summary>시퀀스/언어/id/스타일 이름은 파일 이름이나 라벨로 쓰이므로 영문, 숫자, '-', '_' 만 허용한다.</summary>
     private static bool IsValidName(string name)
     {
         if (string.IsNullOrEmpty(name)) return false;
