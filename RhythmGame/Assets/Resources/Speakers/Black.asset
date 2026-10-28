@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2cefbb4a7067e51498b21ec868be1469, type: 3}
   m_Name: Black
   m_EditorClassIdentifier: Assembly-CSharp::SpeakerDataSO
-  speakerName: asdf
+  speakerName: Black
   expressions:
   - expressionName: Natural
     sprite: {fileID: 5024491450356528421, guid: 367c10992634e6a4d8fe8a4709076678, type: 3}

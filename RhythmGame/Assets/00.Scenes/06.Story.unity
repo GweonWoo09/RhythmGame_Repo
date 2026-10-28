@@ -535,9 +535,9 @@ MonoBehaviour:
   - root: {fileID: 1130912140}
     button: {fileID: 1247181688}
     label: {fileID: 517143743}
-  charInterval: 0.03
+  charInterval: 0.05
   autoButton: {fileID: 119585838}
-  autoAdvanceDelay: 3
+  autoAdvanceDelay: 2
   autoModeIndicator: {fileID: 1736434764}
 --- !u!4 &173453284
 Transform:
@@ -1576,6 +1576,37 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &799327289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 799327290}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &799327290
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 799327289}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &817505287
 GameObject:
   m_ObjectHideFlags: 0
@@ -1815,7 +1846,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 290322cd67594d74f8b82532b0154b98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFader
-  fadeCanvasGroup: {fileID: 0}
+  fadeCanvasGroup: {fileID: 575477333}
   defaultFadeDuration: 0.4
 --- !u!114 &1020254931
 MonoBehaviour:
@@ -2422,7 +2453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea1b1cddf3f873d4983ae5dec2ad2d99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionDialogueEnd
-  targetScene: 2
+  targetScene: 1
   sendPayload: 0
   chapterId: 0
   songId: 
@@ -3821,3 +3852,4 @@ SceneRoots:
   - {fileID: 1589284023}
   - {fileID: 1020254932}
   - {fileID: 2085251883}
+  - {fileID: 799327290}
