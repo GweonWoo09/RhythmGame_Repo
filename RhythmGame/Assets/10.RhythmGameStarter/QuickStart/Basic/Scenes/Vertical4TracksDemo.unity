@@ -497,6 +497,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 374167794678625589, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[0]'
+      value: a
+      objectReference: {fileID: 0}
+    - target: {fileID: 374167794678625589, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[1]'
+      value: s
+      objectReference: {fileID: 0}
+    - target: {fileID: 374167794678625589, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[2]'
+      value: k
+      objectReference: {fileID: 0}
+    - target: {fileID: 374167794678625589, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: 'keyMapping.values.Array.data[3]'
+      value: l
+      objectReference: {fileID: 0}
     - target: {fileID: 396822788307625679, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_textInfo.lineCount
       value: 0
@@ -752,6 +768,42 @@ PrefabInstance:
     - target: {fileID: 4463504305906197728, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
       value: 1801810542
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[0].name
+      value: "\uC815\uD655"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[1].name
+      value: "\uC88B\uC74C"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[2].name
+      value: "\uBCF4\uD1B5"
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[0].threshold
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[1].threshold
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[2].threshold
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[1].scorePrecentage
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684293226625881743, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: levels.values.Array.data[2].scorePrecentage
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4990058766268778735, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_Camera
