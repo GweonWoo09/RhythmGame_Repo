@@ -679,7 +679,7 @@ PrefabInstance:
     - target: {fileID: 2492644252168886258, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: defaultSong
       value: 
-      objectReference: {fileID: 11400000, guid: 80e5f5aa1c0756943b5a9bd60da69577, type: 2}
+      objectReference: {fileID: 11400000, guid: eef5c5f7488bd4844a62a9c5f84589a7, type: 2}
     - target: {fileID: 2658213517499901638, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_textAlignment
       value: 65535

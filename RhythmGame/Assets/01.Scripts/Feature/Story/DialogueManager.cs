@@ -256,7 +256,7 @@ public class DialogueManager : MonoBehaviour
         {
             var end = dialogSequence.onEnd;
 
-            if (end.clearChapter > 0) GameManager.Instance.MarkChapterCleared(end.clearChapter);
+            if (end.clearChapter > 0) GameManager.Instance.ClearChapter(end.clearChapter);
             if (end.unlockChapter > 0) GameManager.Instance.UnlockChapter(end.unlockChapter);
         }
 

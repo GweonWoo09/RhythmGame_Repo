@@ -66,6 +66,7 @@ public sealed class SheetConvertResult
 /// </summary>
 public static class DialogueSheetConverter
 {
+    #region Field
     private const string ColSequence = "sequence";
     private const string ColId = "id";
     private const string ColType = "type";
@@ -104,6 +105,7 @@ public static class DialogueSheetConverter
     private static readonly HashSet<string> BuiltInVariables = new HashSet<string> { "player" };
 
     private static readonly Regex BracePair = new Regex(@"\{([^{}]*)\}");
+    #endregion
 
     #region Models
     private sealed class SheetRow
@@ -198,6 +200,7 @@ public static class DialogueSheetConverter
     }
     #endregion
 
+    #region Build
     public static SheetConvertResult Build(string linesCsv, string metaCsv, IDialogueSheetEnvironment env)
     {
         var result = new SheetConvertResult();
@@ -269,6 +272,7 @@ public static class DialogueSheetConverter
         result.SequenceCount = order.Count;
         return result;
     }
+    #endregion
 
     #region Read
     private static Table ReadTable(string csv, string tabName, SheetConvertResult result)

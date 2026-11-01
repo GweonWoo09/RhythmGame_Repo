@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: The Gilded Fracture_176_Easy
   m_EditorClassIdentifier: com.bennykok.rgs.runtime::RhythmGameStarter.SongItem
   coverArt: {fileID: 0}
-  clip: {fileID: 8300000, guid: 8ef52bef60a3e834cba7731e3a87b1e1, type: 3}
+  clip: {fileID: 8300000, guid: d46a6db63573f5341b5a7363986866a3, type: 3}
   author: 
   bpm: 176
   speedModifier: 1

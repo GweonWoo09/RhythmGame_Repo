@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void MarkChapterCleared(int chapterId)
+    public void ClearChapter(int chapterId)
     {
         var chapter = ProgressData.chapters.Find(c => c.chapterId == chapterId);
         if (chapter == null)

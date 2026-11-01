@@ -1,6 +1,7 @@
 {
   "_generated": "Generated from Google Sheet by DialogueSheetImporter. Do not edit by hand.",
   "cast": [ { "speakerId": "White", "slot": 0 } ],
+  "onEnd": { "unlockChapter": 1 },
   "lines": [
     { "speakerId": "White", "expression": "Natural", "screenSlot": 0, "text": "…여기는 어디지?" },
     { "speakerId": "White", "expression": "Determined", "screenSlot": 0, "text": "(아무것도 기억나지 않아. 내가 누구였는지도…)." },
