@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
+  m_Name: Merry Deception_124_data
+  m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
+  songId: Merry Deception
+  title: 
+  composer: 
+  bpm: 124
+  flavorText: 
+  cover: {fileID: -3412453793783914963, guid: 31d366584e867ef4088af06539db83be, type: 3}
+  isStorySong: 0
+  previewClip: {fileID: 8300000, guid: f9487e29bd6b3f54db71b5b54908c392, type: 3}
+  easy: {fileID: 0}
+  normal: {fileID: 11400000, guid: 3491c0a67af24ce49ab784762f85642b, type: 2}
+  hard: {fileID: 11400000, guid: 975e57d9816d6674a9cfe291893dbfd4, type: 2}

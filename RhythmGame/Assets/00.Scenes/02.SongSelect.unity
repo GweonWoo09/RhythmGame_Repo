@@ -203,6 +203,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 46632055}
+  - component: {fileID: 46632056}
   m_Layer: 0
   m_Name: Subtitle
   m_TagString: Untagged
@@ -232,6 +233,27 @@ Transform:
   - {fileID: 1296104354}
   m_Father: {fileID: 700418877}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &46632056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 46632054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ad9e5d4c772d1f489a3297af93583df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListView
+  controller: {fileID: 448758617}
+  slots:
+  - {fileID: 504641670}
+  - {fileID: 1523192947}
+  - {fileID: 1199409200}
+  - {fileID: 918447938}
+  - {fileID: 1576329533}
+  - {fileID: 718749899}
+  - {fileID: 1296104357}
 --- !u!1 &63905473
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,7 +774,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &305969676
 RectTransform:
   m_ObjectHideFlags: 0
@@ -769,8 +791,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -333.2, y: 149.5}
+  m_SizeDelta: {x: -747.4438, y: -440.9759}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &305969677
 MonoBehaviour:
@@ -1231,6 +1253,7 @@ GameObject:
   m_Component:
   - component: {fileID: 448758618}
   - component: {fileID: 448758617}
+  - component: {fileID: 448758619}
   m_Layer: 0
   m_Name: SongSelectController
   m_TagString: Untagged
@@ -1247,15 +1270,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 448758616}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ab94b0f198b1f44bbea9bc131a9f738, type: 3}
+  m_Script: {fileID: 11500000, guid: 60974e56d78987b48a19d6401bdab4b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SongSelectController
-  songs:
-  - {fileID: 11400000, guid: 975e57d9816d6674a9cfe291893dbfd4, type: 2}
-  number: {fileID: 1817901507}
-  title: {fileID: 560993303}
-  composer: {fileID: 211499696}
-  bpm: {fileID: 349362732}
+  library: {fileID: 11400000, guid: d6d6fa58982b98a40bafca2b5412925e, type: 2}
+  upKey: 273
+  downKey: 274
+  leftKey: 276
+  rightKey: 275
+  startKey: 13
+  categoryKey: 9
+  backKey: 27
+  backScene: 1
 --- !u!4 &448758618
 Transform:
   m_ObjectHideFlags: 0
@@ -1271,6 +1297,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &448758619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448758616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afcc2c9723b66f34188ca1295ad51151, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongPreviewPlayer
+  controller: {fileID: 448758617}
+  delay: 0.3
+  stopFadeDuration: 0.3
 --- !u!1 &504641666
 GameObject:
   m_ObjectHideFlags: 0
@@ -1282,6 +1323,7 @@ GameObject:
   - component: {fileID: 504641667}
   - component: {fileID: 504641669}
   - component: {fileID: 504641668}
+  - component: {fileID: 504641670}
   m_Layer: 5
   m_Name: Subtitle
   m_TagString: Untagged
@@ -1410,6 +1452,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 504641666}
   m_CullTransparentMesh: 1
+--- !u!114 &504641670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 504641666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 504641668}
+  composerText: {fileID: 889453288}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &529008439
 GameObject:
   m_ObjectHideFlags: 0
@@ -1833,6 +1893,9 @@ GameObject:
   - component: {fileID: 700418876}
   - component: {fileID: 700418875}
   - component: {fileID: 700418874}
+  - component: {fileID: 700418878}
+  - component: {fileID: 700418880}
+  - component: {fileID: 700418879}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1937,6 +2000,7 @@ RectTransform:
   - {fileID: 1941421318}
   - {fileID: 63905474}
   - {fileID: 46632055}
+  - {fileID: 826836191}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1944,6 +2008,74 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &700418878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700418873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0517a254639280b4483b5d76c5c4d1df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongDetailView
+  controller: {fileID: 448758617}
+  numberText: {fileID: 1817901507}
+  titleText: {fileID: 560993303}
+  composerText: {fileID: 211499696}
+  bpmText: {fileID: 349362732}
+  flavorText: {fileID: 1276133094}
+  highScoreText: {fileID: 1259944182}
+  highRankText: {fileID: 1106912714}
+  coverImage: {fileID: 0}
+  numberFormat: No.{0:00}
+  composerFormat: '{0}'
+  bpmFormat: 'BPM: {0}'
+  highScoreFormat: "\uCD5C\uACE0\uC810\uC218: {0}"
+  highRankFormat: "\uCD5C\uACE0\uD310\uC815: {0}"
+  noRecordText: '-'
+--- !u!114 &700418879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700418873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06b02b1ac8033464b9102eac0624818b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DifficultyLabelsView
+  controller: {fileID: 448758617}
+  labels:
+  - {fileID: 1313628483}
+  - {fileID: 1586023231}
+  - {fileID: 1634152381}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.15}
+  selectedScale: 1.15
+--- !u!114 &700418880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700418873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dea54e641c890dc4da14ee2c547f9917, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CategoryLabelsView
+  controller: {fileID: 448758617}
+  labels:
+  - {fileID: 1941421319}
+  - {fileID: 63905475}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.15}
+  selectedScale: 1.15
 --- !u!1 &718749895
 GameObject:
   m_ObjectHideFlags: 0
@@ -1955,6 +2087,7 @@ GameObject:
   - component: {fileID: 718749896}
   - component: {fileID: 718749898}
   - component: {fileID: 718749897}
+  - component: {fileID: 718749899}
   m_Layer: 5
   m_Name: Subtitle (5)
   m_TagString: Untagged
@@ -2083,6 +2216,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 718749895}
   m_CullTransparentMesh: 1
+--- !u!114 &718749899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 718749895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 718749897}
+  composerText: {fileID: 1530136715}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &822188307
 GameObject:
   m_ObjectHideFlags: 0
@@ -2219,6 +2370,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 822188307}
+  m_CullTransparentMesh: 1
+--- !u!1 &826836190
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 826836191}
+  - component: {fileID: 826836193}
+  - component: {fileID: 826836192}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &826836191
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826836190}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 700418877}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &826836192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826836190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -8828913735292132790, guid: c062997f13e6d4e4cb64f75d05d9dbbd, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &826836193
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826836190}
   m_CullTransparentMesh: 1
 --- !u!1 &878099444
 GameObject:
@@ -2443,6 +2669,7 @@ GameObject:
   - component: {fileID: 918447935}
   - component: {fileID: 918447937}
   - component: {fileID: 918447936}
+  - component: {fileID: 918447938}
   m_Layer: 5
   m_Name: Subtitle (3)
   m_TagString: Untagged
@@ -2571,6 +2798,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918447934}
   m_CullTransparentMesh: 1
+--- !u!114 &918447938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918447934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 918447936}
+  composerText: {fileID: 645909072}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1039813507
 GameObject:
   m_ObjectHideFlags: 0
@@ -2931,6 +3176,7 @@ GameObject:
   - component: {fileID: 1199409197}
   - component: {fileID: 1199409199}
   - component: {fileID: 1199409198}
+  - component: {fileID: 1199409200}
   m_Layer: 5
   m_Name: Subtitle (2)
   m_TagString: Untagged
@@ -3059,6 +3305,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1199409196}
   m_CullTransparentMesh: 1
+--- !u!114 &1199409200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1199409196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 1199409198}
+  composerText: {fileID: 1039813509}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1259944180
 GameObject:
   m_ObjectHideFlags: 0
@@ -3419,6 +3683,7 @@ GameObject:
   - component: {fileID: 1296104354}
   - component: {fileID: 1296104356}
   - component: {fileID: 1296104355}
+  - component: {fileID: 1296104357}
   m_Layer: 5
   m_Name: Subtitle (6)
   m_TagString: Untagged
@@ -3547,6 +3812,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1296104353}
   m_CullTransparentMesh: 1
+--- !u!114 &1296104357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1296104353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 1296104355}
+  composerText: {fileID: 822188309}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1300816375
 GameObject:
   m_ObjectHideFlags: 0
@@ -3920,6 +4203,7 @@ GameObject:
   - component: {fileID: 1523192944}
   - component: {fileID: 1523192946}
   - component: {fileID: 1523192945}
+  - component: {fileID: 1523192947}
   m_Layer: 5
   m_Name: Subtitle (1)
   m_TagString: Untagged
@@ -4048,6 +4332,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1523192943}
   m_CullTransparentMesh: 1
+--- !u!114 &1523192947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1523192943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 1523192945}
+  composerText: {fileID: 529008441}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1530136713
 GameObject:
   m_ObjectHideFlags: 0
@@ -4196,6 +4498,7 @@ GameObject:
   - component: {fileID: 1576329530}
   - component: {fileID: 1576329532}
   - component: {fileID: 1576329531}
+  - component: {fileID: 1576329533}
   m_Layer: 5
   m_Name: Subtitle (4)
   m_TagString: Untagged
@@ -4324,6 +4627,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576329529}
   m_CullTransparentMesh: 1
+--- !u!114 &1576329533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576329529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b063ac2ef4d88374ca7872dd71393f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SongListSlot
+  titleText: {fileID: 1576329531}
+  composerText: {fileID: 388210065}
+  coverImage: {fileID: 0}
+  selectedMark: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 0.5}
+  selectedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1586023229
 GameObject:
   m_ObjectHideFlags: 0

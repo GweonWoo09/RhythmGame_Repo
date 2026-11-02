@@ -13,7 +13,9 @@ public class ResultSubmitter : MonoBehaviour
 
         var result = new GameManager.PlayResult
         {
-            songId = PlaySession.Song != null ? PlaySession.Song.name : "Unknown",
+            // 곡 선택창의 최고 기록과 같은 ID를 쓰도록 SongData의 songId 우선
+            songId = PlaySession.SongData != null ? PlaySession.SongData.songId
+                   : PlaySession.Song != null ? PlaySession.Song.name : "Unknown",
             difficulty = PlaySession.Difficulty,
             score = stats.score,
             accuracy = stats.GetAccuracy(),

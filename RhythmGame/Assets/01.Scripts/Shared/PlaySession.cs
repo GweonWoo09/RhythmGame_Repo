@@ -11,6 +11,7 @@ How to use
 public static class PlaySession
 {
     public static SongItem Song;
+    public static SongDataSO SongData; // selected song info (title, songId for records)
     public static string Difficulty = "Normal";
     public static float Speed = 1f;
     public static SceneChanger.SceneType ReturnScene = SceneChanger.SceneType.SongSelect;
