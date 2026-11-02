@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// DialogueManager의 이벤트를 구독해서 실제 대화창 UI(이미지, 텍스트, 캐릭터 밝기, 선택지 버튼)를
-/// 갱신하는 역할을 담당한다.
+/// 갱신하는 역할만 담당한다. 대화 진행/분기 로직은 갖지 않는다.
 /// 캐릭터 이름/표정 스프라이트는 SpeakerDataSO에서 가져오고, 여기서는 "화면 어느 위치에 그릴지"만 관리한다.
 /// 오토 모드: 타이핑이 끝난 뒤 지정된 시간이 지나면 자동으로 다음 대사로 진행한다.
 ///
@@ -333,6 +333,13 @@ public class DialogueUIView : MonoBehaviour
 
     private void HandleLineShown(DialogueLineInfo info)
     {
+        // 연주에서 돌아와 무대를 복원하는 중: 인물 표정만 맞추고 말풍선/타이핑은 만들지 않는다
+        if (dialogueManager != null && dialogueManager.IsRestoring)
+        {
+            RestoreLine(info);
+            return;
+        }
+
         CancelAutoAdvance();
 
         // 새 대사가 나오면 이전 선택지는 모두 정리한다
@@ -377,6 +384,14 @@ public class DialogueUIView : MonoBehaviour
 
         ApplyTextStyle(slot.textDialogue, info.style);
         StartTyping(slot.textDialogue, info.text);
+    }
+
+    /// <summary>복원 중에 지나가는 대사 기록: 그 인물이 마지막으로 보인 표정을 슬롯에 되돌려 놓는다.</summary>
+    private void RestoreLine(DialogueLineInfo info)
+    {
+        if (info.speaker == null || !IsValidSlot(info.screenSlot)) return;
+
+        speakerSlots[info.screenSlot].characterPortrait.sprite = GetPortraitSprite(info.speaker, info.expressionName);
     }
 
     private void ShowNarration(string text, string styleName)

@@ -15,16 +15,14 @@ MonoBehaviour:
   speakerName: White
   expressions:
   - expressionName: Natural
-    sprite: {fileID: -7986079646100348125, guid: b7d73afa59a6d26438d117b421211806, type: 3}
+    sprite: {fileID: 2243070312951575073, guid: 031de3cfe9c06ec4f948fc9ceb85da7e, type: 3}
   - expressionName: Happy
-    sprite: {fileID: 2396433562708700885, guid: 4f118c7ef88c64c4fb75286cb1779a17, type: 3}
+    sprite: {fileID: -5081441752126590348, guid: 10ad9bcacc0e9844daf28839c566e560, type: 3}
   - expressionName: Doubt
-    sprite: {fileID: -8718171972514745010, guid: 4f85a29a9cadfd64eae9846d90e00109, type: 3}
-  - expressionName: Hollow
-    sprite: {fileID: -1581534463163335926, guid: d5522fc716f8e2e438b525662d61181b, type: 3}
+    sprite: {fileID: -3458967037679544976, guid: 6f7ea0d8d9a5398409867f08db2840f8, type: 3}
   - expressionName: Determined
-    sprite: {fileID: -343606145013638765, guid: 03e87800f102390419867d33fe37075a, type: 3}
+    sprite: {fileID: 5797977029795122511, guid: 309b60a1bfd485d4db32e1ae9ab7b6c9, type: 3}
   - expressionName: Surprised
-    sprite: {fileID: -3030812485475791561, guid: 4836e5676517d83478f32d1f55394216, type: 3}
+    sprite: {fileID: -7783239172155925052, guid: d9c7c8c51ced84948b88de157207d2ea, type: 3}
   - expressionName: Angry
-    sprite: {fileID: -4069132561234296158, guid: 0f1a4ede97b455d4e8ca0f4d5986d880, type: 3}
+    sprite: {fileID: -5370300919401450655, guid: 5a8460ccfa3a1554caccd9a0f70aa105, type: 3}

@@ -15,16 +15,16 @@ MonoBehaviour:
   speakerName: Black
   expressions:
   - expressionName: Natural
-    sprite: {fileID: 5024491450356528421, guid: 367c10992634e6a4d8fe8a4709076678, type: 3}
-  - expressionName: Joy
-    sprite: {fileID: 2127389512643872915, guid: 1c6ad3cda320ef9448be74cb44b0fbef, type: 3}
-  - expressionName: Irritated
-    sprite: {fileID: -7474423754653402845, guid: b5171a414bca0d5438e2d9d87b080b99, type: 3}
+    sprite: {fileID: -7378772797512496815, guid: fcf98d59204d59b498487a76261c9b66, type: 3}
+  - expressionName: Smile
+    sprite: {fileID: 6043942872778893761, guid: 9a84dac5b012af1439bdba4565ac073a, type: 3}
+  - expressionName: Reluctant
+    sprite: {fileID: 6926695633099932457, guid: b4d997bc6ab4e6a48a6f3146fe1d4689, type: 3}
+  - expressionName: Grin
+    sprite: {fileID: -249281078586062123, guid: 0661beb76a2efa14493c8ae285f3d72e, type: 3}
+  - expressionName: Embarrassed
+    sprite: {fileID: -1902481977584528868, guid: 96deae66378e3514181325ede818e051, type: 3}
   - expressionName: Annoyed
-    sprite: {fileID: 5939971688685093291, guid: 67799feb3847dd74b8b1349fb084d477, type: 3}
-  - expressionName: Confused
-    sprite: {fileID: -855298285791758126, guid: 046503ee9f5c2a54ba29a0a5c09f8f3f, type: 3}
-  - expressionName: Cry
-    sprite: {fileID: 6937817954938267909, guid: 654b0750c44a1e340b81aee35d7078c4, type: 3}
-  - expressionName: Angry
-    sprite: {fileID: -7880802256771021485, guid: b906cd2a885e7fc42bd9548af6124b9c, type: 3}
+    sprite: {fileID: -4988451370221513075, guid: cea91fd6f8155cc4ca36353364e7b1d2, type: 3}
+  - expressionName: Stern
+    sprite: {fileID: 4416623534232437684, guid: 6daf4d55c27326f479d4e01d0af61712, type: 3}

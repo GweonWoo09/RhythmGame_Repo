@@ -15,12 +15,12 @@ MonoBehaviour:
   speakerName: Red
   expressions:
   - expressionName: Natural
-    sprite: {fileID: 3622792381989719942, guid: c55e6878ec989f042853baeecb9e32e4, type: 3}
+    sprite: {fileID: -7738059136940344638, guid: 1466cc35cce549345895f64f29228bb2, type: 3}
   - expressionName: Smile
-    sprite: {fileID: 7801881510924318990, guid: 7f523382c02faa645b1c11c408ce1d03, type: 3}
-  - expressionName: Avoid
-    sprite: {fileID: 170246926323121467, guid: 10537da7e839d7f4b96b8b8875d528ed, type: 3}
+    sprite: {fileID: -6965583146941759362, guid: 7bfa95d60c4a32d409892a06a0095a5e, type: 3}
+  - expressionName: Avoidant
+    sprite: {fileID: -8423448289278842894, guid: 238b31261473d60438f71f589730890f, type: 3}
   - expressionName: Tired
-    sprite: {fileID: 4502505711581307117, guid: 3092f73914e5f174396eb60cefe3979b, type: 3}
+    sprite: {fileID: -6145410749624100386, guid: f14d08f9deae10740b4145f37270afa1, type: 3}
   - expressionName: Angry
-    sprite: {fileID: 621222158458474870, guid: 6fbe2db86cab1a9499b97a371d80be08, type: 3}
+    sprite: {fileID: -3598629441727188184, guid: c62750d7ba6413b409cdfeb751850351, type: 3}

@@ -679,7 +679,7 @@ PrefabInstance:
     - target: {fileID: 2492644252168886258, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: defaultSong
       value: 
-      objectReference: {fileID: 11400000, guid: eef5c5f7488bd4844a62a9c5f84589a7, type: 2}
+      objectReference: {fileID: 11400000, guid: 975e57d9816d6674a9cfe291893dbfd4, type: 2}
     - target: {fileID: 2658213517499901638, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_textAlignment
       value: 65535
@@ -867,11 +867,11 @@ PrefabInstance:
     - target: {fileID: 6823101425222065983, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: midiTracksMapping
       value: 
-      objectReference: {fileID: 11400000, guid: d26d9e2f1780f894bbbba85eb8820a08, type: 2}
+      objectReference: {fileID: 11400000, guid: c2e839ca7db46044bbb2bb3bd1bda761, type: 2}
     - target: {fileID: 6823101425222065983, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: notePrefabMapping
       value: 
-      objectReference: {fileID: 11400000, guid: 367580fe7135f564d97283fee746742f, type: 2}
+      objectReference: {fileID: 11400000, guid: dbf2927d18abb3541909bb3eb1ae9f8b, type: 2}
     - target: {fileID: 7744508468501082708, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_Material
       value: 

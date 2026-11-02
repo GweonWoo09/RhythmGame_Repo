@@ -18,6 +18,11 @@ using UnityEngine;
 /// 6) 대화 종료 시 onEnd의 clearChapter/unlockChapter를 GameManager에 반영하고 OnDialogEnd를 발행한다.
 ///    씬 이동은 SceneTransitionDialogueEnd가 EndAction을 읽어 처리한다.
 /// 7) 대사, 이름, 선택지 문구의 {변수}(예: {player})는 표시 직전에 DialogueVariables로 치환한다.
+/// 8) 줄의 commands에 play:곡ID[:난이도]가 있으면, 그 줄을 넘기는 순간 진행을 멈추고(IsSuspended)
+///    OnPlayRequested로 연주를 요청한다. 연주 후 씬이 다시 열리면 PrepareResume으로 받은 스냅샷에서 이어간다.
+///    - 연주를 마쳤으면 play 줄의 "다음 줄"(branch -> goto -> 다음 줄)부터,
+///      마치지 못했으면 play 줄을 다시 보여준다 (넘기면 다시 연주).
+///    - 무대 상태(cast, show/hide, 인물 표정)는 기록해 두었다가 돌아올 때 조용히 복원한다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
@@ -33,6 +38,18 @@ public class DialogueManager : MonoBehaviour
 
     // 조건을 통과해 UI로 전달된 선택지 목록. SelectChoice의 인덱스는 이 배열 기준이다.
     private DialogChoice[] _visibleChoices;
+
+    // play 명령으로 연주하러 나간 동안 true. 이 동안 AdvanceDialog는 아무것도 하지 않는다.
+    private bool isSuspended = false;
+    private bool _ignorePlayOnce = false;
+
+    // 연주에서 돌아와 이어가기 위한 정보 (PrepareResume으로 받고 Start에서 사용)
+    private DialoguePlaySnapshot _resume;
+    private bool _resumeSongFinished;
+
+    // 지금까지의 무대 상태 변화 기록 (연주에서 돌아올 때 UI 무대를 복원하는 데 쓴다)
+    private readonly List<DialogueStageRecord> _stageLog = new List<DialogueStageRecord>();
+    private AudioClip _currentBgm;
 
     /// <summary>
     /// 새 대사가 표시될 때: (화면 슬롯, 화자 데이터(null이면 내레이션), 표정 이름, 대사 텍스트).
@@ -56,8 +73,18 @@ public class DialogueManager : MonoBehaviour
     /// <summary>줄의 commands를 "이름", "인자"로 쪼개 발행한다. 예: "hide:0" -> ("hide", "0"). 처리는 구독자 몫.</summary>
     public event Action<string, string> OnCommand;
 
+    /// <summary>
+    /// play 명령이 붙은 줄을 넘기는 순간 발행. 스냅샷에 곡 ID/난이도와 돌아와서 이어갈 정보가 담겨 있다.
+    /// 구독자(FlowStoryEntry)가 연주를 시작시켜야 하고, 시작하지 못하면 CancelPlay()를 불러야 한다.
+    /// 구독자가 없으면 에러 로그를 남기고 play를 건너뛴다.
+    /// </summary>
+    public event Action<DialoguePlaySnapshot> OnPlayRequested;
+
     private void Start()
     {
+        // 연주 후(또는 연주하다 나왔다가) 돌아온 경우: 연주 직전 대사 위치에서 이어간다
+        if (_resume != null && TryResumeFromSnapshot()) return;
+
         if (dialogSequence == null && !string.IsNullOrEmpty(startSequenceId))
         {
             dialogSequence = DialogueJsonLoader.Load(startSequenceId);
@@ -67,6 +94,17 @@ public class DialogueManager : MonoBehaviour
         {
             BeginSequence(0);
         }
+    }
+
+    /// <summary>
+    /// Start()가 시작할 JSON 시퀀스를 바꾼다. 인스펙터에 지정된 dialogSequence 에셋은 무시된다.
+    /// 반드시 Start() 이전(Awake)에 호출해야 한다. (이야기 흐름이 칸마다 다른 시퀀스를 넘길 때 FlowStoryEntry가 쓴다)
+    /// 이미 시작된 뒤에 시퀀스를 바꾸려면 LoadSequenceFromJson / SetDialogSequence를 쓴다.
+    /// </summary>
+    public void OverrideStartSequence(string sequenceId)
+    {
+        dialogSequence = null;
+        startSequenceId = sequenceId;
     }
 
     /// <summary>
@@ -86,6 +124,7 @@ public class DialogueManager : MonoBehaviour
         currentDialogIndex = -1;
         isFinished = false;
         isWaitingForChoice = false;
+        isSuspended = false;
         _visibleChoices = null;
 
         BeginSequence(startIndex);
@@ -97,9 +136,12 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void AdvanceDialog()
     {
-        if (isFinished || isWaitingForChoice || !HasLines()) return;
+        if (isFinished || isWaitingForChoice || isSuspended || !HasLines()) return;
 
         var line = dialogSequence.lines[currentDialogIndex];
+
+        // 줄에 play 명령이 있으면, 이 줄을 넘기는 순간 연주하러 나간다
+        if (TryRequestPlay(line)) return;
 
         if (!TryGetNextIndex(line, out int nextIndex))
         {
@@ -183,33 +225,49 @@ public class DialogueManager : MonoBehaviour
     private void BeginSequence(int startIndex)
     {
         PlaySequenceBGM();
+
+        // cast 이벤트가 UI의 무대를 초기화하므로, 무대 상태 기록도 시퀀스가 시작될 때마다 새로 쌓는다
+        _stageLog.Clear();
+        _stageLog.Add(new DialogueStageRecord { kind = DialogueStageRecordKind.Cast, cast = dialogSequence.cast });
+
         OnCastUpdated?.Invoke(dialogSequence.cast);
         ShowDialog(startIndex);
     }
 
     /// <summary>index부터 시작해 condition이 참인 첫 줄을 보여준다. 없으면 대화 종료.</summary>
-    private void ShowDialog(int index)
+    /// <param name="replaying">
+    /// 연주를 마치지 못하고 돌아와 play 줄을 다시 보여주는 경우 true.
+    /// 조건 확인, BGM, 플래그, 명령은 이미 한 번 처리됐으므로(플래그가 += 이면 두 번 더해지므로) 건너뛴다.
+    /// </param>
+    private void ShowDialog(int index, bool replaying = false)
     {
-        index = FindPlayableIndex(index);
-        if (index < 0)
+        if (!replaying)
         {
-            FinishDialog();
-            return;
+            index = FindPlayableIndex(index);
+            if (index < 0)
+            {
+                FinishDialog();
+                return;
+            }
         }
 
         currentDialogIndex = index;
 
         var line = dialogSequence.lines[index];
 
-        // 이 줄에서 BGM을 바꾸도록 지정되어 있으면 교체
-        if (line.bgmOverride != null && AudioManager.Instance != null)
+        if (!replaying)
         {
-            AudioManager.Instance.PlayBGM(line.bgmOverride);
-        }
+            // 이 줄에서 BGM을 바꾸도록 지정되어 있으면 교체
+            if (line.bgmOverride != null && AudioManager.Instance != null)
+            {
+                _currentBgm = line.bgmOverride;
+                AudioManager.Instance.PlayBGM(line.bgmOverride);
+            }
 
-        // 플래그 기록 -> 명령 발행 (선택지 조건은 이 기록이 반영된 뒤에 평가된다)
-        DialogueExpression.ApplyAll(line.setFlags);
-        RaiseCommands(line.commands);
+            // 플래그 기록 -> 명령 발행 (선택지 조건은 이 기록이 반영된 뒤에 평가된다)
+            DialogueExpression.ApplyAll(line.setFlags);
+            RaiseCommands(line.commands);
+        }
 
         string text = DialogueVariables.Resolve(line.dialogText);
 
@@ -218,8 +276,7 @@ public class DialogueManager : MonoBehaviour
             ? line.displayName
             : (line.speaker != null ? line.speaker.speakerName : "");
 
-        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, text);
-        OnLineShown?.Invoke(new DialogueLineInfo
+        var info = new DialogueLineInfo
         {
             screenSlot = line.screenSlot,
             speaker = line.speaker,
@@ -227,7 +284,16 @@ public class DialogueManager : MonoBehaviour
             displayName = DialogueVariables.Resolve(rawName),
             style = line.style,
             text = text
-        });
+        };
+
+        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, text);
+        OnLineShown?.Invoke(info);
+
+        // 인물 표정이 어떻게 바뀌어 왔는지 기록 (연주에서 돌아올 때 복원용)
+        if (!replaying && line.speaker != null)
+        {
+            _stageLog.Add(new DialogueStageRecord { kind = DialogueStageRecordKind.Line, line = info });
+        }
 
         if (line.choices != null && line.choices.Length > 0)
         {
@@ -330,7 +396,7 @@ public class DialogueManager : MonoBehaviour
 
     private void RaiseCommands(string[] commands)
     {
-        if (commands == null || OnCommand == null) return;
+        if (commands == null) return;
 
         foreach (string command in commands)
         {
@@ -340,7 +406,16 @@ public class DialogueManager : MonoBehaviour
             string name = parts[0].Trim();
             string arg = parts.Length > 1 ? parts[1].Trim() : string.Empty;
 
-            OnCommand.Invoke(name, arg);
+            // play는 줄이 표시될 때가 아니라 줄을 넘길 때 처리한다 (TryRequestPlay)
+            if (name == "play") continue;
+
+            // 무대에 영향을 주는 명령만 기록한다. (bg, sfx처럼 부작용이 있는 명령은 복원 때 다시 실행하면 안 된다)
+            if (name == "show" || name == "hide")
+            {
+                _stageLog.Add(new DialogueStageRecord { kind = DialogueStageRecordKind.Command, name = name, arg = arg });
+            }
+
+            OnCommand?.Invoke(name, arg);
         }
     }
 
@@ -358,11 +433,171 @@ public class DialogueManager : MonoBehaviour
     }
     #endregion
 
+    #region Play (연주하러 나갔다 돌아오기)
+    /// <summary>
+    /// 연주에서 돌아온 Story 씬에서, DialogueManager.Start()보다 먼저(Awake) 호출한다. (FlowStoryEntry가 한다)
+    /// songFinished가 true면 play 줄의 다음 줄부터, false면 play 줄을 다시 보여주며 이어간다.
+    /// </summary>
+    public void PrepareResume(DialoguePlaySnapshot snapshot, bool songFinished)
+    {
+        _resume = snapshot;
+        _resumeSongFinished = songFinished;
+    }
+
+    /// <summary>OnPlayRequested 구독자가 연주를 시작하지 못했을 때 부른다. play를 건너뛰고 다음으로 진행한다.</summary>
+    public void CancelPlay()
+    {
+        if (!isSuspended) return;
+
+        isSuspended = false;
+        _ignorePlayOnce = true;
+        AdvanceDialog();
+        _ignorePlayOnce = false;
+    }
+
+    /// <summary>줄에 play 명령이 있으면 진행을 멈추고 연주를 요청한다. 요청했으면 true.</summary>
+    private bool TryRequestPlay(DialogLine line)
+    {
+        string songId, difficulty;
+        if (_ignorePlayOnce || !TryGetPlayCommand(line, out songId, out difficulty)) return false;
+
+        if (OnPlayRequested == null)
+        {
+            Debug.LogError($"[DialogueManager] {dialogSequence.name} {currentDialogIndex}번 줄의 play:{songId}를 처리할 곳이 없어 건너뜁니다. " +
+                           "Story 씬에 FlowStoryEntry가 있는지 확인하세요.");
+            return false;
+        }
+
+        isSuspended = true;
+
+        OnPlayRequested.Invoke(new DialoguePlaySnapshot
+        {
+            sequenceId = dialogSequence.name,
+            playLineIndex = currentDialogIndex,
+            songId = songId,
+            difficulty = difficulty,
+            stageLog = new List<DialogueStageRecord>(_stageLog),
+            bgm = _currentBgm
+        });
+
+        return true;
+    }
+
+    /// <summary>"play:곡ID" 또는 "play:곡ID:난이도"를 찾는다.</summary>
+    private static bool TryGetPlayCommand(DialogLine line, out string songId, out string difficulty)
+    {
+        songId = null;
+        difficulty = null;
+
+        if (line.commands == null) return false;
+
+        foreach (string command in line.commands)
+        {
+            if (string.IsNullOrWhiteSpace(command)) continue;
+
+            string[] parts = command.Split(new[] { ':' }, 2);
+            if (parts[0].Trim() != "play") continue;
+
+            string[] args = (parts.Length > 1 ? parts[1] : "").Split(':');
+            songId = args[0].Trim();
+            difficulty = args.Length > 1 ? args[1].Trim() : "";
+            return songId.Length > 0;
+        }
+
+        return false;
+    }
+
+    /// <summary>PrepareResume으로 받은 위치에서 대화를 이어간다. 이어갈 수 없으면 false (처음부터 시작하게 한다).</summary>
+    private bool TryResumeFromSnapshot()
+    {
+        DialoguePlaySnapshot snapshot = _resume;
+        bool songFinished = _resumeSongFinished;
+        _resume = null;
+
+        DialogueDataSO sequence = (dialogSequence != null && dialogSequence.name == snapshot.sequenceId)
+            ? dialogSequence
+            : DialogueJsonLoader.Load(snapshot.sequenceId);
+
+        if (!IsValidIndex(sequence, snapshot.playLineIndex))
+        {
+            Debug.LogError($"[DialogueManager] 연주에서 돌아왔지만 '{snapshot.sequenceId}'의 {snapshot.playLineIndex}번 줄을 찾을 수 없어 처음부터 시작합니다.");
+            return false;
+        }
+
+        dialogSequence = sequence;
+        currentDialogIndex = snapshot.playLineIndex;
+        isFinished = false;
+        isWaitingForChoice = false;
+        isSuspended = false;
+
+        if (snapshot.bgm != null)
+        {
+            _currentBgm = snapshot.bgm;
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayBGM(snapshot.bgm);
+        }
+
+        ReplayStage(snapshot.stageLog);
+
+        // 연주를 마치지 못했다: play 줄을 다시 보여준다 (넘기면 다시 연주)
+        if (!songFinished)
+        {
+            ShowDialog(snapshot.playLineIndex, true);
+            return true;
+        }
+
+        // 연주를 마쳤다: play 줄의 다음 줄부터. (연주 결과 플래그가 이미 기록돼 있으므로 branch 조건이 그대로 통한다)
+        DialogLine playLine = dialogSequence.lines[snapshot.playLineIndex];
+        int nextIndex;
+        if (TryGetNextIndex(playLine, out nextIndex))
+        {
+            ShowDialog(nextIndex);
+        }
+        else
+        {
+            FinishDialog();
+        }
+
+        return true;
+    }
+
+    /// <summary>기록해 둔 무대 상태 변화를 UI에 다시 알린다. 이 동안 IsRestoring이 true다.</summary>
+    private void ReplayStage(List<DialogueStageRecord> log)
+    {
+        _stageLog.Clear();
+        if (log == null) return;
+
+        IsRestoring = true;
+
+        foreach (DialogueStageRecord record in log)
+        {
+            switch (record.kind)
+            {
+                case DialogueStageRecordKind.Cast:
+                    OnCastUpdated?.Invoke(record.cast);
+                    break;
+
+                case DialogueStageRecordKind.Command:
+                    OnCommand?.Invoke(record.name, record.arg);
+                    break;
+
+                case DialogueStageRecordKind.Line:
+                    OnLineShown?.Invoke(record.line);
+                    break;
+            }
+
+            _stageLog.Add(record);
+        }
+
+        IsRestoring = false;
+    }
+    #endregion
+
     /// <summary>시퀀스 진입 시 기본 BGM 재생 (지정 안 됐으면 기존 BGM 유지)</summary>
     private void PlaySequenceBGM()
     {
         if (dialogSequence.bgm != null && AudioManager.Instance != null)
         {
+            _currentBgm = dialogSequence.bgm;
             AudioManager.Instance.PlayBGM(dialogSequence.bgm);
         }
     }
@@ -401,6 +636,18 @@ public class DialogueManager : MonoBehaviour
     }
 
     public bool IsFinished => isFinished;
+
+    /// <summary>play 명령으로 연주하러 나가 있는 동안 true</summary>
+    public bool IsSuspended => isSuspended;
+
+    /// <summary>
+    /// 연주에서 돌아와 무대 상태를 조용히 복원하는 동안 true.
+    /// 이 동안 발행되는 OnLineShown은 "인물 표정 갱신"일 뿐이라 UI는 타이핑/말풍선을 만들지 않아야 한다.
+    /// </summary>
+    public bool IsRestoring { get; private set; }
+
+    /// <summary>Start()가 시작할 시퀀스 ID (인스펙터의 시퀀스 에셋 이름 또는 startSequenceId)</summary>
+    public string StartSequenceId => dialogSequence != null ? dialogSequence.name : startSequenceId;
     public bool IsWaitingForChoice => isWaitingForChoice;
 
     /// <summary>현재(마지막) 시퀀스의 챕터 번호</summary>
@@ -430,4 +677,31 @@ public struct DialogueLineInfo
 
     /// <summary>대사 텍스트 ({변수} 치환 완료)</summary>
     public string text;
+}
+
+/// <summary>무대 상태가 바뀐 기록의 종류</summary>
+public enum DialogueStageRecordKind { Cast, Command, Line }
+
+/// <summary>무대 상태가 바뀐 기록 한 건 (cast 배치 / show·hide 명령 / 인물이 말한 줄)</summary>
+public struct DialogueStageRecord
+{
+    public DialogueStageRecordKind kind;
+    public DialogueCast[] cast;
+    public string name;
+    public string arg;
+    public DialogueLineInfo line;
+}
+
+/// <summary>
+/// play 명령으로 연주하러 나갈 때 남기는 "돌아와서 이어갈" 정보.
+/// 메모리에만 있고 파일로 저장되지 않는다. (앱을 완전히 종료하면 이어하기는 StoryFlow의 저장 위치 = 그 이야기 칸의 처음부터)
+/// </summary>
+public sealed class DialoguePlaySnapshot
+{
+    public string sequenceId;
+    public int playLineIndex;
+    public string songId;
+    public string difficulty;
+    public List<DialogueStageRecord> stageLog;
+    public AudioClip bgm;
 }

@@ -16,9 +16,9 @@ MonoBehaviour:
   ignoreOctave: 0
   ignoreName: 1
   notesPrefab:
-  - prefab: {fileID: 8397699897526961635, guid: a8bbe05f24310734da5700943f3421a9, type: 3}
+  - prefab: {fileID: 8397699897526961635, guid: b36b5c76e77a03e408f410aab0ff4ebd, type: 3}
     poolSize: 20
-  - prefab: {fileID: 1528742009364248792, guid: 05192b8f8c9bd1d409159c60ca73689b, type: 3}
+  - prefab: {fileID: 1528742009364248792, guid: f883f8ed798cdab4ca4869b0d5978785, type: 3}
     poolSize: 6
   mapping:
   - notePrefabIndex: 1
