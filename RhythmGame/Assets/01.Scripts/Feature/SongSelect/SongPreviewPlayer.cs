@@ -11,7 +11,7 @@ public class SongPreviewPlayer : MonoBehaviour
     [Tooltip("곡을 빠르게 넘길 때 매번 재생하지 않도록 기다리는 시간(초)")]
     [SerializeField] private float delay = 0.3f;
 
-    [Tooltip("곡을 시작할 때 미리듣기를 끄는 시간(초)")]
+    [Tooltip("곡 선택창을 떠날 때 미리듣기를 끄는 시간(초)")]
     [SerializeField] private float stopFadeDuration = 0.3f;
 
     private Coroutine pending;
@@ -19,13 +19,13 @@ public class SongPreviewPlayer : MonoBehaviour
     private void OnEnable()
     {
         controller.SongIndexChanged += OnSongChanged;
-        controller.SongStarted += OnSongStarted;
+        controller.Leaving += OnLeaving;
     }
 
     private void OnDisable()
     {
         controller.SongIndexChanged -= OnSongChanged;
-        controller.SongStarted -= OnSongStarted;
+        controller.Leaving -= OnLeaving;
         CancelPending();
     }
 
@@ -45,7 +45,7 @@ public class SongPreviewPlayer : MonoBehaviour
             AudioManager.Instance.PlayBGM(clip); // 같은 곡이 재생 중이면 AudioManager가 무시함
     }
 
-    private void OnSongStarted()
+    private void OnLeaving()
     {
         CancelPending();
         if (AudioManager.Instance != null)

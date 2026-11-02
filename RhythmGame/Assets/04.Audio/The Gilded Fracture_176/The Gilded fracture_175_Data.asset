@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: The Gilded fracture_175_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
   songId: The Gilded fracture
-  title: 
+  title: The Gilded fracture
   composer: 
   bpm: 175
   flavorText: 

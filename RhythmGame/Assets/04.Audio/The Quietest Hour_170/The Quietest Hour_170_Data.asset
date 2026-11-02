@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
   m_Name: The Quietest Hour_170_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
-  songId: 
-  title: 
+  songId: The Quietest Hour
+  title: The Quietest Hour
   composer: 
   bpm: 0
   flavorText: 
@@ -22,4 +22,4 @@ MonoBehaviour:
   previewClip: {fileID: 0}
   easy: {fileID: 0}
   normal: {fileID: 0}
-  hard: {fileID: 0}
+  hard: {fileID: 11400000, guid: 0c59dc99bcb377d4db36b885b4a8842e, type: 2}

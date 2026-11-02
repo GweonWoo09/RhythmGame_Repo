@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Merry Deception_124_data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
   songId: Merry Deception
-  title: 
+  title: Merry Deception
   composer: 
   bpm: 124
   flavorText: 

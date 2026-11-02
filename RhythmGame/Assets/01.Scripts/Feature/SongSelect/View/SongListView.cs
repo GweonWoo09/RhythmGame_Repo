@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,9 @@ public class SongListView : MonoBehaviour
     [SerializeField] private SongSelectController controller;
     [Tooltip("위에서부터 순서대로 넣는다")]
     [SerializeField] private SongListSlot[] slots;
+
+    /// <summary>선택된 곡이 표시된 칸이 바뀔 때 (곡이 없으면 null)</summary>
+    public event Action<SongListSlot> SelectedSlotChanged;
 
     private IReadOnlyList<SongDataSO> songs;
     private int firstVisible; // 맨 위 칸에 보이는 곡의 번호
@@ -47,5 +51,13 @@ public class SongListView : MonoBehaviour
             slots[i].Show(song);
             slots[i].SetSelected(songIndex == index);
         }
+
+        SelectedSlotChanged?.Invoke(index >= 0 ? GetSlot(index - firstVisible) : null);
+    }
+
+    /// <summary>위에서부터 index번째 칸 (없으면 null)</summary>
+    public SongListSlot GetSlot(int index)
+    {
+        return slots != null && index >= 0 && index < slots.Length ? slots[index] : null;
     }
 }

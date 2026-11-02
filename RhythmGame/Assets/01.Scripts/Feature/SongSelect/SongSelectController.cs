@@ -16,7 +16,7 @@ public class SongSelectController : MonoBehaviour
     [SerializeField] private KeyCode leftKey = KeyCode.LeftArrow;
     [SerializeField] private KeyCode rightKey = KeyCode.RightArrow;
     [SerializeField] private KeyCode startKey = KeyCode.Return;
-    [SerializeField] private KeyCode categoryKey = KeyCode.Tab;
+    [SerializeField] private KeyCode categoryKey = KeyCode.LeftShift;
     [SerializeField] private KeyCode backKey = KeyCode.Escape;
 
     [Header("뒤로가기(ESC) 했을 때 갈 씬")]
@@ -31,6 +31,8 @@ public class SongSelectController : MonoBehaviour
     public event Action<SongCategory> CategoryChanged;
     /// <summary>곡을 시작해서 인게임으로 넘어갈 때</summary>
     public event Action SongStarted;
+    /// <summary>곡 선택창을 떠날 때 (곡 시작, 뒤로가기 모두)</summary>
+    public event Action Leaving;
 
     public SongDataSO CurrentSong => songs.Count > 0 ? songs[songIndex] : null;
     public Difficulty CurrentDifficulty { get; private set; } = Difficulty.Normal;
@@ -154,6 +156,7 @@ public class SongSelectController : MonoBehaviour
         PlaySession.SongData = song;
         PlaySession.Difficulty = CurrentDifficulty.ToString();
         SongStarted?.Invoke();
+        Leaving?.Invoke();
         PlaySession.Start(chart, SceneChanger.SceneType.SongSelect);
     }
 
@@ -162,6 +165,7 @@ public class SongSelectController : MonoBehaviour
         if (!HasSceneChanger()) return;
 
         isLeaving = true;
+        Leaving?.Invoke();
         SceneChanger.Instance.LoadScene(backScene);
     }
 
