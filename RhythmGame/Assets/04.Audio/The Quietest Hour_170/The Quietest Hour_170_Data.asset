@@ -15,11 +15,11 @@ MonoBehaviour:
   songId: The Quietest Hour
   title: The Quietest Hour
   composer: 
-  bpm: 0
+  bpm: 170
   flavorText: 
-  cover: {fileID: 0}
+  cover: {fileID: -960315065029329229, guid: 7339d49426f86af4c8eac57b319822b7, type: 3}
   isStorySong: 0
-  previewClip: {fileID: 0}
+  previewClip: {fileID: 8300000, guid: 6631bb6803ca3bd41b169931ee5f2c6c, type: 3}
   easy: {fileID: 0}
   normal: {fileID: 0}
   hard: {fileID: 11400000, guid: 0c59dc99bcb377d4db36b885b4a8842e, type: 2}

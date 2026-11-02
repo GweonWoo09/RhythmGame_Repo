@@ -13,11 +13,15 @@ MonoBehaviour:
   m_Name: 00_SongLibrary
   m_EditorClassIdentifier: Assembly-CSharp::SongLibrarySO
   songs:
-  - {fileID: 11400000, guid: b64956967eae01747b258130a573f3c6, type: 2}
+  - {fileID: 11400000, guid: 2d58fb2973413224bb68d4d590aa944e, type: 2}
+  - {fileID: 11400000, guid: 98516e46b50983a4cbe6e3e4e5209c8f, type: 2}
   - {fileID: 11400000, guid: 9511631940298f3438ce6fae132b5c49, type: 2}
+  - {fileID: 11400000, guid: 554c031102d78e1409651a1f891b23ba, type: 2}
+  - {fileID: 11400000, guid: 9adceae00eacc224a91d3158b0dc06cf, type: 2}
+  - {fileID: 11400000, guid: b64956967eae01747b258130a573f3c6, type: 2}
+  - {fileID: 11400000, guid: d1f7acf1e61e55641945ebb39c0586b5, type: 2}
+  - {fileID: 11400000, guid: 5b0a0ec9b7fbf654ead51e0732748a39, type: 2}
   - {fileID: 11400000, guid: 0b3e0e1f4ae439b4e9de2a8f24dd0586, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: f75fb495c6382fd469ac5d45bf26fea7, type: 2}
+  - {fileID: 11400000, guid: 0389132277f6c93429db1ad02694432a, type: 2}
+  - {fileID: 11400000, guid: 8559360626abc2b48bd651190a813390, type: 2}

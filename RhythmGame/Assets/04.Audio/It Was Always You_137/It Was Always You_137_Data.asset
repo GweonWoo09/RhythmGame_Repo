@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
+  m_Name: It Was Always You_137_Data
+  m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
+  songId: It Was Always You_137
+  title: It Was Always You_137
+  composer: 
+  bpm: 137
+  flavorText: 
+  cover: {fileID: -7111841356944912715, guid: 4f34f8dec3d8d63488a3b7a62af4e75d, type: 3}
+  isStorySong: 0
+  previewClip: {fileID: 8300000, guid: 637badbc3a4ab764cbb377a5e10ed837, type: 3}
+  easy: {fileID: 11400000, guid: eef5c5f7488bd4844a62a9c5f84589a7, type: 2}
+  normal: {fileID: 0}
+  hard: {fileID: 0}

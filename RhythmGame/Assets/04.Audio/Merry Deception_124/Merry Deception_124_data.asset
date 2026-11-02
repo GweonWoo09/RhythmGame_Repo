@@ -17,7 +17,7 @@ MonoBehaviour:
   composer: 
   bpm: 124
   flavorText: 
-  cover: {fileID: -3412453793783914963, guid: 31d366584e867ef4088af06539db83be, type: 3}
+  cover: {fileID: -504249159019379751, guid: 91c66bbeaadfbcf4d8f3e876572c9eda, type: 3}
   isStorySong: 0
   previewClip: {fileID: 8300000, guid: f9487e29bd6b3f54db71b5b54908c392, type: 3}
   easy: {fileID: 0}

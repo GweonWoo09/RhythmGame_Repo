@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
+  m_Name: Fatalism_188_Data
+  m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
+  songId: Fatalism_188
+  title: Fatalism_188
+  composer: 
+  bpm: 188
+  flavorText: 
+  cover: {fileID: 3374259558666380409, guid: c3004e4dcdc47e34b9c366da909ff41e, type: 3}
+  isStorySong: 0
+  previewClip: {fileID: 8300000, guid: e413fe1ecfc437444a0b400ce6faa0bc, type: 3}
+  easy: {fileID: 0}
+  normal: {fileID: 0}
+  hard: {fileID: 11400000, guid: 5f1e5f4259b2a074ca68729a2b495d23, type: 2}

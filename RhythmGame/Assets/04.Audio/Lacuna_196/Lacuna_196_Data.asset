@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
+  m_Name: Lacuna_196_Data
+  m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
+  songId: Lacuna_196
+  title: Lacuna_196
+  composer: 
+  bpm: 196
+  flavorText: 
+  cover: {fileID: -6293597025221196525, guid: 869da1e5d64f66546b16885911870c01, type: 3}
+  isStorySong: 0
+  previewClip: {fileID: 8300000, guid: 58ee9c0d6bd78044ab29372c544736ea, type: 3}
+  easy: {fileID: 11400000, guid: 31ab5cea062864f41bc4db5db6b37c55, type: 2}
+  normal: {fileID: 0}
+  hard: {fileID: 0}

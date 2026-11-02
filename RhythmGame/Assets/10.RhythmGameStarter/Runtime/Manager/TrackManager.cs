@@ -168,7 +168,8 @@ namespace RhythmGameStarter
             var note = noteObject.GetComponent<Note>();
             if (!note) return;
             note.ResetForPool();
-            note.transform.SetParent(notesPoolParent);
+            // [수정] 크기를 그대로 둔 채 옮긴다. (true면 트랙 크기 비율이 재사용할 때마다 곱해져 노트가 점점 작아짐)
+            note.transform.SetParent(notesPoolParent, false);
             note.gameObject.SetActive(false);
             note.transform.localPosition = Vector3.zero;
         }

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
+  m_Name: Once Again!_Data
+  m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
+  songId: Once Again!
+  title: Once Again!
+  composer: 
+  bpm: 0
+  flavorText: 
+  cover: {fileID: 0}
+  isStorySong: 0
+  previewClip: {fileID: 8300000, guid: c6419e94d61d30349a383e486558c83a, type: 3}
+  easy: {fileID: 11400000, guid: f0240d58075cc6f4398baf02d18c5836, type: 2}
+  normal: {fileID: 0}
+  hard: {fileID: 0}

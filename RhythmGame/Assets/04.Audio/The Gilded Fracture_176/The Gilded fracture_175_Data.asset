@@ -17,9 +17,9 @@ MonoBehaviour:
   composer: 
   bpm: 175
   flavorText: 
-  cover: {fileID: -3320605177049601336, guid: 92f0b5ff41069114390df0cd77056402, type: 3}
+  cover: {fileID: 7322119584055100378, guid: 10ca49a06a10c9e40af6109518f95ca7, type: 3}
   isStorySong: 0
   previewClip: {fileID: 8300000, guid: d46a6db63573f5341b5a7363986866a3, type: 3}
-  easy: {fileID: 11400000, guid: 59f93e291dccee3408eb46c2c8747b5b, type: 2}
+  easy: {fileID: 11400000, guid: 83e53c80ec8f55d47982737a028d3fd3, type: 2}
   normal: {fileID: 11400000, guid: eaed796926cea1e4593bc61b1a5e75a3, type: 2}
   hard: {fileID: 11400000, guid: 19db7d14e39e19d448211072d244930d, type: 2}
