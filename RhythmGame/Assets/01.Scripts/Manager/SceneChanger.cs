@@ -14,11 +14,6 @@ using UnityEngine.SceneManagement;
 ///      · 새 씬이 활성화되기 전에 실패 -> OnSceneLoadFailed (씬/상태는 그대로 유지)
 ///      · 새 씬이 활성화된 뒤에는      -> OnSceneLoadComplete (BGM 오류 등 부가 실패는 로그만 남김)
 ///  - 이미 로딩 중이라 무시된 요청은 이벤트 없이 false만 반환한다 (진행 중인 로드가 자기 이벤트를 발행하므로).
-///
-/// [이전 씬 정책]
-///  - HasPreviousScene이 true일 때만 LoadPreviousScene()이 동작한다.
-///  - 시작 전용 씬(Boot/Loading 등)은 sceneEntries에 등록하지 않거나, 등록하더라도 excludeFromHistory를 체크하면
-///    그 씬을 "돌아갈 대상"으로 기록하지 않는다. 따라서 첫 전환 직후 뒤로가기가 부트 씬으로 되돌아가지 않는다.
 /// </summary>
 public class SceneChanger : MonoBehaviour
 {
@@ -203,7 +198,7 @@ public class SceneChanger : MonoBehaviour
     }
     #endregion
 
-    // 씬 로드/전환할 때 이벤트
+    // 씬 로드/전환할 때 이벤트(Action)
     #region Load / Transition Events
     public event Action<float> OnLoadProgress;
     public event Action<SceneType> OnSceneLoadStart;

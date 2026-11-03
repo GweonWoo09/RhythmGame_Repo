@@ -665,6 +665,10 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 1270975605}
+    - target: {fileID: 2492644252168886258, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: defaultSong
+      value: 
+      objectReference: {fileID: 11400000, guid: 975e57d9816d6674a9cfe291893dbfd4, type: 2}
     - target: {fileID: 2658213517499901638, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_textAlignment
       value: 65535

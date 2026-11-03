@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 대화 진행 로직만 담당한다. 실제 UI(Image, Text)는 건드리지 않고
-/// 이벤트를 통해 현재 대사/선택지 정보를 알린다. 화면 표시는 DialogueUIView가 담당.
+/// 대화 진행 로직 담당.
+/// 이벤트를 통해 현재 대사/선택지 정보를 DialogueUIView에게 알린다.
 /// 대사 데이터는 DialogueDataSO 에셋으로부터 받아오며, BGM 전환은 AudioManager에 위임한다.
 ///
 /// [v2 진행 규칙]
-/// 1) 줄을 보여주기 전에 condition이 거짓이면 그 줄을 통째로 건너뛴다 (setFlags/goto도 실행되지 않음).
+/// 1) 줄을 보여주기 전에 condition이 거짓이면 그 줄을 통째로 건너뛴다 (setFlags/goto도).
 /// 2) 줄이 표시될 때: bgmOverride -> setFlags 적용 -> commands 발행 -> OnDialogUpdated -> 선택지.
 /// 3) 줄을 읽고 넘어갈 때: branches(처음 참인 것) -> gotoLabel -> 다음 줄 순서로 목적지를 정한다.
 ///    목적지가 "end"이거나 마지막 줄을 지나면 대화 종료.

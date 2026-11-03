@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: DialogueSheetSettings
   m_EditorClassIdentifier: Assembly-CSharp-Editor::DialogueSheetSettings
   spreadsheet: https://docs.google.com/spreadsheets/d/1ezyxmmyfVqImqpPnDAgV22WG7C2AQvU6WDQRQhbhQsE/edit?gid=1490790440#gid=1490790440
-  linesGid: 599233620
-  metaGid: 1442998203
-  songsGid: 1000845928
+  linesGid: 302315339
+  metaGid: 654721729
+  songsGid: 69668503
   outputRoot: Assets/Resources/Dialogue
   songCatalogPath: Assets/Resources/SongCatalog.json
   speakerResourcesPath: Speakers

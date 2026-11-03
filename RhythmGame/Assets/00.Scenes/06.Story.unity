@@ -3900,6 +3900,51 @@ RectTransform:
   m_AnchoredPosition: {x: 96.7, y: -21}
   m_SizeDelta: {x: 111.23999, y: 25.304}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1909111375
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1909111376}
+  - component: {fileID: 1909111377}
+  m_Layer: 0
+  m_Name: GameFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1909111376
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909111375}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1909111377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909111375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac31a43741ebe1540bae511885705d6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlowStoryEntry
+  dialogueManager: {fileID: 1392145938}
 --- !u!1 &1941064603
 GameObject:
   m_ObjectHideFlags: 0
@@ -4544,6 +4589,7 @@ SceneRoots:
   - {fileID: 58556739}
   - {fileID: 1392145939}
   - {fileID: 173453284}
+  - {fileID: 1909111376}
   - {fileID: 1589284023}
   - {fileID: 1020254932}
   - {fileID: 2085251883}
