@@ -1,6 +1,10 @@
 using UnityEngine;
 
-/// <summary>Bridges GameManager play results to the active StoryFlow.</summary>
+/// <summary>
+/// 스토리와 리듬게임간의 플로우를 연결하기 위해
+/// 리듬게임 끝나고 결과창으로 넘어가도록
+/// 리듬게임 끝나고 결과창으로 넘어가도록
+/// </summary>
 public sealed class StoryFlowRunner : MonoBehaviour
 {
     private static StoryFlowRunner _instance;

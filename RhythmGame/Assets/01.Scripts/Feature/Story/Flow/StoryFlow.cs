@@ -27,7 +27,7 @@ using UnityEngine;
 ///   연주를 마치지 못하고 나왔다가 같은 이야기에 다시 들어오면 play 줄부터 다시 보여준다.
 ///   곡 ID -> 곡 에셋 연결은 SongCatalog(시트의 songs 탭) + PlaySessionAdapter가 맡는다.
 ///
-/// 필요한 외부 수정: SceneChanger.SceneType 에 Story 추가 + sceneEntries 등록, GameManager.ClearChapter 추가.
+/// 필요한 외부 수정: SceneChanger.SceneType 에 Story 추가 + sceneEntries 등록, GameManager.MarkChapterCleared 추가.
 /// </summary>
 public static class StoryFlow
 {
@@ -295,7 +295,8 @@ public static class StoryFlow
             return false;
         }
 
-        if (!PlaySessionAdapter.Apply(entry, snapshot.difficulty)) return false;
+        // 연주가 끝나면 이 이야기(Story)로 돌아간다 (ReturnScene)
+        if (!PlaySessionAdapter.Apply(entry, snapshot.difficulty, SceneChanger.SceneType.Story)) return false;
 
         StoryFlowRunner.EnsureExists();
 

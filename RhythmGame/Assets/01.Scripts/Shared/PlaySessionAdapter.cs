@@ -2,18 +2,18 @@ using RhythmGameStarter;
 using UnityEngine;
 
 /// <summary>
-/// 카탈로그의 곡을 리듬게임 씬이 읽는 PlaySession(정적 설정)에 넣어 주는 어댑터.
-/// StoryFlow가 연주를 시작하기 직전에 호출한다. (씬이 바뀌어도 정적 값은 유지된다)
+/// 카탈로그의 곡을 PlaySession(정적 설정)에 넣어 주는 어댑터.
+///   PlaySession.Song        : SongItem  (Resources에서 Load<SongItem>으로 읽는다)
+///   PlaySession.Difficulty  : string    (기본값 "Normal". 빈 값이면 기존 값을 유지한다)
+///   PlaySession.ReturnScene : 연주가 끝나면 돌아갈 씬 (스토리에서 온 연주는 Story)
 ///
-/// [확인 필요] PlaySession.cs를 아직 보지 못했다. ResultSubmitter에서 확인한 것은 다음 두 가지뿐이다.
-///   - PlaySession.Song        : 곡 에셋. 이름(.name)을 읽는다.
-///   - PlaySession.Difficulty  : 난이도. 문자열로 쓰인다.
-/// 아래 대입이 프로젝트의 실제 타입과 다르면 컴파일 오류가 나는데, 이 파일의 Apply 안만 고치면 된다.
-/// (곡 에셋 타입을 SongItem으로 가정했다. 다른 타입이면 Load<>의 타입 인자만 바꾼다.)
+/// PlaySession.Start(song, returnScene)은 곡 객체를 받아 씬을 바로 열므로,
+/// 대사 payload(songId, chapterId)를 함께 넘기려면 이 어댑터로 값만 넣고 LoadScene을 직접 호출한다.
 /// </summary>
 public static class PlaySessionAdapter
 {
-    public static bool Apply(SongCatalog.Entry entry, string difficulty)
+    /// <param name="returnScene">연주 후 돌아갈 씬. null이면 기존 값을 유지한다.</param>
+    public static bool Apply(SongCatalog.Entry entry, string difficulty, SceneChanger.SceneType? returnScene = null)
     {
         if (entry == null || string.IsNullOrEmpty(entry.path))
         {
@@ -30,10 +30,14 @@ public static class PlaySessionAdapter
 
         PlaySession.Song = song;
 
-        // 난이도가 비어 있으면 PlaySession의 기존 값을 그대로 둔다
         if (!string.IsNullOrEmpty(difficulty))
         {
             PlaySession.Difficulty = difficulty;
+        }
+
+        if (returnScene.HasValue)
+        {
+            PlaySession.ReturnScene = returnScene.Value;
         }
 
         return true;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Merry_Deception_124_Normal
   m_EditorClassIdentifier: com.bennykok.rgs.runtime::RhythmGameStarter.SongItem
   coverArt: {fileID: 0}
-  clip: {fileID: 8300000, guid: f9487e29bd6b3f54db71b5b54908c392, type: 3}
+  clip: {fileID: 8300000, guid: 6c344336888d95d47bbb96f5084acccc, type: 3}
   author: 
   bpm: 124
   speedModifier: 1
