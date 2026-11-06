@@ -2467,7 +2467,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2812891354770858997, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: beatSize
-      value: 4
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4087034868758555205, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: levels.values.Array.size

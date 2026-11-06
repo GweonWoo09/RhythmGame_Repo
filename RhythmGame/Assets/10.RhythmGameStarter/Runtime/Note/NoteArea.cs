@@ -184,7 +184,8 @@ namespace RhythmGameStarter
                             (keyboardInputHandler &&
                              keyboardInputHandler.GetTrackActionKey(track, track.transform.GetSiblingIndex())))
                         {
-                            if (longNoteDetecter && longNoteDetecter.exitedLineArea)
+                            // [수정] 충돌체 대신 시간으로 끝을 판단 (꼬리 시간이 지나면 성공)
+                            if (longNoteDetecter && IsLongNoteFinished(currentNote, 0f))
                             {
                                 // print("noteFinished");
 
@@ -201,7 +202,8 @@ namespace RhythmGameStarter
                                  (keyboardInputHandler &&
                                   keyboardInputHandler.GetTrackActionKeyUp(track, track.transform.GetSiblingIndex())))
                         {
-                            if (longNoteDetecter.exitedLineArea)
+                            // [수정] 꼬리 시간보다 판정 범위(MissWindow)만큼 일찍 떼도 성공으로 인정
+                            if (IsLongNoteFinished(currentNote, MissWindow))
                             {
                                 // print("noteFinished");
                                 AddCombo(currentNote, longNoteDownSongTime); // [수정]
@@ -385,6 +387,13 @@ namespace RhythmGameStarter
             var diffMs = Mathf.Abs(inputSongTime - note.noteTime) * 1000f;
             songManager.comboSystem.AddCombo(1, diffMs, note.score);
             songManager.trackManager.onNoteTriggered.Invoke(note);
+        }
+
+        // [수정] 롱노트 꼬리 시간이 지났는지 (tolerance초만큼 일찍 떼는 것까지 허용)
+        private bool IsLongNoteFinished(Note note, float tolerance)
+        {
+            if (!note) return false;
+            return songManager.songPosition >= note.noteTime + note.noteLength - tolerance;
         }
 
         // [수정] 이 레인에서 판정 범위 안에 있는, 아직 판정 안 된 가장 이른 노트

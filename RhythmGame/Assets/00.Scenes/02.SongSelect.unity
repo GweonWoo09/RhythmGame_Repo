@@ -1416,7 +1416,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1487,6 +1487,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &529008439
 GameObject:
   m_ObjectHideFlags: 0
@@ -1932,7 +1936,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
+  m_IgnoreReversedGraphics: 0
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
@@ -2186,7 +2190,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2257,6 +2261,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &787974829
 GameObject:
   m_ObjectHideFlags: 0
@@ -2905,7 +2913,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2976,6 +2984,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &1039813507
 GameObject:
   m_ObjectHideFlags: 0
@@ -3412,7 +3424,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3483,6 +3495,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &1259944180
 GameObject:
   m_ObjectHideFlags: 0
@@ -3919,7 +3935,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3990,6 +4006,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &1300816375
 GameObject:
   m_ObjectHideFlags: 0
@@ -4439,7 +4459,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4510,6 +4530,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &1530136713
 GameObject:
   m_ObjectHideFlags: 0
@@ -4734,7 +4758,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 11
+  m_fontSize: 18
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4805,6 +4829,10 @@ MonoBehaviour:
   selectedMark: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 0.5}
   selectedColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedCoverScale: 1.08
+  dimmedCoverColor: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  selectedShiftX: 14
+  animationSpeed: 18
 --- !u!1 &1586023229
 GameObject:
   m_ObjectHideFlags: 0
