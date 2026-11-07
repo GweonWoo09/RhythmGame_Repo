@@ -69,3 +69,6 @@ RhythmGame/Logs
 RhythmGame/UserSettings
 RhythmGame/Temp
 RhythmGame/.idea
+
+# archive backups
+*.zip
