@@ -72,3 +72,6 @@ RhythmGame/.idea
 
 # archive backups
 *.zip
+
+# Unity build output
+RhythmGame/Builds/
