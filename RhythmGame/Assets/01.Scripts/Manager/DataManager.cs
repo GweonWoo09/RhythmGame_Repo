@@ -23,6 +23,8 @@ using UnityEngine;
         public float bgmVolume = 1f;
         public float sfxVolume = 1f;
         public string language = "ko";
+        public float noteSpeed = 5f;       // [수정] 노트 속도
+        public int audioOffsetMs = 0;      // [수정] 싱크 보정 (ms)
     }
     #endregion
 
@@ -322,6 +324,8 @@ using UnityEngine;
             data.sfxVolume = Mathf.Clamp01(data.sfxVolume);
 
             if (string.IsNullOrEmpty(data.language)) data.language = "ko";
+            data.noteSpeed = Mathf.Clamp(data.noteSpeed, 1f, 10f);               // [수정]
+            data.audioOffsetMs = Mathf.Clamp(data.audioOffsetMs, -300, 300);     // [수정]
         }
         #endregion
 
