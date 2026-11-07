@@ -47,6 +47,7 @@ namespace RhythmGameStarter
         [NonSerialized] public TrackManager trackManager;
 
         private bool songHasStarted;
+        public bool SongHasStarted => songHasStarted; // [수정] 일시정지 컨트롤러에서 사용
         private bool songStartEventInvoked;
         private double dspStartTime;
         private double dspPausedTime;
@@ -128,7 +129,12 @@ namespace RhythmGameStarter
             if (songPaused) return;
 
             songPaused = true;
-            if (audioSource) audioSource.Pause();
+            // [수정] 시작 대기(delay) 중이면 예약 재생을 멈추고, 재개할 때 남은 시간만큼 다시 예약한다
+            if (audioSource)
+            {
+                if (songPosition < 0) audioSource.Stop();
+                else audioSource.Pause();
+            }
 
             dspPausedTime = AudioSettings.dspTime;
         }
@@ -143,7 +149,12 @@ namespace RhythmGameStarter
             if (!songPaused) return;
 
             songPaused = false;
-            if (audioSource) audioSource.Play();
+            // [수정]
+            if (audioSource)
+            {
+                if (songPosition < 0) audioSource.PlayScheduled(AudioSettings.dspTime - songPosition / audioSource.pitch);
+                else audioSource.Play();
+            }
 
             accumulatedPauseTime += AudioSettings.dspTime - dspPausedTime;
         }

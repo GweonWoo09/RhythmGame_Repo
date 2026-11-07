@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -12,13 +13,19 @@ public class SettingsPopup : MonoBehaviour
 
     private static bool isOpen;
     private static int closedFrame = -1;
+    private static SettingsPopup current; // [수정] 코드에서 닫기용
 
     // 닫힌 그 프레임에도 막아야, ESC 한 번에 '설정 닫기'와 '나가기'가 같이 실행되지 않는다
     public static bool BlocksInput => isOpen || Time.frameCount == closedFrame;
 
+    // [수정] 열고 닫을 때 알림 (인게임 일시정지 등에서 구독)
+    public static event Action Opened;
+    public static event Action Closed;
+
     private void Awake()
     {
         isOpen = false;
+        current = this; // [수정]
         if (panel != null) panel.SetActive(false);
     }
 
@@ -28,10 +35,19 @@ public class SettingsPopup : MonoBehaviour
         else if (isOpen && Input.GetKeyDown(closeKey)) SetOpen(false);
     }
 
+    /// <summary>[수정] 열려 있으면 닫는다 (인게임에서 곡 나가기 등)</summary>
+    public static void Close()
+    {
+        if (current != null && isOpen) current.SetOpen(false);
+    }
+
     private void SetOpen(bool open)
     {
         isOpen = open;
         if (panel != null) panel.SetActive(open);
         if (!open) closedFrame = Time.frameCount;
+
+        if (open) Opened?.Invoke(); // [수정]
+        else Closed?.Invoke();
     }
 }
