@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c9aee7e548d5de44a366308702e981a, type: 3}
-  m_Name: UMBRA_133_normal
+  m_Name: UMBRA_133_Normal
   m_EditorClassIdentifier: com.bennykok.rgs.runtime::RhythmGameStarter.SongItem
   coverArt: {fileID: 0}
   clip: {fileID: 8300000, guid: b51b73c5be8e1f147b05649f1eaaa2c2, type: 3}

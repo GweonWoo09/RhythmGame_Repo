@@ -61,6 +61,7 @@ public class DialogueUIView : MonoBehaviour
 
     [Header("오토 모드")]
     [SerializeField] private Button autoButton;
+    [SerializeField] private KeyCode autoModeKey = KeyCode.A;
     [Tooltip("타이핑이 끝난 뒤 자동으로 다음 대사로 넘어가기까지의 대기 시간 (초)")]
     [SerializeField] private float autoAdvanceDelay = 5f;
     [Tooltip("오토 모드가 켜졌을 때 표시할 오브젝트 (버튼 강조 표시 등, 선택)")]
@@ -152,6 +153,22 @@ public class DialogueUIView : MonoBehaviour
     private void Update()
     {
         if (dialogueManager == null) return;
+
+        if (SettingsPopup.BlocksInput) return;
+
+        if (Input.GetKeyDown(autoModeKey))
+        {
+            ToggleAutoMode();
+            return;
+        }
+
+        if (dialogueManager.IsWaitingForChoice && TryGetChoiceKeyDown(out int choiceIndex))
+        {
+            CancelAutoAdvance();
+            dialogueManager.SelectChoice(choiceIndex);
+            return;
+        }
+
         if (!Input.GetKeyDown(KeyCode.Space)) return;
 
         // 타이핑 중이면 선택지 줄이든 일반 줄이든 항상 스킵 가능
@@ -167,6 +184,24 @@ public class DialogueUIView : MonoBehaviour
         // 플레이어가 직접 넘겼으니 진행 중이던 오토 타이머는 취소
         CancelAutoAdvance();
         dialogueManager.AdvanceDialog();
+    }
+
+    private bool TryGetChoiceKeyDown(out int choiceIndex)
+    {
+        choiceIndex = -1;
+
+        // 숫자 1은 첫 번째 표시 선택지, 2는 두 번째 선택지를 선택한다.
+        for (int i = 0; i < 9; i++)
+        {
+            if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha1 + i))
+                || Input.GetKeyDown((KeyCode)((int)KeyCode.Keypad1 + i)))
+            {
+                choiceIndex = i;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     #region Auto Mode

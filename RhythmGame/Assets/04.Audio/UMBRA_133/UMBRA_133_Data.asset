@@ -22,4 +22,4 @@ MonoBehaviour:
   previewClip: {fileID: 8300000, guid: 37cdc57fb96ea044d95b1561bc871580, type: 3}
   easy: {fileID: 11400000, guid: 52b1f094293478d4e9ab7959bd7588af, type: 2}
   normal: {fileID: 11400000, guid: e566d0916199b874ab67139aa4d8b8af, type: 2}
-  hard: {fileID: 0}
+  hard: {fileID: 11400000, guid: 215ac4de392ae844aaef543e9489330c, type: 2}
