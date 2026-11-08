@@ -26,6 +26,13 @@ public class GameManager : MonoBehaviour
 
         InitializeGameData();
     }
+
+    // DataManager는 Awake에서 인스턴스만 등록하므로, 모든 Awake가 끝난 Start에서 저장된 진행도를 읽는다.
+    // (여기서 읽지 않으면 첫 SaveGame이 빈 데이터로 기존 세이브를 덮어쓴다)
+    private void Start()
+    {
+        if (Instance == this) LoadGame();
+    }
     #endregion
 
     // 게임 상태 설정
@@ -92,12 +99,52 @@ public class GameManager : MonoBehaviour
         public int value;
     }
  
+    /// <summary>무대 상태 기록 한 건 (DialogueStageRecord의 저장용 형태). 인물이 말한 줄은 줄 번호로 남긴다.</summary>
+    [Serializable]
+    public class StoryStageEntry
+    {
+        public int kind;        // DialogueStageRecordKind
+        public string name;     // Command: show / hide
+        public string arg;
+        public int lineIndex;   // Line: 시퀀스 안의 줄 번호
+    }
+
+    /// <summary>
+    /// 스토리 도중 나가기(ESC -> 나가기)로 남긴 대사 위치. 같은 시퀀스로 다시 들어오면 이 줄부터 이어간다.
+    /// sequenceId가 비어 있으면 저장된 위치 없음.
+    /// </summary>
+    [Serializable]
+    public class StoryBookmark
+    {
+        public string sequenceId = "";
+        public int lineIndex;
+        public int bgmLineIndex = -1;  // 지금 BGM을 바꾼 줄 (-1: 시퀀스 기본 BGM)
+        public List<StoryStageEntry> stage = new List<StoryStageEntry>();
+
+        public bool IsEmpty => string.IsNullOrEmpty(sequenceId);
+    }
+
     [Serializable]
     public class GameProgressData
     {
         public List<ChapterProgress> chapters = new List<ChapterProgress>();
         public List<SongRecord> songRecords = new List<SongRecord>();
         public List<StoryFlagEntry> storyFlags = new List<StoryFlagEntry>();
+        public StoryBookmark storyBookmark = new StoryBookmark();
+    }
+
+    /// <summary>저장된 대사 위치 (없으면 null)</summary>
+    public StoryBookmark GetStoryBookmark()
+    {
+        var bookmark = ProgressData.storyBookmark;
+        return (bookmark == null || bookmark.IsEmpty) ? null : bookmark;
+    }
+
+    /// <summary>대사 위치를 기록하고 바로 저장한다. null이면 위치를 지운다.</summary>
+    public void SetStoryBookmark(StoryBookmark bookmark)
+    {
+        ProgressData.storyBookmark = bookmark ?? new StoryBookmark();
+        SaveGame();
     }
  
     public GameProgressData ProgressData { get; private set; }
@@ -130,18 +177,17 @@ public class GameManager : MonoBehaviour
         return ProgressData.storyFlags.Exists(f => f.key == key);
     }
  
+    /// <summary>세이브가 없을 때의 새 게임 데이터. 저장된 진행도는 Start에서 LoadGame으로 덮어쓴다.</summary>
     private void InitializeGameData()
     {
-        // 실제 프로젝트에서는 DataManager.Load() 등으로 대체
         ProgressData = new GameProgressData();
- 
-        // 예시: 챕터 1은 기본 해금
-        ProgressData.chapters.Add(new ChapterProgress
-        {
-            chapterId = 1,
-            isUnlocked = true,
-            isCleared = false
-        });
+        EnsureDefaultUnlocks();
+    }
+
+    /// <summary>챕터 1은 항상 해금 (새 게임이든 불러온 세이브든)</summary>
+    private void EnsureDefaultUnlocks()
+    {
+        UnlockChapter(1);
     }
  
     public bool IsChapterUnlocked(int chapterId)
@@ -271,12 +317,31 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void SaveGame()
     {
+        if (DataManager.Instance == null)
+        {
+            Debug.LogWarning("[GameManager] DataManager가 없어 진행도를 저장하지 못했습니다. (Loading 씬부터 실행했는지 확인)");
+            return;
+        }
+
         DataManager.Instance.Save(ProgressData);
     }
 
+    /// <summary>
+    /// 저장된 진행도를 불러온다. 세이브가 없거나 읽을 수 없으면 현재 데이터(새 게임)를 그대로 둔다.
+    /// </summary>
     public void LoadGame()
     {
-        ProgressData = DataManager.Instance.Load();
+        if (DataManager.Instance == null)
+        {
+            Debug.LogWarning("[GameManager] DataManager가 없어 저장된 진행도를 불러오지 못했습니다. 새 게임 데이터로 진행합니다.");
+            return;
+        }
+
+        var loaded = DataManager.Instance.Load();
+        if (loaded == null) return;
+
+        ProgressData = loaded;
+        EnsureDefaultUnlocks();
     }
     #endregion
 

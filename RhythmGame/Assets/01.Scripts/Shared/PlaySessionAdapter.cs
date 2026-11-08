@@ -30,6 +30,11 @@ public static class PlaySessionAdapter
 
         PlaySession.Song = song;
 
+        // 곡 선택창에서 남은 SongData를 지운다. 남아 있으면 ResultSubmitter가 그 곡의 songId로 결과를 보내서
+        // StoryFlow가 결과를 무시하고(카탈로그 ID와 불일치) 기록도 엉뚱한 곡에 저장된다.
+        // 비워 두면 결과 songId는 곡 에셋 이름(= 카탈로그 ID)이 된다.
+        PlaySession.SongData = null;
+
         if (!string.IsNullOrEmpty(difficulty))
         {
             PlaySession.Difficulty = difficulty;
