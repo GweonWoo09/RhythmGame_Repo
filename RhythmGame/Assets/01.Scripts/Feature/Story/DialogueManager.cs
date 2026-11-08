@@ -50,6 +50,10 @@ public class DialogueManager : MonoBehaviour
     // 지금까지의 무대 상태 변화 기록 (연주에서 돌아올 때 UI 무대를 복원하는 데 쓴다)
     private readonly List<DialogueStageRecord> _stageLog = new List<DialogueStageRecord>();
     private AudioClip _currentBgm;
+    private int _currentBgmLine = -1; // 지금 BGM을 바꾼 줄 (-1: 시퀀스 기본 BGM). 대사 위치 저장용
+
+    // 씬에 들어왔을 때의 시퀀스. 이 대화를 끝까지 보면 저장된 대사 위치를 지운다.
+    private string _enteredSequenceId;
 
     /// <summary>
     /// 새 대사가 표시될 때: (화면 슬롯, 화자 데이터(null이면 내레이션), 표정 이름, 대사 텍스트).
@@ -83,12 +87,21 @@ public class DialogueManager : MonoBehaviour
     private void Start()
     {
         // 연주 후(또는 연주하다 나왔다가) 돌아온 경우: 연주 직전 대사 위치에서 이어간다
-        if (_resume != null && TryResumeFromSnapshot()) return;
+        if (_resume != null && TryResumeFromSnapshot())
+        {
+            _enteredSequenceId = dialogSequence.name;
+            return;
+        }
 
         if (dialogSequence == null && !string.IsNullOrEmpty(startSequenceId))
         {
             dialogSequence = DialogueJsonLoader.Load(startSequenceId);
         }
+
+        if (dialogSequence != null) _enteredSequenceId = dialogSequence.name;
+
+        // 나가기로 저장해 둔 대사 위치가 이 시퀀스라면 그 줄부터 이어간다
+        if (TryResumeFromBookmark()) return;
 
         if (HasLines())
         {
@@ -261,6 +274,7 @@ public class DialogueManager : MonoBehaviour
             if (line.bgmOverride != null && AudioManager.Instance != null)
             {
                 _currentBgm = line.bgmOverride;
+                _currentBgmLine = index;
                 AudioManager.Instance.PlayBGM(line.bgmOverride);
             }
 
@@ -269,30 +283,15 @@ public class DialogueManager : MonoBehaviour
             RaiseCommands(line.commands);
         }
 
-        string text = DialogueVariables.Resolve(line.dialogText);
+        var info = BuildLineInfo(line);
 
-        // 표시 이름: 줄의 displayName > 화자의 speakerName. 둘 다 {변수}를 쓸 수 있다.
-        string rawName = !string.IsNullOrEmpty(line.displayName)
-            ? line.displayName
-            : (line.speaker != null ? line.speaker.speakerName : "");
-
-        var info = new DialogueLineInfo
-        {
-            screenSlot = line.screenSlot,
-            speaker = line.speaker,
-            expressionName = line.expressionName,
-            displayName = DialogueVariables.Resolve(rawName),
-            style = line.style,
-            text = text
-        };
-
-        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, text);
+        OnDialogUpdated?.Invoke(line.screenSlot, line.speaker, line.expressionName, info.text);
         OnLineShown?.Invoke(info);
 
-        // 인물 표정이 어떻게 바뀌어 왔는지 기록 (연주에서 돌아올 때 복원용)
+        // 인물 표정이 어떻게 바뀌어 왔는지 기록 (연주에서 돌아올 때 / 저장한 위치에서 이어갈 때 복원용)
         if (!replaying && line.speaker != null)
         {
-            _stageLog.Add(new DialogueStageRecord { kind = DialogueStageRecordKind.Line, line = info });
+            _stageLog.Add(new DialogueStageRecord { kind = DialogueStageRecordKind.Line, line = info, lineIndex = index });
         }
 
         if (line.choices != null && line.choices.Length > 0)
@@ -312,6 +311,25 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>줄을 화면 표시용 정보로 바꾼다 ({변수} 치환 포함)</summary>
+    private static DialogueLineInfo BuildLineInfo(DialogLine line)
+    {
+        // 표시 이름: 줄의 displayName > 화자의 speakerName. 둘 다 {변수}를 쓸 수 있다.
+        string rawName = !string.IsNullOrEmpty(line.displayName)
+            ? line.displayName
+            : (line.speaker != null ? line.speaker.speakerName : "");
+
+        return new DialogueLineInfo
+        {
+            screenSlot = line.screenSlot,
+            speaker = line.speaker,
+            expressionName = line.expressionName,
+            displayName = DialogueVariables.Resolve(rawName),
+            style = line.style,
+            text = DialogueVariables.Resolve(line.dialogText)
+        };
+    }
+
     private void FinishDialog()
     {
         isFinished = true;
@@ -324,6 +342,17 @@ public class DialogueManager : MonoBehaviour
 
             if (end.clearChapter > 0) GameManager.Instance.ClearChapter(end.clearChapter);
             if (end.unlockChapter > 0) GameManager.Instance.UnlockChapter(end.unlockChapter);
+
+            // 이 대화를 끝까지 봤으니 저장해 둔 대사 위치는 지운다. (챕터 해금/클리어도 함께 저장된다)
+            var bookmark = GameManager.Instance.GetStoryBookmark();
+            if (bookmark != null && (bookmark.sequenceId == dialogSequence.name || bookmark.sequenceId == _enteredSequenceId))
+            {
+                GameManager.Instance.SetStoryBookmark(null);
+            }
+            else
+            {
+                GameManager.Instance.SaveGame();
+            }
         }
 
         OnDialogEnd?.Invoke();
@@ -477,7 +506,8 @@ public class DialogueManager : MonoBehaviour
             songId = songId,
             difficulty = difficulty,
             stageLog = new List<DialogueStageRecord>(_stageLog),
-            bgm = _currentBgm
+            bgm = _currentBgm,
+            bgmLineIndex = _currentBgmLine
         });
 
         return true;
@@ -530,6 +560,7 @@ public class DialogueManager : MonoBehaviour
         isWaitingForChoice = false;
         isSuspended = false;
 
+        _currentBgmLine = snapshot.bgmLineIndex;
         if (snapshot.bgm != null)
         {
             _currentBgm = snapshot.bgm;
@@ -592,11 +623,122 @@ public class DialogueManager : MonoBehaviour
     }
     #endregion
 
+    #region Bookmark (나가기로 저장한 대사 위치)
+    /// <summary>
+    /// 지금 보고 있는 줄까지의 진행을 GameManager에 기록하고 세이브 파일에 저장한다. (StoryExitMenu의 나가기 버튼)
+    /// 이 줄의 플래그와 명령은 이미 처리됐으므로, 돌아오면 이 줄을 다시 보여주기만 한다. 선택지 대기 중이면 선택지도 다시 뜬다.
+    /// 저장할 위치가 없으면(대화가 끝났거나 시작 전) false.
+    /// </summary>
+    public bool SaveBookmark()
+    {
+        if (GameManager.Instance == null)
+        {
+            Debug.LogWarning("[DialogueManager] GameManager가 없어 대사 위치를 저장하지 못했습니다. (Loading 씬부터 실행했는지 확인)");
+            return false;
+        }
+
+        if (isFinished || !IsValidIndex(dialogSequence, currentDialogIndex)) return false;
+
+        var bookmark = new GameManager.StoryBookmark
+        {
+            sequenceId = dialogSequence.name,
+            lineIndex = currentDialogIndex,
+            bgmLineIndex = _currentBgmLine
+        };
+
+        foreach (var record in _stageLog)
+        {
+            // cast는 시퀀스에서 다시 읽을 수 있으므로 저장하지 않는다
+            if (record.kind == DialogueStageRecordKind.Cast) continue;
+
+            bookmark.stage.Add(new GameManager.StoryStageEntry
+            {
+                kind = (int)record.kind,
+                name = record.name,
+                arg = record.arg,
+                lineIndex = record.lineIndex
+            });
+        }
+
+        GameManager.Instance.SetStoryBookmark(bookmark);
+        return true;
+    }
+
+    /// <summary>저장된 대사 위치가 지금 시퀀스의 것이면 그 줄부터 이어간다. 이어갔으면 true.</summary>
+    private bool TryResumeFromBookmark()
+    {
+        if (GameManager.Instance == null || !HasLines()) return false;
+
+        var bookmark = GameManager.Instance.GetStoryBookmark();
+        if (bookmark == null || bookmark.sequenceId != dialogSequence.name) return false;
+
+        if (!IsValidIndex(dialogSequence, bookmark.lineIndex))
+        {
+            Debug.LogWarning($"[DialogueManager] 저장된 대사 위치({bookmark.sequenceId} {bookmark.lineIndex}번 줄)를 찾을 수 없어 처음부터 시작합니다.");
+            return false;
+        }
+
+        // 저장된 무대 기록을 되살린다 (cast -> show/hide -> 인물이 말한 줄)
+        var log = new List<DialogueStageRecord>
+        {
+            new DialogueStageRecord { kind = DialogueStageRecordKind.Cast, cast = dialogSequence.cast }
+        };
+
+        if (bookmark.stage != null)
+        {
+            foreach (var entry in bookmark.stage)
+            {
+                var kind = (DialogueStageRecordKind)entry.kind;
+
+                if (kind == DialogueStageRecordKind.Command)
+                {
+                    log.Add(new DialogueStageRecord { kind = kind, name = entry.name, arg = entry.arg });
+                }
+                else if (kind == DialogueStageRecordKind.Line && IsValidIndex(dialogSequence, entry.lineIndex))
+                {
+                    log.Add(new DialogueStageRecord
+                    {
+                        kind = kind,
+                        line = BuildLineInfo(dialogSequence.lines[entry.lineIndex]),
+                        lineIndex = entry.lineIndex
+                    });
+                }
+            }
+        }
+
+        currentDialogIndex = bookmark.lineIndex;
+        isFinished = false;
+        isWaitingForChoice = false;
+        isSuspended = false;
+        _visibleChoices = null;
+
+        // BGM: 저장 당시 BGM을 바꾼 줄이 있으면 그 곡, 없으면 시퀀스 기본 BGM
+        AudioClip bgm = dialogSequence.bgm;
+        _currentBgmLine = -1;
+        if (IsValidIndex(dialogSequence, bookmark.bgmLineIndex) && dialogSequence.lines[bookmark.bgmLineIndex].bgmOverride != null)
+        {
+            bgm = dialogSequence.lines[bookmark.bgmLineIndex].bgmOverride;
+            _currentBgmLine = bookmark.bgmLineIndex;
+        }
+
+        if (bgm != null)
+        {
+            _currentBgm = bgm;
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayBGM(bgm);
+        }
+
+        ReplayStage(log);
+        ShowDialog(bookmark.lineIndex, true);
+        return true;
+    }
+    #endregion
+
     /// <summary>시퀀스 진입 시 기본 BGM 재생 (지정 안 됐으면 기존 BGM 유지)</summary>
     private void PlaySequenceBGM()
     {
         if (dialogSequence.bgm != null && AudioManager.Instance != null)
         {
+            _currentBgmLine = -1;
             _currentBgm = dialogSequence.bgm;
             AudioManager.Instance.PlayBGM(dialogSequence.bgm);
         }
@@ -690,6 +832,7 @@ public struct DialogueStageRecord
     public string name;
     public string arg;
     public DialogueLineInfo line;
+    public int lineIndex; // Line: 시퀀스 안의 줄 번호 (대사 위치 저장용)
 }
 
 /// <summary>
@@ -704,4 +847,5 @@ public sealed class DialoguePlaySnapshot
     public string difficulty;
     public List<DialogueStageRecord> stageLog;
     public AudioClip bgm;
+    public int bgmLineIndex = -1;
 }

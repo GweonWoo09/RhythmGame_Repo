@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
@@ -54,6 +55,10 @@ public class DialogueUIView : MonoBehaviour
     [Header("선택지 UI")]
     [SerializeField] private GameObject choicePanelRoot;
     [SerializeField] private ChoiceButtonRef[] choiceButtons; // 최대 선택지 개수만큼 씬에 미리 배치
+    [Tooltip("↑↓ 로 고른 선택지 버튼의 색")]
+    [SerializeField] private Color choiceHighlightColor = new Color(1f, 0.85f, 0.45f, 1f);
+    [Tooltip("↑↓ 로 고른 선택지 버튼의 크기 배율")]
+    [SerializeField] private float choiceHighlightScale = 1.05f;
 
     [Header("타이핑 효과")]
     [Tooltip("한 글자를 출력하는 간격 (초)")]
@@ -86,6 +91,14 @@ public class DialogueUIView : MonoBehaviour
     // 타이핑이 끝나기를 기다리는 선택지 (타이핑 중에는 버튼을 띄우지 않는다)
     private DialogChoice[] _pendingChoices;
 
+    // 화면에 떠 있는 선택지 수(0이면 선택지 없음)와 ↑↓ 로 고른 선택지
+    private int _shownChoiceCount;
+    private int _choiceCursor;
+
+    // 강조 표시 전의 원래 버튼 색/크기
+    private Color[] _choiceBaseColors;
+    private Vector3[] _choiceBaseScales;
+
     private bool _isAutoMode = false;
     private Coroutine _autoAdvanceCoroutine;
 
@@ -101,11 +114,9 @@ public class DialogueUIView : MonoBehaviour
         }
 
         CaptureTextDefaults(narrationText);
+        CaptureChoiceDefaults();
 
-        if (choicePanelRoot != null)
-        {
-            choicePanelRoot.SetActive(false);
-        }
+        HideChoicePanel();
 
         if (narrationBoxRoot != null)
         {
@@ -154,7 +165,7 @@ public class DialogueUIView : MonoBehaviour
     {
         if (dialogueManager == null) return;
 
-        if (SettingsPopup.BlocksInput) return;
+        if (SettingsPopup.BlocksInput || StoryExitMenu.BlocksInput) return;
 
         if (Input.GetKeyDown(autoModeKey))
         {
@@ -164,9 +175,30 @@ public class DialogueUIView : MonoBehaviour
 
         if (dialogueManager.IsWaitingForChoice && TryGetChoiceKeyDown(out int choiceIndex))
         {
-            CancelAutoAdvance();
-            dialogueManager.SelectChoice(choiceIndex);
+            ConfirmChoice(choiceIndex);
             return;
+        }
+
+        // 선택지가 화면에 떠 있으면 ↑↓ 로 고르고 Enter로 확정한다
+        if (dialogueManager.IsWaitingForChoice && _shownChoiceCount > 0)
+        {
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                MoveChoiceCursor(-1);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                MoveChoiceCursor(1);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
+                ConfirmChoice(_choiceCursor);
+                return;
+            }
         }
 
         if (!Input.GetKeyDown(KeyCode.Space)) return;
@@ -239,6 +271,12 @@ public class DialogueUIView : MonoBehaviour
     private IEnumerator AutoAdvanceRoutine()
     {
         yield return new WaitForSeconds(autoAdvanceDelay);
+
+        // 나가기 창이나 설정창이 열려 있는 동안에는 넘기지 않고 닫힐 때까지 기다린다
+        while (StoryExitMenu.BlocksInput || SettingsPopup.BlocksInput)
+        {
+            yield return null;
+        }
 
         _autoAdvanceCoroutine = null;
 
@@ -381,10 +419,7 @@ public class DialogueUIView : MonoBehaviour
         _pendingChoices = null;
         StopTyping();
 
-        if (choicePanelRoot != null)
-        {
-            choicePanelRoot.SetActive(false);
-        }
+        HideChoicePanel();
 
         // 화자가 없으면 내레이션
         if (info.speaker == null)
@@ -655,6 +690,80 @@ public class DialogueUIView : MonoBehaviour
         {
             Debug.LogWarning($"[DialogueUIView] 선택지({choices.Length}개)가 choiceButtons({choiceButtons.Length}개)보다 많아 일부가 표시되지 않습니다.");
         }
+
+        // 마우스로 눌렀던 버튼이 EventSystem에 선택된 채로 남아 있으면 Enter 한 번에
+        // EventSystem의 Submit과 아래 ↑↓/Enter 처리가 둘 다 실행되므로 선택을 비운다
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        // ↑↓ 선택은 첫 번째 선택지부터
+        _shownChoiceCount = Mathf.Min(choices.Length, choiceButtons.Length);
+        _choiceCursor = 0;
+        RefreshChoiceHighlight();
+    }
+
+    private void ConfirmChoice(int choiceIndex)
+    {
+        CancelAutoAdvance();
+        dialogueManager.SelectChoice(choiceIndex);
+    }
+
+    private void MoveChoiceCursor(int direction)
+    {
+        if (_shownChoiceCount <= 0) return;
+
+        _choiceCursor = (_choiceCursor + direction + _shownChoiceCount) % _shownChoiceCount;
+        RefreshChoiceHighlight();
+    }
+
+    /// <summary>고른 선택지만 강조 색/크기로, 나머지는 원래대로</summary>
+    private void RefreshChoiceHighlight()
+    {
+        if (choiceButtons == null || _choiceBaseColors == null) return;
+
+        for (int i = 0; i < choiceButtons.Length; i++)
+        {
+            bool highlighted = i < _shownChoiceCount && i == _choiceCursor;
+            var button = choiceButtons[i].button;
+            if (button == null) continue;
+
+            if (button.targetGraphic != null)
+            {
+                button.targetGraphic.color = highlighted ? choiceHighlightColor : _choiceBaseColors[i];
+            }
+
+            button.transform.localScale = highlighted ? _choiceBaseScales[i] * choiceHighlightScale : _choiceBaseScales[i];
+        }
+    }
+
+    private void CaptureChoiceDefaults()
+    {
+        if (choiceButtons == null) return;
+
+        _choiceBaseColors = new Color[choiceButtons.Length];
+        _choiceBaseScales = new Vector3[choiceButtons.Length];
+
+        for (int i = 0; i < choiceButtons.Length; i++)
+        {
+            var button = choiceButtons[i].button;
+            _choiceBaseColors[i] = (button != null && button.targetGraphic != null) ? button.targetGraphic.color : Color.white;
+            _choiceBaseScales[i] = button != null ? button.transform.localScale : Vector3.one;
+        }
+    }
+
+    /// <summary>선택지 창을 닫고 ↑↓ 선택 상태와 강조 표시를 지운다</summary>
+    private void HideChoicePanel()
+    {
+        _shownChoiceCount = 0;
+        _choiceCursor = 0;
+        RefreshChoiceHighlight();
+
+        if (choicePanelRoot != null)
+        {
+            choicePanelRoot.SetActive(false);
+        }
     }
     #endregion
 
@@ -680,10 +789,7 @@ public class DialogueUIView : MonoBehaviour
             narrationBoxRoot.SetActive(false);
         }
 
-        if (choicePanelRoot != null)
-        {
-            choicePanelRoot.SetActive(false);
-        }
+        HideChoicePanel();
 
         if (dialogBoxRoot != null)
         {
