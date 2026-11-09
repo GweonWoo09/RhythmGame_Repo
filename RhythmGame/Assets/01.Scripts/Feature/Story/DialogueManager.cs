@@ -629,7 +629,8 @@ public class DialogueManager : MonoBehaviour
     /// 이 줄의 플래그와 명령은 이미 처리됐으므로, 돌아오면 이 줄을 다시 보여주기만 한다. 선택지 대기 중이면 선택지도 다시 뜬다.
     /// 저장할 위치가 없으면(대화가 끝났거나 시작 전) false.
     /// </summary>
-    public bool SaveBookmark()
+    /// <param name="interrupted">게임 종료로 저장하는 경우 true (다음 실행 때 Lobby에서 이어하기 창을 띄운다)</param>
+    public bool SaveBookmark(bool interrupted = false)
     {
         if (GameManager.Instance == null)
         {
@@ -643,7 +644,8 @@ public class DialogueManager : MonoBehaviour
         {
             sequenceId = dialogSequence.name,
             lineIndex = currentDialogIndex,
-            bgmLineIndex = _currentBgmLine
+            bgmLineIndex = _currentBgmLine,
+            interrupted = interrupted
         };
 
         foreach (var record in _stageLog)
@@ -662,6 +664,15 @@ public class DialogueManager : MonoBehaviour
 
         GameManager.Instance.SetStoryBookmark(bookmark);
         return true;
+    }
+
+    // 스토리 도중 게임을 종료하면(창 닫기, Alt+F4, 에디터 플레이 중지 포함) 지금 줄을 저장한다.
+    // 연주하러 나간 동안(IsSuspended)에는 이 씬이 이미 닫혀 있으므로 여기에 오지 않는다.
+    private void OnApplicationQuit()
+    {
+        // 나가기 버튼으로 이미 저장하고 떠나는 중이면 그 저장을 그대로 둔다
+        if (isFinished || isSuspended || StoryExitMenu.IsLeaving) return;
+        SaveBookmark(true);
     }
 
     /// <summary>저장된 대사 위치가 지금 시퀀스의 것이면 그 줄부터 이어간다. 이어갔으면 true.</summary>

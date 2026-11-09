@@ -26,6 +26,9 @@ public class StoryExitMenu : MonoBehaviour
     /// <summary>나가기 창이 열려 있거나(닫힌 그 프레임 포함) 씬을 떠나는 중이면 true</summary>
     public static bool BlocksInput => isOpen || isLeaving || Time.frameCount == closedFrame;
 
+    /// <summary>나가기 버튼으로 이미 저장하고 씬을 떠나는 중인가</summary>
+    public static bool IsLeaving => isLeaving;
+
     private void Awake()
     {
         isOpen = false;

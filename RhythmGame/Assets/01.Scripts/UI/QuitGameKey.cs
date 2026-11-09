@@ -9,7 +9,7 @@ public class QuitGameKey : MonoBehaviour
 
     private void Update()
     {
-        if (SettingsPopup.BlocksInput) return;
+        if (SettingsPopup.BlocksInput || StoryContinuePopup.BlocksInput) return;
         if (!Input.GetKeyDown(quitKey)) return;
 
 #if UNITY_EDITOR

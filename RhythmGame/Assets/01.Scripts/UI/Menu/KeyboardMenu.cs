@@ -20,6 +20,7 @@ public class KeyboardMenu : MonoBehaviour
     {
         if (items == null || items.Length == 0) return;
         if (SettingsPopup.BlocksInput) return; // 설정창이 열려 있으면 메뉴 조작 안 함
+        if (StoryContinuePopup.BlocksInput) return; // 스토리 이어하기 창이 열려 있을 때도
 
         if (Input.GetKeyDown(upKey)) Move(-1);
         else if (Input.GetKeyDown(downKey)) Move(1);

@@ -121,6 +121,9 @@ public class GameManager : MonoBehaviour
         public int bgmLineIndex = -1;  // 지금 BGM을 바꾼 줄 (-1: 시퀀스 기본 BGM)
         public List<StoryStageEntry> stage = new List<StoryStageEntry>();
 
+        /// <summary>스토리 도중 게임을 종료해서 저장된 위치인가. true면 다음 실행 때 Lobby에서 이어하기 창을 띄운다.</summary>
+        public bool interrupted;
+
         public bool IsEmpty => string.IsNullOrEmpty(sequenceId);
     }
 
@@ -144,6 +147,16 @@ public class GameManager : MonoBehaviour
     public void SetStoryBookmark(StoryBookmark bookmark)
     {
         ProgressData.storyBookmark = bookmark ?? new StoryBookmark();
+        SaveGame();
+    }
+
+    /// <summary>종료 중 저장 표시를 지운다 (Lobby의 이어하기 창을 한 번 보여준 뒤). 위치는 그대로 둔다.</summary>
+    public void ClearStoryInterrupted()
+    {
+        var bookmark = GetStoryBookmark();
+        if (bookmark == null || !bookmark.interrupted) return;
+
+        bookmark.interrupted = false;
         SaveGame();
     }
  

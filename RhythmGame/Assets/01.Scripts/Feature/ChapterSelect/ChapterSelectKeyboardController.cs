@@ -38,7 +38,7 @@ public class ChapterSelectKeyboardController : MonoBehaviour
 
     private void Update()
     {
-        if (isLeaving || SettingsPopup.BlocksInput) return;
+        if (isLeaving || SettingsPopup.BlocksInput || StoryContinuePopup.BlocksInput) return;
 
         if (Input.GetKeyDown(previousKey))
         {
