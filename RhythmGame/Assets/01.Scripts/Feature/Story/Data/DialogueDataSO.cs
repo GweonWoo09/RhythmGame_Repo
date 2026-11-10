@@ -49,7 +49,7 @@ using UnityEngine;
     [System.Serializable]
     public struct DialogueCast
     {
-        [Tooltip("화면 슬롯 번호 (DialogueUIView.speakerSlots 인덱스)")]
+        [Tooltip("화면 슬롯 번호 (DialogueUIView.positionSlots 인덱스)")]
         public int slot; // 캐릭터 위치 슬롯
 
         public SpeakerDataSO speaker; // 캐릭터 정보
@@ -112,7 +112,7 @@ using UnityEngine;
         [Tooltip("speaker.expressions 중 어떤 표정을 보여줄지. 예: \"Happy\"")]
         public string expressionName;
 
-        [Tooltip("화면 어느 위치(슬롯)에 표시할지. DialogueUIView의 speakerSlots 인덱스와 대응.")]
+        [Tooltip("화면 어느 위치(슬롯)에 표시할지. DialogueUIView의 positionSlots 인덱스와 대응.")]
         public int screenSlot;
 
         [Tooltip("이 줄에서만 화자 이름 대신 보여줄 이름. 예: \"???\". {player} 같은 변수를 쓸 수 있다. 비우면 speaker.speakerName.")]

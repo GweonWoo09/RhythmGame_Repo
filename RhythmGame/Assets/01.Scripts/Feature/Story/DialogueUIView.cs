@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 /// <summary>
@@ -11,14 +12,21 @@ using UnityEngine.UI;
 /// 캐릭터 이름/표정 스프라이트는 SpeakerDataSO에서 가져오고, 여기서는 "화면 어느 위치에 그릴지"만 관리한다.
 /// 오토 모드: 타이핑이 끝난 뒤 지정된 시간이 지나면 자동으로 다음 대사로 진행한다.
 ///
-/// [위치 슬롯]  speakerSlots 배열은 [0]=Left(왼쪽), [1]=Right(오른쪽), [2]=Center(가운데) 순서로 구성한다.
-///             (DialogueSlots 참고. 가운데 슬롯이 필요 없으면 요소를 2개만 둬도 된다.)
+/// [캐릭터 슬롯] characterSlots: 캐릭터 스프라이트를 그리는 이미지 (CharacterHolder 안의 White, Red, Black ...).
+///             어떤 슬롯이 어떤 인물을 그릴지는 speaker 칸으로 정한다. 비워 두면 이미지 오브젝트 이름이
+///             SpeakerDataSO 에셋 이름과 같은 슬롯을 쓰고, 그것도 없으면 비어 있는 슬롯을 빌려 쓴다.
+/// [위치 슬롯]  positionSlots: 화면 위치. [0]=Left(왼쪽), [1]=Right(오른쪽), [2]=Center(가운데) 순서 (DialogueSlots 참고).
+///             anchor(CharacterHolder 안의 Left/Right/Center 오브젝트) 좌표로 캐릭터를 옮긴다.
+///             캐릭터의 아래쪽 가운데(발 위치)가 anchor에 오도록 놓는다. 대사의 screenSlot이 이 인덱스다.
+/// [대화창]    dialogBox: 모든 인물이 위치와 상관없이 함께 쓰는 대화창 하나 (이름, 대사, 배경).
+///             한 위치에는 한 인물만 선다. 다른 인물이 그 위치로 오면 먼저 있던 인물은 내려간다.
+///             이미 화면에 있는 인물이 다른 위치에서 말하면 그 위치로 부드럽게 이동한다 (moveDuration).
 ///
-/// [무대(cast)] 시퀀스의 cast에 등록된 인물은 계속 화면에 서 있고, 말하는 슬롯만 밝게(Bright), 나머지는 어둡게(Dim).
-///             cast에 없는 슬롯은 말할 때만 보인다. 연출 명령으로 도중에 넣고 뺄 수 있다.
-///               hide:left            해당 슬롯 인물을 내린다
-///               show:right           해당 슬롯 인물을 무대에 올린다 (그 슬롯의 현재 스프라이트 그대로)
-///               show:right:Red:Happy 인물(speakerId)과 표정까지 지정해서 올린다 (표정 생략 가능)
+/// [무대(cast)] 시퀀스의 cast에 등록된 위치의 인물은 계속 화면에 서 있고, 말하는 인물만 밝게(Bright), 나머지는 어둡게(Dim).
+///             cast에 없는 위치의 인물은 말할 때만 보인다. 연출 명령으로 도중에 넣고 뺄 수 있다.
+///               hide:left            해당 위치의 인물을 내린다
+///               show:right           해당 위치의 인물을 무대에 올린다 (그 위치에 마지막으로 섰던 인물 그대로)
+///               show:right:Red:Happy 인물(speakerId)과 표정까지 지정해서 그 위치에 올린다 (표정 생략 가능)
 ///
 /// [대사 스타일] DialogLine.style 이름에 맞춰 글꼴 스타일/색을 적용한다.
 ///             textStyles에 정의한 것이 우선이고, 없으면 기본 제공: thought(기울임), shout(굵게), whisper(기울임+흐리게).
@@ -34,8 +42,18 @@ public class DialogueUIView : MonoBehaviour
     [Header("연동할 로직 컴포넌트")]
     [SerializeField] private DialogueManager dialogueManager;
 
-    [Header("화면 슬롯: [0]=Left, [1]=Right, [2]=Center 순서 (DialogLine.screenSlot 인덱스와 대응)")]
-    [SerializeField] private SpeakerSlotUI[] speakerSlots;
+    [Header("캐릭터 슬롯: 캐릭터 스프라이트를 그리는 이미지 (인물마다 하나)")]
+    [SerializeField] private CharacterSlotUI[] characterSlots;
+
+    [Header("위치 슬롯: [0]=Left, [1]=Right, [2]=Center 순서 (DialogLine.screenSlot 인덱스와 대응)")]
+    [FormerlySerializedAs("speakerSlots")]
+    [SerializeField] private PositionSlotUI[] positionSlots;
+
+    [Tooltip("인물이 다른 위치로 옮겨갈 때 걸리는 시간 (초). 0이면 바로 옮긴다.")]
+    [SerializeField] private float moveDuration = 0.25f;
+
+    [Header("대화창: 모든 인물이 위치와 상관없이 함께 쓴다")]
+    [SerializeField] private DialogueBoxUI dialogBox;
 
     [Header("무대(cast) 연출")]
     [Tooltip("말하지 않는 인물(cast)의 색. 알파는 무시되고 항상 불투명으로 표시된다.")]
@@ -72,11 +90,23 @@ public class DialogueUIView : MonoBehaviour
     [Tooltip("오토 모드가 켜졌을 때 표시할 오브젝트 (버튼 강조 표시 등, 선택)")]
     [SerializeField] private GameObject autoModeIndicator;
 
-    // 현재 말하는 슬롯 (-1: 내레이션 또는 아직 없음)
+    // 현재 말하는 위치 (-1: 내레이션 또는 아직 없음)
     private int _speakingSlot = -1;
 
-    // 무대에 서 있는 슬롯들 (cast 등록 인물 + show 명령으로 올린 인물)
+    // 무대에 서 있는 위치들 (cast 등록 위치 + show 명령으로 올린 위치)
     private readonly HashSet<int> _castSlots = new HashSet<int>();
+
+    // 위치마다 서 있는 캐릭터 슬롯 번호 (-1: 비어 있음)
+    private int[] _occupant;
+
+    // 인물(SpeakerDataSO) -> 그 인물을 그리는 캐릭터 슬롯 번호
+    private readonly Dictionary<SpeakerDataSO, int> _characterOf = new Dictionary<SpeakerDataSO, int>();
+
+    // 캐릭터 슬롯마다 지금 그리고 있는 인물 / 진행 중인 이동 연출
+    private SpeakerDataSO[] _drawnSpeaker;
+    private Coroutine[] _moveRoutines;
+    private readonly HashSet<SpeakerDataSO> _warnedNoCharacter = new HashSet<SpeakerDataSO>();
+    private readonly HashSet<int> _warnedChoiceRoots = new HashSet<int>();
 
     private Coroutine _typingCoroutine;
     private TextMeshProUGUI _typingTarget;
@@ -106,12 +136,24 @@ public class DialogueUIView : MonoBehaviour
     // DialogueManager.Start()가 첫 대사를 띄우는 시점에는 UI 초기화가 이미 끝나 있다.
     private void Awake()
     {
-        foreach (var slot in speakerSlots)
+        if (characterSlots == null) characterSlots = new CharacterSlotUI[0];
+        if (positionSlots == null) positionSlots = new PositionSlotUI[0];
+
+        FindMissingAnchors();
+
+        _occupant = new int[positionSlots.Length];
+        for (int i = 0; i < _occupant.Length; i++) _occupant[i] = -1;
+
+        _drawnSpeaker = new SpeakerDataSO[characterSlots.Length];
+        _moveRoutines = new Coroutine[characterSlots.Length];
+
+        foreach (var character in characterSlots)
         {
-            CaptureTextDefaults(slot.textDialogue);
-            SetPortraitState(slot, PortraitState.Hidden);
-            SetDialogBoxActive(slot, false);
+            SetPortraitState(character, PortraitState.Hidden);
         }
+
+        CaptureTextDefaults(dialogBox.textDialogue);
+        SetDialogBoxActive(false);
 
         CaptureTextDefaults(narrationText);
         CaptureChoiceDefaults();
@@ -299,30 +341,26 @@ public class DialogueUIView : MonoBehaviour
     /// <summary>시퀀스가 시작/교체될 때: 무대에 서 있을 인물을 새로 배치한다 (이전 cast는 내린다).</summary>
     private void HandleCastUpdated(DialogueCast[] cast)
     {
-        foreach (int slotIndex in _castSlots)
-        {
-            if (IsValidSlot(slotIndex))
-            {
-                SetPortraitState(speakerSlots[slotIndex], PortraitState.Hidden);
-            }
-        }
-
         _castSlots.Clear();
 
-        if (cast == null) return;
-
-        foreach (var member in cast)
+        if (cast != null)
         {
-            if (!IsValidSlot(member.slot))
+            foreach (var member in cast)
             {
-                Debug.LogWarning($"[DialogueUIView] cast의 {SlotWarning(member.slot)}");
-                continue;
+                if (!IsValidSlot(member.slot))
+                {
+                    Debug.LogWarning($"[DialogueUIView] cast의 {SlotWarning(member.slot)}");
+                    continue;
+                }
+
+                if (member.speaker == null) continue;
+
+                // 새 장면이므로 미끄러지지 않고 바로 그 자리에 세운다
+                if (PlaceCharacter(member.speaker, member.expressionName, member.slot, false))
+                {
+                    _castSlots.Add(member.slot);
+                }
             }
-
-            if (member.speaker == null) continue;
-
-            speakerSlots[member.slot].characterPortrait.sprite = GetPortraitSprite(member.speaker, member.expressionName);
-            _castSlots.Add(member.slot);
         }
 
         RefreshPortraits();
@@ -348,7 +386,7 @@ public class DialogueUIView : MonoBehaviour
         int slotIndex;
         if (!DialogueSlots.TryParse(arg, out slotIndex) || !IsValidSlot(slotIndex))
         {
-            Debug.LogWarning($"[DialogueUIView] 'hide:{arg}' 명령의 슬롯을 해석할 수 없습니다. (예: hide:left)");
+            Debug.LogWarning($"[DialogueUIView] 'hide:{arg}' 명령의 위치를 해석할 수 없습니다. (예: hide:left)");
             return;
         }
 
@@ -356,7 +394,7 @@ public class DialogueUIView : MonoBehaviour
         RefreshPortraits();
     }
 
-    /// <summary>show:슬롯  또는  show:슬롯:speakerId[:expression]</summary>
+    /// <summary>show:위치  또는  show:위치:speakerId[:expression]</summary>
     private void HandleShowCommand(string arg)
     {
         string[] parts = arg.Split(':');
@@ -364,7 +402,7 @@ public class DialogueUIView : MonoBehaviour
         int slotIndex;
         if (!DialogueSlots.TryParse(parts[0], out slotIndex) || !IsValidSlot(slotIndex))
         {
-            Debug.LogWarning($"[DialogueUIView] 'show:{arg}' 명령의 슬롯을 해석할 수 없습니다. (예: show:right)");
+            Debug.LogWarning($"[DialogueUIView] 'show:{arg}' 명령의 위치를 해석할 수 없습니다. (예: show:right)");
             return;
         }
 
@@ -380,7 +418,7 @@ public class DialogueUIView : MonoBehaviour
             else
             {
                 string expression = parts.Length >= 3 ? parts[2].Trim() : "";
-                speakerSlots[slotIndex].characterPortrait.sprite = GetPortraitSprite(speaker, expression);
+                PlaceCharacter(speaker, expression, slotIndex, true);
             }
         }
 
@@ -388,18 +426,203 @@ public class DialogueUIView : MonoBehaviour
         RefreshPortraits();
     }
 
-    /// <summary>현재 말하는 슬롯 / 무대에 선 슬롯 / 그 외에 따라 모든 초상화의 상태를 다시 맞춘다.</summary>
+    /// <summary>현재 말하는 위치 / 무대에 선 위치 / 그 외에 따라 모든 캐릭터 슬롯의 상태를 다시 맞춘다.</summary>
     private void RefreshPortraits()
     {
-        for (int i = 0; i < speakerSlots.Length; i++)
+        for (int c = 0; c < characterSlots.Length; c++)
         {
+            int position = PositionOf(c);
             PortraitState state;
 
-            if (i == _speakingSlot) state = PortraitState.Bright;
-            else if (_castSlots.Contains(i)) state = PortraitState.Dim;
+            if (position < 0) state = PortraitState.Hidden;
+            else if (position == _speakingSlot) state = PortraitState.Bright;
+            else if (_castSlots.Contains(position)) state = PortraitState.Dim;
             else state = PortraitState.Hidden;
 
-            SetPortraitState(speakerSlots[i], state);
+            SetPortraitState(characterSlots[c], state);
+        }
+
+        // 말하는 인물을 맨 앞에 그린다 (같은 부모 안에서 가장 나중에 그려지도록)
+        if (IsValidSlot(_speakingSlot) && _occupant[_speakingSlot] >= 0)
+        {
+            Image portrait = characterSlots[_occupant[_speakingSlot]].characterPortrait;
+            if (portrait != null) portrait.transform.SetAsLastSibling();
+        }
+    }
+    #endregion
+
+    #region Character placement
+    /// <summary>
+    /// 인물을 위치에 세운다: 그 인물의 캐릭터 슬롯을 찾아 표정 스프라이트를 넣고 위치 슬롯의 anchor로 옮긴다.
+    /// 그 위치에 다른 인물이 서 있었으면 그 인물은 내려간다. 인물이 다른 위치에 서 있었으면 그 자리는 비고,
+    /// 그 자리가 무대(cast)였다면 무대도 함께 옮겨간다.
+    /// </summary>
+    /// <param name="animate">이미 화면에 보이던 인물이면 moveDuration 동안 미끄러지듯 옮긴다</param>
+    /// <returns>캐릭터 슬롯을 찾아 세웠으면 true</returns>
+    private bool PlaceCharacter(SpeakerDataSO speaker, string expressionName, int position, bool animate)
+    {
+        if (speaker == null || !IsValidSlot(position)) return false;
+
+        int character = GetCharacterSlot(speaker);
+        if (character < 0) return false;
+
+        var slot = characterSlots[character];
+        if (slot.characterPortrait == null) return false;
+
+        bool wasVisible = PositionOf(character) >= 0 && slot.characterPortrait.color.a > 0f;
+
+        // 원래 서 있던 자리를 비운다 (무대였으면 새 자리로 옮긴다)
+        int previous = PositionOf(character);
+        if (previous >= 0 && previous != position)
+        {
+            _occupant[previous] = -1;
+            if (_castSlots.Remove(previous)) _castSlots.Add(position);
+        }
+
+        _occupant[position] = character;
+        _drawnSpeaker[character] = speaker;
+        slot.characterPortrait.sprite = GetPortraitSprite(speaker, expressionName);
+
+        MoveToPosition(character, position, animate && wasVisible && previous != position);
+        return true;
+    }
+
+    /// <summary>인물을 그릴 캐릭터 슬롯을 정한다. speaker 칸 지정 > 오브젝트 이름 일치 > 비어 있는 슬롯 순.</summary>
+    private int GetCharacterSlot(SpeakerDataSO speaker)
+    {
+        int found;
+        if (_characterOf.TryGetValue(speaker, out found)) return found;
+
+        found = -1;
+
+        for (int i = 0; i < characterSlots.Length && found < 0; i++)
+        {
+            if (characterSlots[i].speaker == speaker) found = i;
+        }
+
+        for (int i = 0; i < characterSlots.Length && found < 0; i++)
+        {
+            var portrait = characterSlots[i].characterPortrait;
+            if (characterSlots[i].speaker == null && portrait != null && !_characterOf.ContainsValue(i)
+                && (portrait.name == speaker.name || portrait.name == speaker.speakerName))
+            {
+                found = i;
+            }
+        }
+
+        // 전용 슬롯이 없는 인물: 다른 인물에게 지정되지 않았고 지금 아무도 그리고 있지 않은 슬롯을 빌린다
+        for (int i = 0; i < characterSlots.Length && found < 0; i++)
+        {
+            if (characterSlots[i].speaker == null && characterSlots[i].characterPortrait != null
+                && !_characterOf.ContainsValue(i) && !IsReservedByName(i))
+            {
+                found = i;
+            }
+        }
+
+        if (found < 0)
+        {
+            if (_warnedNoCharacter.Add(speaker))
+            {
+                Debug.LogWarning($"[DialogueUIView] '{speaker.name}'을(를) 그릴 캐릭터 슬롯이 없습니다. characterSlots에 이미지를 추가해 주세요.");
+            }
+            return -1;
+        }
+
+        _characterOf[speaker] = found;
+        return found;
+    }
+
+    /// <summary>이 슬롯의 오브젝트 이름이 다른 인물 에셋 이름과 같은가 (그 인물 몫으로 남겨 둔다)</summary>
+    private bool IsReservedByName(int character)
+    {
+        var portrait = characterSlots[character].characterPortrait;
+        return portrait != null && DialogueJsonLoader.FindSpeaker(portrait.name) != null;
+    }
+
+    /// <summary>캐릭터 슬롯이 서 있는 위치. 없으면 -1.</summary>
+    private int PositionOf(int character)
+    {
+        if (_occupant == null) return -1;
+
+        for (int i = 0; i < _occupant.Length; i++)
+        {
+            if (_occupant[i] == character) return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>캐릭터의 아래쪽 가운데(발 위치)가 위치 슬롯의 anchor에 오도록 옮긴다.</summary>
+    private void MoveToPosition(int character, int position, bool animate)
+    {
+        Transform anchor = positionSlots[position].anchor;
+        Image portrait = characterSlots[character].characterPortrait;
+        if (anchor == null || portrait == null) return;
+
+        if (_moveRoutines[character] != null)
+        {
+            StopCoroutine(_moveRoutines[character]);
+            _moveRoutines[character] = null;
+        }
+
+        RectTransform rect = portrait.rectTransform;
+        Vector3 target = anchor.position + (rect.position - BottomCenter(rect));
+
+        if (!animate || moveDuration <= 0f || !isActiveAndEnabled)
+        {
+            rect.position = target;
+            return;
+        }
+
+        _moveRoutines[character] = StartCoroutine(MoveRoutine(character, rect, target));
+    }
+
+    private IEnumerator MoveRoutine(int character, RectTransform rect, Vector3 target)
+    {
+        Vector3 start = rect.position;
+        float elapsed = 0f;
+
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / moveDuration);
+            rect.position = Vector3.LerpUnclamped(start, target, t * t * (3f - 2f * t)); // 부드럽게 출발/도착
+            yield return null;
+        }
+
+        rect.position = target;
+        _moveRoutines[character] = null;
+    }
+
+    private static Vector3 BottomCenter(RectTransform rect)
+    {
+        Rect r = rect.rect;
+        return rect.TransformPoint(new Vector3(r.center.x, r.yMin, 0f));
+    }
+
+    /// <summary>anchor가 비어 있는 위치 슬롯은 캐릭터 이미지의 부모(CharacterHolder)에서 Left/Right/Center 이름으로 찾는다.</summary>
+    private void FindMissingAnchors()
+    {
+        Transform holder = null;
+        foreach (var character in characterSlots)
+        {
+            if (character.characterPortrait != null)
+            {
+                holder = character.characterPortrait.transform.parent;
+                break;
+            }
+        }
+
+        if (holder == null) return;
+
+        string[] names = { "Left", "Right", "Center" };
+        for (int i = 0; i < positionSlots.Length && i < names.Length; i++)
+        {
+            if (positionSlots[i].anchor == null)
+            {
+                positionSlots[i].anchor = holder.Find(names[i]);
+            }
         }
     }
     #endregion
@@ -439,21 +662,25 @@ public class DialogueUIView : MonoBehaviour
             narrationBoxRoot.SetActive(false);
         }
 
-        // 말풍선은 말하는 슬롯 것만 켠다
-        for (int i = 0; i < speakerSlots.Length; i++)
-        {
-            SetDialogBoxActive(speakerSlots[i], i == info.screenSlot);
-        }
+        // 대화창은 하나를 모든 인물이 함께 쓴다
+        SetDialogBoxActive(true);
+
+        // 말하는 인물을 그 위치에 세운다 (다른 위치에 서 있었으면 옮겨간다)
+        PlaceCharacter(info.speaker, info.expressionName, info.screenSlot, true);
 
         _speakingSlot = info.screenSlot;
         RefreshPortraits();
 
-        var slot = speakerSlots[info.screenSlot];
-        slot.textName.text = info.displayName;
-        slot.characterPortrait.sprite = GetPortraitSprite(info.speaker, info.expressionName);
+        if (dialogBox.textName != null) dialogBox.textName.text = info.displayName;
 
-        ApplyTextStyle(slot.textDialogue, info.style);
-        StartTyping(slot.textDialogue, info.text);
+        if (dialogBox.textDialogue == null)
+        {
+            Debug.LogWarning("[DialogueUIView] dialogBox의 textDialogue가 연결되지 않아 대사를 표시할 수 없습니다.");
+            return;
+        }
+
+        ApplyTextStyle(dialogBox.textDialogue, info.style);
+        StartTyping(dialogBox.textDialogue, info.text);
     }
 
     /// <summary>복원 중에 지나가는 대사 기록: 그 인물이 마지막으로 보인 표정을 슬롯에 되돌려 놓는다.</summary>
@@ -461,7 +688,7 @@ public class DialogueUIView : MonoBehaviour
     {
         if (info.speaker == null || !IsValidSlot(info.screenSlot)) return;
 
-        speakerSlots[info.screenSlot].characterPortrait.sprite = GetPortraitSprite(info.speaker, info.expressionName);
+        PlaceCharacter(info.speaker, info.expressionName, info.screenSlot, false);
     }
 
     private void ShowNarration(string text, string styleName)
@@ -472,10 +699,8 @@ public class DialogueUIView : MonoBehaviour
             return;
         }
 
-        foreach (var slot in speakerSlots)
-        {
-            SetDialogBoxActive(slot, false);
-        }
+        // 대화창과 내레이션 창이 같은 오브젝트여도 되도록, 먼저 끄고 내레이션 창을 켠다
+        SetDialogBoxActive(false);
 
         if (narrationBoxRoot != null)
         {
@@ -670,19 +895,22 @@ public class DialogueUIView : MonoBehaviour
             if (i < choices.Length)
             {
                 int choiceIndex = i; // 클로저 캡처용 지역 변수
-                choiceButtons[i].root.SetActive(true);
-                choiceButtons[i].label.text = choices[i].choiceText;
+                SetChoiceButtonActive(i, true);
+                if (choiceButtons[i].label != null) choiceButtons[i].label.text = choices[i].choiceText;
 
-                choiceButtons[i].button.onClick.RemoveAllListeners();
-                choiceButtons[i].button.onClick.AddListener(() =>
+                if (choiceButtons[i].button != null)
                 {
-                    CancelAutoAdvance();
-                    dialogueManager.SelectChoice(choiceIndex);
-                });
+                    choiceButtons[i].button.onClick.RemoveAllListeners();
+                    choiceButtons[i].button.onClick.AddListener(() =>
+                    {
+                        CancelAutoAdvance();
+                        dialogueManager.SelectChoice(choiceIndex);
+                    });
+                }
             }
             else
             {
-                choiceButtons[i].root.SetActive(false);
+                SetChoiceButtonActive(i, false);
             }
         }
 
@@ -702,6 +930,31 @@ public class DialogueUIView : MonoBehaviour
         _shownChoiceCount = Mathf.Min(choices.Length, choiceButtons.Length);
         _choiceCursor = 0;
         RefreshChoiceHighlight();
+    }
+
+    /// <summary>
+    /// 선택지 버튼 하나를 켜고 끈다. root가 비어 있거나 선택지 패널(또는 그 부모)로 잘못 연결돼 있으면
+    /// 패널 전체가 꺼지지 않도록 버튼 오브젝트를 대신 켜고 끈다.
+    /// </summary>
+    private void SetChoiceButtonActive(int index, bool active)
+    {
+        GameObject target = choiceButtons[index].root;
+        Button button = choiceButtons[index].button;
+
+        bool rootIsPanel = target != null && choicePanelRoot != null
+                           && choicePanelRoot.transform.IsChildOf(target.transform);
+
+        if (target == null || rootIsPanel)
+        {
+            if (rootIsPanel && _warnedChoiceRoots.Add(index))
+            {
+                Debug.LogWarning($"[DialogueUIView] choiceButtons[{index}].root가 선택지 패널({target.name})로 연결돼 있어 버튼 오브젝트를 대신 사용합니다. root에는 버튼 오브젝트를 연결해 주세요.");
+            }
+
+            target = button != null ? button.gameObject : null;
+        }
+
+        if (target != null) target.SetActive(active);
     }
 
     private void ConfirmChoice(int choiceIndex)
@@ -777,10 +1030,7 @@ public class DialogueUIView : MonoBehaviour
         _castSlots.Clear();
         _speakingSlot = -1;
 
-        foreach (var slot in speakerSlots)
-        {
-            SetDialogBoxActive(slot, false);
-        }
+        SetDialogBoxActive(false);
 
         RefreshPortraits();
 
@@ -800,26 +1050,28 @@ public class DialogueUIView : MonoBehaviour
     #region Slot Helpers
     private bool IsValidSlot(int slotIndex)
     {
-        return speakerSlots != null && slotIndex >= 0 && slotIndex < speakerSlots.Length;
+        return positionSlots != null && slotIndex >= 0 && slotIndex < positionSlots.Length;
     }
 
     private string SlotWarning(int slotIndex)
     {
-        return $"슬롯 {DialogueSlots.Describe(slotIndex)}에 해당하는 speakerSlots 요소가 없습니다. " +
-               $"speakerSlots는 [0]=Left, [1]=Right, [2]=Center 순서로 구성해야 합니다. (현재 {(speakerSlots != null ? speakerSlots.Length : 0)}개)";
+        return $"위치 {DialogueSlots.Describe(slotIndex)}에 해당하는 positionSlots 요소가 없습니다. " +
+               $"positionSlots는 [0]=Left, [1]=Right, [2]=Center 순서로 구성해야 합니다. (현재 {(positionSlots != null ? positionSlots.Length : 0)}개)";
     }
 
-    /// <summary>말풍선(이름, 대사, 배경)의 표시 여부. 캐릭터 초상화는 건드리지 않는다.</summary>
-    private void SetDialogBoxActive(SpeakerSlotUI slot, bool active)
+    /// <summary>공용 대화창(이름, 대사, 배경)의 표시 여부. 캐릭터는 건드리지 않는다.</summary>
+    private void SetDialogBoxActive(bool active)
     {
-        slot.dialogImage.gameObject.SetActive(active);
-        slot.textName.gameObject.SetActive(active);
-        slot.textDialogue.gameObject.SetActive(active);
+        if (dialogBox.dialogImage != null) dialogBox.dialogImage.gameObject.SetActive(active);
+        if (dialogBox.textName != null) dialogBox.textName.gameObject.SetActive(active);
+        if (dialogBox.textDialogue != null) dialogBox.textDialogue.gameObject.SetActive(active);
     }
 
-    /// <summary>캐릭터 초상화의 표시 상태. Hidden: 투명, Dim: 어둡게, Bright: 원래 색.</summary>
-    private void SetPortraitState(SpeakerSlotUI slot, PortraitState state)
+    /// <summary>캐릭터의 표시 상태. Hidden: 투명, Dim: 어둡게, Bright: 원래 색.</summary>
+    private void SetPortraitState(CharacterSlotUI slot, PortraitState state)
     {
+        if (slot.characterPortrait == null) return;
+
         Color color = slot.characterPortrait.color;
 
         switch (state)
@@ -853,17 +1105,34 @@ public class DialogueUIView : MonoBehaviour
     #endregion
 }
 
-/// <summary>
-/// 화면의 한 위치(슬롯)에 대응하는 씬 UI 참조 묶음.
-/// 어떤 캐릭터가 여기에 표시될지는 DialogLine.speaker(SpeakerDataSO)가 매 대사마다 결정한다.
-/// </summary>
+/// <summary>캐릭터 슬롯: 인물 한 명의 표정 스프라이트를 그리는 이미지. 위치는 갖지 않는다 (위치 슬롯으로 옮겨진다).</summary>
 [System.Serializable]
-public struct SpeakerSlotUI
+public struct CharacterSlotUI
 {
-    [Tooltip("표정 스프라이트가 그려질 캐릭터 이미지")]
+    [Tooltip("표정 스프라이트가 그려질 캐릭터 이미지 (CharacterHolder 안의 White, Red, Black ...)")]
     public Image characterPortrait;
+
+    [Tooltip("이 슬롯이 그릴 인물. 비우면 이미지 오브젝트 이름이 SpeakerDataSO 에셋 이름과 같은 인물을 그리고, " +
+             "그런 인물이 없으면 전용 슬롯이 없는 인물에게 빌려준다.")]
+    public SpeakerDataSO speaker;
+}
+
+/// <summary>위치 슬롯: 화면의 한 위치(왼쪽/오른쪽/가운데).</summary>
+[System.Serializable]
+public struct PositionSlotUI
+{
+    [Tooltip("캐릭터를 세울 자리 (CharacterHolder 안의 Left/Right/Center). 캐릭터의 아래쪽 가운데가 이 좌표에 온다. " +
+             "비우면 CharacterHolder에서 이름으로 찾는다.")]
+    public Transform anchor;
+}
+
+/// <summary>모든 인물이 함께 쓰는 대화창 (이름, 대사, 배경)</summary>
+[System.Serializable]
+public struct DialogueBoxUI
+{
     public TextMeshProUGUI textName;
     public TextMeshProUGUI textDialogue;
+    [Tooltip("대화창 배경. 켜고 끌 때 이 오브젝트를 쓴다.")]
     public Image dialogImage;
 }
 
@@ -871,7 +1140,7 @@ public struct SpeakerSlotUI
 [System.Serializable]
 public struct ChoiceButtonRef
 {
-    public GameObject root;   // 버튼 전체를 감싸는 오브젝트 (활성/비활성 제어용)
+    public GameObject root;   // 버튼 하나를 감싸는 오브젝트 (활성/비활성 제어용). 비우면 버튼 오브젝트를 쓴다. 선택지 패널을 넣으면 안 된다.
     public Button button;
     public TextMeshProUGUI label;
 }

@@ -591,15 +591,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogUIView
   dialogueManager: {fileID: 1392145938}
-  speakerSlots:
+  characterSlots:
   - characterPortrait: {fileID: 1536292556}
+    speaker: {fileID: 11400000, guid: 7b0a328c8d925ad4b8e06021d54d9609, type: 2}
+  - characterPortrait: {fileID: 2000030196}
+    speaker: {fileID: 11400000, guid: 3d3d29dc3ee756c48af468c86f3230ef, type: 2}
+  - characterPortrait: {fileID: 1713041365}
+    speaker: {fileID: 11400000, guid: 6a58c3d77aa3a8b4eb883e5d4dc98afa, type: 2}
+  positionSlots:
+  - anchor: {fileID: 251283605}
+  - anchor: {fileID: 1314453335}
+  - anchor: {fileID: 1440302481}
+  moveDuration: 0.25
+  dialogBox:
     textName: {fileID: 817505289}
     textDialogue: {fileID: 779694079}
     dialogImage: {fileID: 1324114876}
-  - characterPortrait: {fileID: 2000030196}
-    textName: {fileID: 282381963}
-    textDialogue: {fileID: 1330985263}
-    dialogImage: {fileID: 1769174442}
   dimTint: {r: 0.55, g: 0.55, b: 0.55, a: 1}
   narrationBoxRoot: {fileID: 1324114874}
   narrationText: {fileID: 779694079}
@@ -607,13 +614,16 @@ MonoBehaviour:
   dialogBoxRoot: {fileID: 664460374}
   choicePanelRoot: {fileID: 1130912140}
   choiceButtons:
-  - root: {fileID: 1130912140}
+  - root: {fileID: 786263085}
     button: {fileID: 786263089}
     label: {fileID: 203301304}
-  - root: {fileID: 1130912140}
+  - root: {fileID: 1807802306}
+    button: {fileID: 1807802308}
+    label: {fileID: 1405528657}
+  - root: {fileID: 1247181684}
     button: {fileID: 1247181688}
     label: {fileID: 517143743}
-  choiceHighlightColor: {r: 1, g: 0.85, b: 0.45, a: 1}
+  choiceHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   choiceHighlightScale: 1.05
   charInterval: 0.05
   autoButton: {fileID: 119585838}
@@ -822,7 +832,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -259.99997, y: -350}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &282381961
@@ -2901,7 +2911,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 259.99997, y: -350}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1324114874
@@ -3473,7 +3483,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -350}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1477878385
@@ -3903,9 +3913,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1695393155}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -260, y: -120}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -259.99997, y: 109.8}
   m_SizeDelta: {x: 206.3, y: 374.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1536292555
@@ -4067,7 +4077,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1608867466
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4157,8 +4167,8 @@ RectTransform:
   - {fileID: 2000030195}
   - {fileID: 1713041364}
   - {fileID: 1314453335}
-  - {fileID: 251283605}
   - {fileID: 1440302481}
+  - {fileID: 251283605}
   m_Father: {fileID: 664460375}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -4320,7 +4330,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1713041364
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4330,15 +4340,15 @@ RectTransform:
   m_GameObject: {fileID: 1713041363}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1695393155}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 245, y: -145}
-  m_SizeDelta: {x: 162.4253, y: 519.7609}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -0.00000071525574, y: 117.899994}
+  m_SizeDelta: {x: 102.9, y: 385.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1713041365
 MonoBehaviour:
@@ -4360,7 +4370,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 5024491450356528421, guid: 367c10992634e6a4d8fe8a4709076678, type: 3}
+  m_Sprite: {fileID: -7378772797512496815, guid: fcf98d59204d59b498487a76261c9b66, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4548,7 +4558,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1807802307
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4878,6 +4888,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlowStoryEntry
   dialogueManager: {fileID: 1392145938}
+  playImmediately: 0
 --- !u!1 &1941064603
 GameObject:
   m_ObjectHideFlags: 0
@@ -5152,9 +5163,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1695393155}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 260, y: -120}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 260.00003, y: 120.2}
   m_SizeDelta: {x: 163.7, y: 390.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2000030196

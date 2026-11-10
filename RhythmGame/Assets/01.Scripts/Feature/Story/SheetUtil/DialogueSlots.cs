@@ -6,7 +6,7 @@ using System.Globalization;
     ///
     ///   0 = Left(왼쪽)   1 = Right(오른쪽)   2 = Center(가운데)
     ///
-    /// DialogueUIView.speakerSlots 배열은 이 순서로 구성한다: [0]=Left, [1]=Right, [2]=Center.
+    /// DialogueUIView.positionSlots 배열은 이 순서로 구성한다: [0]=Left, [1]=Right, [2]=Center.
     /// 기존 데이터의 숫자 슬롯(0, 1)은 그대로 동작한다. 그 밖의 번호(3 이상)도 숫자로 쓸 수 있다.
     /// Unity API에 의존하지 않는다.
     /// </summary>
