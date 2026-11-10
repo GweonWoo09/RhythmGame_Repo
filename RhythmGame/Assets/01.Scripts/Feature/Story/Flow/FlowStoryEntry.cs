@@ -78,13 +78,47 @@ public class FlowStoryEntry : MonoBehaviour
         dialogueManager.OnPlayRequested -= HandlePlayRequested;
     }
 
-    /// <summary>대사의 play 줄을 넘겼다: 연주를 시작한다. 시작하지 못하면 play를 건너뛰고 대사를 계속한다.</summary>
+    [Tooltip("끄면(기본) play 줄에서 곡을 곡 선택창의 Story 탭에 추가하고 곡 선택창으로 이동한다.\n" +
+             "켜면 예전처럼 그 자리에서 바로 연주하고 끝나면 대사로 돌아온다.")]
+    [SerializeField] private bool playImmediately = false;
+
+    /// <summary>
+    /// 대사의 play 줄을 넘겼다.
+    /// 기본: 곡을 Story 탭에 추가하고, play 줄 다음 줄을 대사 위치로 저장한 뒤 곡 선택창(Story 탭, 그 곡 선택)으로 간다.
+    /// playImmediately: 연주를 바로 시작한다. 시작하지 못하면 play를 건너뛰고 대사를 계속한다.
+    /// </summary>
     private void HandlePlayRequested(DialoguePlaySnapshot snapshot)
     {
-        if (!StoryFlow.PlayInline(snapshot))
+        if (playImmediately)
         {
-            dialogueManager.CancelPlay();
+            if (!StoryFlow.PlayInline(snapshot)) dialogueManager.CancelPlay();
+            return;
         }
+
+        if (SceneChanger.Instance == null || GameManager.Instance == null)
+        {
+            Debug.LogError("[FlowStoryEntry] SceneChanger/GameManager가 없어 곡 선택창으로 갈 수 없습니다. play를 건너뜁니다. (Loading 씬부터 실행)");
+            dialogueManager.CancelPlay();
+            return;
+        }
+
+        // 곡 카탈로그에 없는 곡(시트 songs 탭의 path가 아직 비어 있는 곡)은 연주 없이 다음 대사로 넘어간다
+        SongCatalog.Entry entry;
+        if (!SongCatalog.TryGet(snapshot.songId, out entry))
+        {
+            Debug.LogWarning($"[FlowStoryEntry] play:{snapshot.songId}의 곡이 곡 카탈로그에 없어 건너뜁니다. (시트 songs 탭의 path를 채운 뒤 동기화)");
+            dialogueManager.CancelPlay();
+            return;
+        }
+
+        GameManager.Instance.UnlockStorySong(snapshot.songId);
+        dialogueManager.LeaveAfterPlayLine();
+
+        // 이야기 흐름이 돌고 있었다면 멈춘다 (흐름의 저장 위치는 남는다)
+        if (StoryFlow.IsRunning) StoryFlow.Stop();
+
+        SongSelectController.RequestStorySong(snapshot.songId, snapshot.difficulty);
+        SceneChanger.Instance.LoadScene(SceneChanger.SceneType.SongSelect);
     }
 
     private void HandleDialogEnd()

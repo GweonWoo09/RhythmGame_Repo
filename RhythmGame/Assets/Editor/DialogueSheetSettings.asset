@@ -12,10 +12,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59c546ad6a204a0439500baeac7f07f5, type: 3}
   m_Name: DialogueSheetSettings
   m_EditorClassIdentifier: Assembly-CSharp-Editor::DialogueSheetSettings
-  spreadsheet: https://docs.google.com/spreadsheets/d/1ezyxmmyfVqImqpPnDAgV22WG7C2AQvU6WDQRQhbhQsE/edit?gid=1490790440#gid=1490790440
-  linesGid: 302315339
-  metaGid: 654721729
-  songsGid: 69668503
+  sheets:
+  - label: tutorial
+    spreadsheet: https://docs.google.com/spreadsheets/d/1ezyxmmyfVqImqpPnDAgV22WG7C2AQvU6WDQRQhbhQsE/edit
+    linesGid: 302315339
+    metaGid: 654721729
+    songsGid: 69668503
+    enabled: 1
+  - label: chapter1
+    spreadsheet: https://docs.google.com/spreadsheets/d/1DmFF3-JPtuqxrcrs0Aohl5XZrt1USTF-gBnISND9mro/edit
+    linesGid: 2107236143
+    metaGid: 1123398204
+    songsGid:
+    enabled: 1
+  - label: chapter2
+    spreadsheet: https://docs.google.com/spreadsheets/d/17EPgIGRwbBmc2bKJHWcrbucLRpPlFbDjETLKfmVYdaQ/edit
+    linesGid: 2005093089
+    metaGid: 815738596
+    songsGid: 1776518497
+    enabled: 1
+  - label: chapter3
+    spreadsheet: https://docs.google.com/spreadsheets/d/1ErPTkH3zmaH28B60pm4C0F8vwDdjHlR0E7BQ0fx1eUo/edit
+    linesGid: 2063550590
+    metaGid: 2036697957
+    songsGid:
+    enabled: 1
+  - label: ending_fantasy
+    spreadsheet: https://docs.google.com/spreadsheets/d/1PojYhdqexaPSyreeBQcaqzTd0yWRoyyxHfURmJAvl5Y/edit
+    linesGid: 432265866
+    metaGid: 875228739
+    songsGid: 538907668
+    enabled: 1
+  - label: ending_reality
+    spreadsheet: https://docs.google.com/spreadsheets/d/1JNWiAEEeKfTGLO81Z4cKHUDOxjKlwKSWLujE-WC0bCk/edit
+    linesGid: 1300927847
+    metaGid: 1547241599
+    songsGid: 2081609421
+    enabled: 1
+  - label: ending_true
+    spreadsheet: https://docs.google.com/spreadsheets/d/1fXlgx6kEdlSSNbUoM43HRfBT5ljpW7HhFi1jnVFbw6M/edit
+    linesGid: 349341412
+    metaGid: 1015185143
+    songsGid: 958186986
+    enabled: 1
   outputRoot: Assets/Resources/Dialogue
   songCatalogPath: Assets/Resources/SongCatalog.json
   speakerResourcesPath: Speakers
+  spreadsheet:
+  linesGid:
+  metaGid:
+  songsGid:

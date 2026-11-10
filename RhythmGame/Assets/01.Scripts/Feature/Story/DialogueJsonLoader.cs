@@ -38,6 +38,7 @@ public class DialogueEndJson
     public int unlockChapter;
     public string songId;
     public string difficulty;
+    public string nextSequence; // 끝나면 이어서 재생할 시퀀스 ID
 }
 
 [Serializable]
@@ -217,7 +218,8 @@ public static class DialogueJsonLoader
             clearChapter = src.clearChapter,
             unlockChapter = src.unlockChapter,
             songId = src.songId,
-            difficulty = src.difficulty
+            difficulty = src.difficulty,
+            nextSequence = src.nextSequence
         };
     }
 

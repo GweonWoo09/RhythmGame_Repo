@@ -76,6 +76,9 @@ using UnityEngine;
 
         [Tooltip("씬 이동 시 함께 넘길 난이도 (선택)")]
         public string difficulty; // 곡 난이도 (선택)
+
+        [Tooltip("이 시퀀스가 끝나면 같은 Story 화면에서 바로 이어서 재생할 시퀀스 ID (예: chapter2 -> chapter3). 비우면 대화가 끝난다.")]
+        public string nextSequence; // 이어질 시퀀스
     }
 
     /// <summary>조건부 분기 한 건. 줄의 branches 중 처음으로 조건이 참인 것을 따라간다.</summary>

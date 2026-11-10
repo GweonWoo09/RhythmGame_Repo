@@ -124,6 +124,9 @@ public class GameManager : MonoBehaviour
         /// <summary>스토리 도중 게임을 종료해서 저장된 위치인가. true면 다음 실행 때 Lobby에서 이어하기 창을 띄운다.</summary>
         public bool interrupted;
 
+        /// <summary>저장된 줄을 아직 보여주지 않았는가 (play 줄 다음 줄). true면 돌아왔을 때 플래그/명령/BGM까지 처리하며 보여준다.</summary>
+        public bool notShownYet;
+
         public bool IsEmpty => string.IsNullOrEmpty(sequenceId);
     }
 
@@ -134,7 +137,28 @@ public class GameManager : MonoBehaviour
         public List<SongRecord> songRecords = new List<SongRecord>();
         public List<StoryFlagEntry> storyFlags = new List<StoryFlagEntry>();
         public StoryBookmark storyBookmark = new StoryBookmark();
+
+        /// <summary>스토리를 진행하며 곡 선택창의 Story 탭에 추가된 곡 ID (대사의 play:곡ID)</summary>
+        public List<string> unlockedStorySongs = new List<string>();
     }
+
+    /// <summary>스토리 곡을 Story 탭에 추가하고 저장한다. 새로 추가됐으면 true.</summary>
+    public bool UnlockStorySong(string songId)
+    {
+        if (string.IsNullOrEmpty(songId)) return false;
+        if (ProgressData.unlockedStorySongs == null) ProgressData.unlockedStorySongs = new List<string>();
+
+        if (ProgressData.unlockedStorySongs.Exists(id => string.Equals(id, songId, StringComparison.OrdinalIgnoreCase)))
+            return false;
+
+        ProgressData.unlockedStorySongs.Add(songId);
+        SaveGame();
+        return true;
+    }
+
+    /// <summary>Story 탭에 추가된 곡 ID 목록</summary>
+    public IReadOnlyList<string> UnlockedStorySongs =>
+        ProgressData.unlockedStorySongs ?? (ProgressData.unlockedStorySongs = new List<string>());
 
     /// <summary>저장된 대사 위치 (없으면 null)</summary>
     public StoryBookmark GetStoryBookmark()

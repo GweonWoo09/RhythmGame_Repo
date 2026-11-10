@@ -42,11 +42,46 @@ public class SongSelectController : MonoBehaviour
     private int songIndex;
     private bool isLeaving;
 
+    // 스토리에서 곡이 추가되어 넘어올 때: 다음에 곡 선택창이 열리면 Story 탭에서 이 곡을 골라 둔다
+    private static string pendingStorySongId;
+    private static string pendingDifficulty;
+
+    /// <summary>다음에 곡 선택창이 열릴 때 Story 탭을 열고 이 곡(play:곡ID)을 골라 두도록 예약한다.</summary>
+    public static void RequestStorySong(string songId, string difficulty = null)
+    {
+        pendingStorySongId = songId;
+        pendingDifficulty = difficulty;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        pendingStorySongId = null;
+        pendingDifficulty = null;
+    }
+
     private void Start()
     {
         // 결과창에서 돌아왔을 때 마지막으로 고른 곡과 난이도를 다시 선택
         if (Enum.TryParse(PlaySession.Difficulty, out Difficulty lastDifficulty))
             CurrentDifficulty = lastDifficulty;
+
+        if (!string.IsNullOrEmpty(pendingStorySongId))
+        {
+            string id = pendingStorySongId;
+            if (Enum.TryParse(pendingDifficulty, true, out Difficulty storyDifficulty))
+                CurrentDifficulty = storyDifficulty;
+
+            pendingStorySongId = null;
+            pendingDifficulty = null;
+
+            var storySong = library != null ? library.FindById(id) : null;
+            if (storySong == null)
+                Debug.LogWarning($"[SongSelect] 스토리에서 추가된 곡 '{id}'을(를) SongLibrary에서 찾지 못했습니다. (SongDataSO의 songId나 채보 에셋 이름과 같아야 합니다)", this);
+
+            LoadList(SongCategory.Story, storySong);
+            return;
+        }
 
         LoadList(CurrentCategory, PlaySession.SongData);
     }

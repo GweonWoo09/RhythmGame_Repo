@@ -12,7 +12,8 @@ using UnityEngine.Networking;
     /// 구글 시트의 대사 데이터를 JSON으로 동기화하는 에디터 도구. (Assets/Editor/ 폴더에 둘 것)
     ///
     /// 메뉴 (Tools > Dialogue)
-    ///   Sync from Google Sheet           시트를 내려받아 검증하고, 오류가 없을 때만 JSON을 갱신한다.
+    ///   Sync from Google Sheet           설정에 등록된 시트(챕터/엔딩별 스프레드시트)를 모두 내려받아 함께 검증하고,
+    ///                                    오류가 없을 때만 JSON을 갱신한다.
     ///   Validate Google Sheet (no write) 검증만 한다 (파일을 건드리지 않음).
     ///   Import from Local CSV Folder...  lines.csv / meta.csv 가 든 폴더에서 같은 처리를 한다 (오프라인, 비공개 시트용).
     ///   Select Sheet Settings            설정 에셋을 연다 (없으면 만든다).
@@ -67,7 +68,12 @@ using UnityEngine.Networking;
             string songsPath = Path.Combine(folder, LocalSongsFile);
             string songsCsv = File.Exists(songsPath) ? File.ReadAllText(songsPath, Encoding.UTF8) : null;
 
-            Process(linesCsv, metaCsv, songsCsv, GetOrCreateSettings(), false);
+            var inputs = new List<DialogueSheetInput>
+            {
+                new DialogueSheetInput { Label = "", LinesCsv = linesCsv, MetaCsv = metaCsv, SongsCsv = songsCsv }
+            };
+
+            Process(inputs, GetOrCreateSettings(), false);
         }
 
         [UnityEditor.MenuItem("Tools/Dialogue/Select Sheet Settings")]
@@ -116,45 +122,59 @@ using UnityEngine.Networking;
         private static void RunFromWeb(bool dryRun)
         {
             DialogueSheetSettings settings = GetOrCreateSettings();
-            string spreadsheetId = ExtractSpreadsheetId(settings.spreadsheet);
 
-            if (string.IsNullOrEmpty(spreadsheetId))
+            var sources = new List<DialogueSheetSettings.SheetSource>();
+            if (settings.sheets != null)
+            {
+                foreach (DialogueSheetSettings.SheetSource source in settings.sheets)
+                {
+                    if (source != null && source.enabled && !string.IsNullOrEmpty(ExtractSpreadsheetId(source.spreadsheet)))
+                    {
+                        sources.Add(source);
+                    }
+                }
+            }
+
+            if (sources.Count == 0)
             {
                 EditorUtility.DisplayDialog(DialogTitle,
-                    "스프레드시트 주소(또는 ID)가 비어 있습니다.\nDialogueSheetSettings에 입력한 뒤 다시 실행해 주세요.", "설정 열기");
+                    "내려받을 시트가 없습니다.\nDialogueSheetSettings의 sheets에 스프레드시트 주소(또는 ID)를 등록한 뒤 다시 실행해 주세요.", "설정 열기");
                 Selection.activeObject = settings;
                 return;
             }
 
-            string linesCsv = null;
-            string metaCsv = null;
-            string songsCsv = null;
+            var inputs = new List<DialogueSheetInput>();
             string error = null;
 
             try
             {
-                if (!TryDownload(BuildCsvUrl(spreadsheetId, settings.linesGid), "lines 탭", out linesCsv, out error))
+                foreach (DialogueSheetSettings.SheetSource source in sources)
                 {
-                    ShowDownloadError(error);
-                    return;
-                }
+                    string spreadsheetId = ExtractSpreadsheetId(source.spreadsheet);
+                    string label = string.IsNullOrWhiteSpace(source.label) ? spreadsheetId : source.label.Trim();
+                    var input = new DialogueSheetInput { Label = label };
 
-                if (!string.IsNullOrWhiteSpace(settings.metaGid))
-                {
-                    if (!TryDownload(BuildCsvUrl(spreadsheetId, settings.metaGid), "meta 탭", out metaCsv, out error))
+                    if (!TryDownload(BuildCsvUrl(spreadsheetId, source.linesGid), label + " · lines 탭", out input.LinesCsv, out error))
                     {
                         ShowDownloadError(error);
                         return;
                     }
-                }
 
-                if (!string.IsNullOrWhiteSpace(settings.songsGid))
-                {
-                    if (!TryDownload(BuildCsvUrl(spreadsheetId, settings.songsGid), "songs 탭", out songsCsv, out error))
+                    if (!string.IsNullOrWhiteSpace(source.metaGid)
+                        && !TryDownload(BuildCsvUrl(spreadsheetId, source.metaGid), label + " · meta 탭", out input.MetaCsv, out error))
                     {
                         ShowDownloadError(error);
                         return;
                     }
+
+                    if (!string.IsNullOrWhiteSpace(source.songsGid)
+                        && !TryDownload(BuildCsvUrl(spreadsheetId, source.songsGid), label + " · songs 탭", out input.SongsCsv, out error))
+                    {
+                        ShowDownloadError(error);
+                        return;
+                    }
+
+                    inputs.Add(input);
                 }
             }
             finally
@@ -162,7 +182,7 @@ using UnityEngine.Networking;
                 EditorUtility.ClearProgressBar();
             }
 
-            Process(linesCsv, metaCsv, songsCsv, settings, dryRun);
+            Process(inputs, settings, dryRun);
         }
 
         private static bool TryDownload(string url, string label, out string text, out string error)
@@ -218,10 +238,10 @@ using UnityEngine.Networking;
         #endregion
 
         #region Process / Write
-        private static void Process(string linesCsv, string metaCsv, string songsCsv, DialogueSheetSettings settings, bool dryRun)
+        private static void Process(IList<DialogueSheetInput> inputs, DialogueSheetSettings settings, bool dryRun)
         {
             var environment = new UnityEnvironment(settings);
-            SheetConvertResult result = DialogueSheetConverter.Build(linesCsv, metaCsv, songsCsv, environment);
+            SheetConvertResult result = DialogueSheetConverter.Build(inputs, environment);
 
             foreach (string info in result.Infos) Debug.Log(LogPrefix + info);
             foreach (string warning in result.Warnings) Debug.LogWarning(LogPrefix + warning);

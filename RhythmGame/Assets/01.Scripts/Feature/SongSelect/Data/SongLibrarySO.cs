@@ -24,9 +24,32 @@ public class SongLibrarySO : ScriptableObject
         foreach (var song in songs)
         {
             if (song == null) continue;
-            if (category == SongCategory.Story && !song.isStorySong) continue;
+            if (category == SongCategory.Story && !IsInStoryTab(song)) continue;
             result.Add(song);
         }
         return result;
+    }
+
+    /// <summary>play:곡ID와 같은 곡을 찾는다 (없으면 null)</summary>
+    public SongDataSO FindById(string id)
+    {
+        foreach (var song in songs)
+        {
+            if (song != null && song.MatchesId(id)) return song;
+        }
+        return null;
+    }
+
+    /// <summary>Story 탭에 보이는 곡: 처음부터 스토리 곡으로 지정했거나(isStorySong), 스토리를 진행하며 추가된 곡</summary>
+    private static bool IsInStoryTab(SongDataSO song)
+    {
+        if (song.isStorySong) return true;
+        if (GameManager.Instance == null) return false;
+
+        foreach (var id in GameManager.Instance.UnlockedStorySongs)
+        {
+            if (song.MatchesId(id)) return true;
+        }
+        return false;
     }
 }

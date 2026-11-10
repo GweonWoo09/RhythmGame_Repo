@@ -28,6 +28,16 @@ using System.Text.RegularExpressions;
         public string Json;
     }
 
+    /// <summary>스프레드시트 한 개(챕터/엔딩 하나)의 탭 내용. 여러 개를 한 번에 변환하면 시트끼리 서로 참조할 수 있다.</summary>
+    public sealed class DialogueSheetInput
+    {
+        /// <summary>오류 메시지에 붙는 시트 이름 (예: chapter2). 시트가 하나뿐이면 비워도 된다.</summary>
+        public string Label;
+        public string LinesCsv;
+        public string MetaCsv;
+        public string SongsCsv;
+    }
+
     public sealed class SheetConvertResult
     {
         public readonly List<string> Errors = new List<string>();
@@ -41,7 +51,7 @@ using System.Text.RegularExpressions;
     }
 
     /// <summary>
-    /// 구글 시트(CSV 두 장: lines 탭, meta 탭)를 대사 JSON(v2 스키마)으로 변환한다.
+    /// 구글 시트(lines / meta / songs 탭의 CSV)를 대사 JSON(v2 스키마)으로 변환한다. 스프레드시트 여러 개를 한 번에 변환할 수 있다.
     /// 오류가 하나라도 있으면 Files는 비어 있고, 오류는 "[탭 N행] (시퀀스) 메시지" 형태로 모두 모아서 돌려준다.
     ///
     /// [lines 탭 열]
@@ -73,7 +83,14 @@ using System.Text.RegularExpressions;
     ///   결과: Resources/SongCatalog.json 에 곡 ID -> 경로 목록이 만들어진다.
     ///
     /// [meta 탭 열]   sequence | key | value | (memo)
-    ///   key = bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty
+    ///   key = bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty,
+    ///         onEnd.nextSequence
+    ///   onEnd.nextSequence = 이 시퀀스가 끝나면 이어서 재생할 시퀀스 (다른 시트의 시퀀스도 가능. 예: chapter2 -> chapter3)
+    ///
+    /// [여러 시트]  챕터/엔딩마다 스프레드시트를 나눠도 된다. Build(inputs)에 한꺼번에 넘기면
+    ///   target_sequence / onEnd.nextSequence 로 서로를 가리킬 수 있고, songs 탭은 하나의 곡 카탈로그로 합쳐진다.
+    ///   같은 곡 ID가 여러 시트에 있어도 되지만 path가 서로 다르면 오류다.
+    ///   path가 비어 있는 곡은 경고만 내고 카탈로그에서 뺀다 (그 곡의 play 줄은 연주 없이 다음 대사로 넘어간다).
     ///   cast 값 예: "White:left;Black:right"  또는 "White:left:Happy;Black:2" (speakerId:slot[:expression])
     ///
     /// Unity API에 의존하지 않는다.
@@ -111,8 +128,13 @@ using System.Text.RegularExpressions;
         private static readonly HashSet<string> KnownMetaKeys = new HashSet<string>
     {
         "bgm", "chapterid", "cast",
-        "onend.scene", "onend.clearchapter", "onend.unlockchapter", "onend.songid", "onend.difficulty"
+        "onend.scene", "onend.clearchapter", "onend.unlockchapter", "onend.songid", "onend.difficulty",
+        "onend.nextsequence"
     };
+
+        // 오류 메시지에 시트 이름을 붙이기 위한 정보 (Build 한 번 동안만 쓴다)
+        private static readonly Dictionary<string, string> SequenceLabels = new Dictionary<string, string>();
+        private static string _readingLabel;
 
         // DialogueUIView가 기본으로 제공하는 스타일 이름 / DialogueVariables가 기본으로 제공하는 변수 이름
         private static readonly HashSet<string> BuiltInStyles = new HashSet<string> { "thought", "shout", "whisper" };
@@ -218,6 +240,7 @@ using System.Text.RegularExpressions;
             public int EndUnlockChapter;
             public string EndSongId;
             public string EndDifficulty;
+            public string EndNextSequence;
         }
         #endregion
 
@@ -230,78 +253,154 @@ using System.Text.RegularExpressions;
         /// <param name="songsCsv">songs 탭 CSV. null이면 곡 카탈로그를 만들지 않고, play 명령은 오류가 된다.</param>
         public static SheetConvertResult Build(string linesCsv, string metaCsv, string songsCsv, IDialogueSheetEnvironment env)
         {
+            return Build(new[] { new DialogueSheetInput { Label = "", LinesCsv = linesCsv, MetaCsv = metaCsv, SongsCsv = songsCsv } }, env);
+        }
+
+        /// <summary>스프레드시트 여러 개(챕터/엔딩별)를 한 번에 변환한다. 시퀀스 이름은 전체에서 겹치면 안 된다.</summary>
+        public static SheetConvertResult Build(IList<DialogueSheetInput> inputs, IDialogueSheetEnvironment env)
+        {
             var result = new SheetConvertResult();
+            SequenceLabels.Clear();
+            _readingLabel = null;
 
-            Table lines = ReadTable(linesCsv, "lines", result);
-            if (lines == null) return result;
-
-            foreach (string required in new[] { ColSequence, ColType })
+            try
             {
-                if (!lines.Columns.Contains(required))
-                {
-                    result.Errors.Add($"[lines 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 열 이름이어야 합니다)");
-                }
+                BuildAll(inputs, env, result);
+            }
+            finally
+            {
+                SequenceLabels.Clear();
+                _readingLabel = null;
+            }
+
+            return result;
+        }
+
+        private static void BuildAll(IList<DialogueSheetInput> inputs, IDialogueSheetEnvironment env, SheetConvertResult result)
+        {
+            if (inputs == null || inputs.Count == 0)
+            {
+                result.Errors.Add("변환할 시트가 없습니다.");
+                return;
             }
 
             var languages = new List<string>();
-            var unknownColumns = new List<string>();
-            foreach (string column in lines.Columns)
-            {
-                if (column.Length == 0) continue;
-
-                if (column.StartsWith(TextPrefix, StringComparison.Ordinal) && column.Length > TextPrefix.Length)
-                {
-                    string language = column.Substring(TextPrefix.Length);
-                    if (!IsValidName(language))
-                    {
-                        result.Errors.Add($"[lines 탭] 열 이름 '{column}'의 언어 코드가 올바르지 않습니다. (영문/숫자/-/_ 만 가능)");
-                    }
-                    languages.Add(language);
-                }
-                else if (!KnownColumns.Contains(column))
-                {
-                    unknownColumns.Add(column);
-                }
-            }
-
-            if (languages.Count == 0)
-            {
-                result.Errors.Add("[lines 탭] 대사 텍스트 열이 없습니다. 'text_ko' 처럼 'text_언어코드' 열이 하나 이상 필요합니다.");
-            }
-
-            if (unknownColumns.Count > 0)
-            {
-                result.Infos.Add("[lines 탭] 인식하지 못한 열은 무시합니다: " + string.Join(", ", unknownColumns.ToArray()));
-            }
-
-            if (result.Errors.Count > 0) return result;
-
-            string defaultLanguage = languages[0];
-
             var sequences = new Dictionary<string, SequenceModel>();
             var order = new List<string>();
+            var songs = new Dictionary<string, SongModel>();
+            var songOrder = new List<string>();
+            bool anySongsTab = false;
 
-            BuildSequences(lines, languages, sequences, order, result);
-            ReadMeta(metaCsv, sequences, result);
+            foreach (DialogueSheetInput input in inputs)
+            {
+                string label = input.Label ?? "";
+                string prefix = label.Length > 0 ? label + " · " : "";
+                _readingLabel = label;
 
-            List<SongModel> songs;
-            HashSet<string> songIds = ReadSongs(songsCsv, env, result, out songs);
+                Table lines = ReadTable(input.LinesCsv, prefix + "lines", result);
+                if (lines == null) continue;
+
+                bool headerOk = true;
+                foreach (string required in new[] { ColSequence, ColType })
+                {
+                    if (!lines.Columns.Contains(required))
+                    {
+                        result.Errors.Add($"[{prefix}lines 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 열 이름이어야 합니다)");
+                        headerOk = false;
+                    }
+                }
+
+                var sheetLanguages = new List<string>();
+                var unknownColumns = new List<string>();
+                foreach (string column in lines.Columns)
+                {
+                    if (column.Length == 0) continue;
+
+                    if (column.StartsWith(TextPrefix, StringComparison.Ordinal) && column.Length > TextPrefix.Length)
+                    {
+                        string language = column.Substring(TextPrefix.Length);
+                        if (!IsValidName(language))
+                        {
+                            result.Errors.Add($"[{prefix}lines 탭] 열 이름 '{column}'의 언어 코드가 올바르지 않습니다. (영문/숫자/-/_ 만 가능)");
+                            headerOk = false;
+                        }
+                        sheetLanguages.Add(language);
+                    }
+                    else if (!KnownColumns.Contains(column))
+                    {
+                        unknownColumns.Add(column);
+                    }
+                }
+
+                if (sheetLanguages.Count == 0)
+                {
+                    result.Errors.Add($"[{prefix}lines 탭] 대사 텍스트 열이 없습니다. 'text_ko' 처럼 'text_언어코드' 열이 하나 이상 필요합니다.");
+                    headerOk = false;
+                }
+
+                if (unknownColumns.Count > 0)
+                {
+                    result.Infos.Add($"[{prefix}lines 탭] 인식하지 못한 열은 무시합니다: " + string.Join(", ", unknownColumns.ToArray()));
+                }
+
+                if (!headerOk) continue;
+
+                // 언어 목록은 모든 시트의 합집합. 첫 시트의 첫 text_ 열이 기본 언어다.
+                foreach (string language in sheetLanguages)
+                {
+                    if (!languages.Contains(language)) languages.Add(language);
+                }
+
+                BuildSequences(lines, sheetLanguages, sequences, order, label, result);
+                ReadMeta(input.MetaCsv, sequences, label, result);
+
+                if (!string.IsNullOrWhiteSpace(input.SongsCsv))
+                {
+                    anySongsTab = true;
+                    ReadSongs(input.SongsCsv, label, env, songs, songOrder, result);
+                }
+            }
+
+            _readingLabel = null;
 
             if (order.Count == 0 && result.Errors.Count == 0)
             {
                 result.Errors.Add("[lines 탭] 변환할 대사가 없습니다.");
             }
 
+            if (languages.Count == 0) return;
+
+            string defaultLanguage = languages[0];
+            HashSet<string> songIds = anySongsTab ? new HashSet<string>(songs.Keys) : null;
+
             // 다른 시퀀스의 id를 참조하는 검사가 있으므로, id 수집을 먼저 전부 끝낸다
             foreach (string name in order) CollectIds(sequences[name], result);
             foreach (string name in order) ValidateSequence(sequences[name], sequences, defaultLanguage, env, songIds, result);
 
-            if (result.Errors.Count > 0) return result;
+            if (result.Errors.Count > 0) return;
 
             GenerateFiles(sequences, order, languages, result);
-            if (songs != null) result.SongCatalogJson = BuildSongCatalogJson(songs);
+
+            if (anySongsTab)
+            {
+                var catalog = new List<SongModel>();
+                foreach (string id in songOrder)
+                {
+                    SongModel song = songs[id];
+                    if (song.Path.Length > 0)
+                    {
+                        catalog.Add(song);
+                    }
+                    else
+                    {
+                        result.Warnings.Add($"[songs 탭] 곡 '{id}'의 path가 비어 있습니다. 경로를 넣기 전에는 play:{id} 줄에서 연주 없이 다음 대사로 넘어갑니다.");
+                    }
+                }
+
+                result.SongCatalogJson = BuildSongCatalogJson(catalog);
+            }
+
             result.SequenceCount = order.Count;
-            return result;
         }
         #endregion
 
@@ -360,8 +459,12 @@ using System.Text.RegularExpressions;
         }
 
         private static void BuildSequences(Table lines, List<string> languages,
-            Dictionary<string, SequenceModel> sequences, List<string> order, SheetConvertResult result)
+            Dictionary<string, SequenceModel> sequences, List<string> order, string label, SheetConvertResult result)
         {
+            // 이 시트에서 처음 나온 시퀀스 / 다른 시트와 이름이 겹쳐 건너뛸 시퀀스
+            var ownSequences = new HashSet<string>();
+            var duplicated = new HashSet<string>();
+
             foreach (SheetRow row in lines.Rows)
             {
                 string sequenceName = row.Get(ColSequence);
@@ -381,12 +484,25 @@ using System.Text.RegularExpressions;
                     continue;
                 }
 
+                if (duplicated.Contains(sequenceName)) continue;
+
                 SequenceModel sequence;
                 if (!sequences.TryGetValue(sequenceName, out sequence))
                 {
                     sequence = new SequenceModel { Name = sequenceName };
                     sequences[sequenceName] = sequence;
                     order.Add(sequenceName);
+                    ownSequences.Add(sequenceName);
+                    SequenceLabels[sequenceName] = label;
+                }
+                else if (!ownSequences.Contains(sequenceName))
+                {
+                    string other;
+                    SequenceLabels.TryGetValue(sequenceName, out other);
+                    duplicated.Add(sequenceName);
+                    AddError(result, "lines", row.Number, null,
+                        $"시퀀스 '{sequenceName}'는 다른 시트({other})에 이미 있습니다. 시퀀스 이름은 전체 시트에서 겹치면 안 됩니다.");
+                    continue;
                 }
 
                 switch (type)
@@ -522,18 +638,19 @@ using System.Text.RegularExpressions;
             }
         }
 
-        private static void ReadMeta(string metaCsv, Dictionary<string, SequenceModel> sequences, SheetConvertResult result)
+        private static void ReadMeta(string metaCsv, Dictionary<string, SequenceModel> sequences, string label, SheetConvertResult result)
         {
             if (string.IsNullOrWhiteSpace(metaCsv)) return;
 
-            Table meta = ReadTable(metaCsv, "meta", result);
+            string prefix = label.Length > 0 ? label + " · " : "";
+            Table meta = ReadTable(metaCsv, prefix + "meta", result);
             if (meta == null) return;
 
             foreach (string required in new[] { "sequence", "key", "value" })
             {
                 if (!meta.Columns.Contains(required))
                 {
-                    result.Errors.Add($"[meta 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 sequence / key / value)");
+                    result.Errors.Add($"[{prefix}meta 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 sequence / key / value)");
                     return;
                 }
             }
@@ -551,14 +668,16 @@ using System.Text.RegularExpressions;
                 if (!KnownMetaKeys.Contains(key))
                 {
                     AddError(result, "meta", row.Number, sequenceName,
-                        $"알 수 없는 key '{row.Get("key")}'입니다. (bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty)");
+                        $"알 수 없는 key '{row.Get("key")}'입니다. (bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty, onEnd.nextSequence)");
                     continue;
                 }
 
                 SequenceModel sequence;
-                if (!sequences.TryGetValue(sequenceName, out sequence))
+                string owner;
+                if (!sequences.TryGetValue(sequenceName, out sequence)
+                    || !SequenceLabels.TryGetValue(sequenceName, out owner) || owner != label)
                 {
-                    AddWarning(result, "meta", row.Number, sequenceName, "lines 탭에 없는 시퀀스라 무시합니다.");
+                    AddWarning(result, "meta", row.Number, sequenceName, "이 시트의 lines 탭에 없는 시퀀스라 무시합니다.");
                     continue;
                 }
 
@@ -608,7 +727,7 @@ using System.Text.RegularExpressions;
         private static void ValidateSequence(SequenceModel sequence, Dictionary<string, SequenceModel> sequences,
             string defaultLanguage, IDialogueSheetEnvironment env, HashSet<string> songIds, SheetConvertResult result)
         {
-            ValidateMeta(sequence, env, result);
+            ValidateMeta(sequence, sequences, defaultLanguage, env, result);
 
             foreach (LineModel line in sequence.Lines)
             {
@@ -650,9 +769,31 @@ using System.Text.RegularExpressions;
             }
         }
 
-        private static void ValidateMeta(SequenceModel sequence, IDialogueSheetEnvironment env, SheetConvertResult result)
+        private static void ValidateMeta(SequenceModel sequence, Dictionary<string, SequenceModel> sequences,
+            string defaultLanguage, IDialogueSheetEnvironment env, SheetConvertResult result)
         {
             MetaEntry entry;
+
+            if (sequence.Meta.TryGetValue("onend.nextsequence", out entry))
+            {
+                if (!IsValidName(entry.Value))
+                {
+                    AddError(result, "meta", entry.Row, sequence.Name, $"onEnd.nextSequence '{entry.Value}'는 영문/숫자/-/_ 만 쓸 수 있습니다.");
+                }
+                else if (entry.Value == sequence.Name)
+                {
+                    AddError(result, "meta", entry.Row, sequence.Name, "onEnd.nextSequence가 자기 자신을 가리킵니다. (끝나지 않는 반복)");
+                }
+                else if (!sequences.ContainsKey(entry.Value) && !env.SequenceFileExists(defaultLanguage, entry.Value))
+                {
+                    AddError(result, "meta", entry.Row, sequence.Name,
+                        $"onEnd.nextSequence '{entry.Value}'가 어느 시트에도 없고, 이미 만들어진 JSON 파일도 없습니다.");
+                }
+                else
+                {
+                    sequence.EndNextSequence = entry.Value;
+                }
+            }
 
             if (sequence.Meta.TryGetValue("chapterid", out entry))
             {
@@ -1090,30 +1231,29 @@ using System.Text.RegularExpressions;
 
         #region Songs
         /// <summary>
-        /// songs 탭을 읽고 검사한다. songsCsv가 비어 있으면 null (곡 목록 없음).
+        /// songs 탭을 읽고 검사해서 전체 곡 목록(songs)에 합친다.
         /// 곡 ID는 플래그 이름(song_{id}_cleared)에 들어가므로 영문/숫자/_ 만 허용하고,
         /// 결과 처리가 곡 에셋 이름으로 곡을 구분하므로 ID는 경로의 마지막 이름과 같아야 한다.
+        /// path가 비어 있는 곡은 ID만 등록한다 (play 명령 검사는 통과, 카탈로그에는 넣지 않음).
+        /// 같은 ID가 여러 시트에 있으면 path가 채워진 쪽을 쓰고, 서로 다른 path면 오류다.
         /// </summary>
-        private static HashSet<string> ReadSongs(string songsCsv, IDialogueSheetEnvironment env, SheetConvertResult result,
-            out List<SongModel> songs)
+        private static void ReadSongs(string songsCsv, string label, IDialogueSheetEnvironment env,
+            Dictionary<string, SongModel> songs, List<string> songOrder, SheetConvertResult result)
         {
-            songs = null;
-            if (string.IsNullOrWhiteSpace(songsCsv)) return null;
-
-            Table table = ReadTable(songsCsv, "songs", result);
-            if (table == null) return null;
+            string prefix = label.Length > 0 ? label + " · " : "";
+            Table table = ReadTable(songsCsv, prefix + "songs", result);
+            if (table == null) return;
 
             foreach (string required in new[] { "song_id", "path" })
             {
                 if (!table.Columns.Contains(required))
                 {
-                    result.Errors.Add($"[songs 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 song_id / path / title / memo)");
-                    return null;
+                    result.Errors.Add($"[{prefix}songs 탭] 필수 열 '{required}'이(가) 없습니다. (1행은 song_id / path / title / memo)");
+                    return;
                 }
             }
 
-            songs = new List<SongModel>();
-            var ids = new HashSet<string>();
+            var seenInSheet = new HashSet<string>();
 
             foreach (SheetRow row in table.Rows)
             {
@@ -1134,34 +1274,45 @@ using System.Text.RegularExpressions;
                     continue;
                 }
 
-                if (!ids.Add(id))
+                if (!seenInSheet.Add(id))
                 {
                     AddError(result, "songs", row.Number, null, $"song_id '{id}'가 중복됩니다.");
                     continue;
                 }
 
-                if (path.Length == 0)
+                if (path.Length > 0)
                 {
-                    AddError(result, "songs", row.Number, null, $"'{id}'의 path 칸이 비어 있습니다.");
-                    continue;
+                    string assetName = path.Substring(path.LastIndexOf('/') + 1);
+                    if (!string.Equals(assetName, id, StringComparison.OrdinalIgnoreCase))
+                    {
+                        AddError(result, "songs", row.Number, null,
+                            $"song_id '{id}'가 path의 마지막 이름 '{assetName}'과 다릅니다. 연주 결과가 곡 에셋 이름으로 오기 때문에 같아야 합니다.");
+                    }
+
+                    if (!env.SongAssetExists(path))
+                    {
+                        AddError(result, "songs", row.Number, null, $"곡 에셋 'Resources/{path}'을(를) 찾을 수 없습니다.");
+                    }
                 }
 
-                string assetName = path.Substring(path.LastIndexOf('/') + 1);
-                if (!string.Equals(assetName, id, StringComparison.OrdinalIgnoreCase))
+                SongModel existing;
+                if (!songs.TryGetValue(id, out existing))
+                {
+                    songs[id] = new SongModel { Id = id, Title = row.Get("title"), Path = path };
+                    songOrder.Add(id);
+                }
+                else if (existing.Path.Length > 0 && path.Length > 0 && existing.Path != path)
                 {
                     AddError(result, "songs", row.Number, null,
-                        $"song_id '{id}'가 path의 마지막 이름 '{assetName}'과 다릅니다. 연주 결과가 곡 에셋 이름으로 오기 때문에 같아야 합니다.");
+                        $"곡 '{id}'의 path '{path}'가 다른 시트에 적힌 path '{existing.Path}'와 다릅니다.");
                 }
-
-                if (!env.SongAssetExists(path))
+                else
                 {
-                    AddError(result, "songs", row.Number, null, $"곡 에셋 'Resources/{path}'을(를) 찾을 수 없습니다.");
+                    // 같은 곡을 여러 시트가 쓰는 경우: 비어 있는 칸만 채운다
+                    if (existing.Path.Length == 0) existing.Path = path;
+                    if (existing.Title.Length == 0) existing.Title = row.Get("title");
                 }
-
-                songs.Add(new SongModel { Id = id, Title = row.Get("title"), Path = path });
             }
-
-            return ids;
         }
 
         private static string BuildSongCatalogJson(List<SongModel> songs)
@@ -1282,6 +1433,7 @@ using System.Text.RegularExpressions;
             if (sequence.EndUnlockChapter > 0) end.Add(Prop("unlockChapter", Num(sequence.EndUnlockChapter)));
             if (!string.IsNullOrEmpty(sequence.EndSongId)) end.Add(Prop("songId", Str(sequence.EndSongId)));
             if (!string.IsNullOrEmpty(sequence.EndDifficulty)) end.Add(Prop("difficulty", Str(sequence.EndDifficulty)));
+            if (!string.IsNullOrEmpty(sequence.EndNextSequence)) end.Add(Prop("nextSequence", Str(sequence.EndNextSequence)));
             if (end.Count > 0) top.Add(Prop("onEnd", Obj(end)));
 
             // 에코 줄은 시퀀스 맨 끝에 모아 둔다. 원래 줄들이 우연히 에코 줄로 흘러들어가지 않도록,
@@ -1483,7 +1635,13 @@ using System.Text.RegularExpressions;
         private static string Format(string tab, int row, string sequenceName, string message)
         {
             string sequencePart = string.IsNullOrEmpty(sequenceName) ? "" : $" ({sequenceName})";
-            return $"[{tab} 탭 {row}행]{sequencePart} {message}";
+
+            // 시트가 여러 개일 때 어느 시트인지 알려준다 (읽는 중이면 그 시트, 검증 중이면 시퀀스가 속한 시트)
+            string label = _readingLabel;
+            if (string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(sequenceName)) SequenceLabels.TryGetValue(sequenceName, out label);
+            string labelPart = string.IsNullOrEmpty(label) ? "" : label + " · ";
+
+            return $"[{labelPart}{tab} 탭 {row}행]{sequencePart} {message}";
         }
         #endregion
     }

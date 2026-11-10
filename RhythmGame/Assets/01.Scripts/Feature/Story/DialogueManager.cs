@@ -93,6 +93,18 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        // 저장해 둔 대사 위치가 다른 시퀀스(챕터/엔딩)에 있으면 그 시퀀스부터 연다.
+        // (이야기 흐름이 시퀀스를 직접 정해 주는 동안에는 흐름을 따른다)
+        if (!StoryFlow.IsRunning && GameManager.Instance != null)
+        {
+            var saved = GameManager.Instance.GetStoryBookmark();
+            if (saved != null && (dialogSequence == null ? saved.sequenceId != startSequenceId : saved.sequenceId != dialogSequence.name))
+            {
+                DialogueDataSO savedSequence = DialogueJsonLoader.Load(saved.sequenceId);
+                if (savedSequence != null) dialogSequence = savedSequence;
+            }
+        }
+
         if (dialogSequence == null && !string.IsNullOrEmpty(startSequenceId))
         {
             dialogSequence = DialogueJsonLoader.Load(startSequenceId);
@@ -343,9 +355,8 @@ public class DialogueManager : MonoBehaviour
             if (end.clearChapter > 0) GameManager.Instance.ClearChapter(end.clearChapter);
             if (end.unlockChapter > 0) GameManager.Instance.UnlockChapter(end.unlockChapter);
 
-            // 이 대화를 끝까지 봤으니 저장해 둔 대사 위치는 지운다. (챕터 해금/클리어도 함께 저장된다)
-            var bookmark = GameManager.Instance.GetStoryBookmark();
-            if (bookmark != null && (bookmark.sequenceId == dialogSequence.name || bookmark.sequenceId == _enteredSequenceId))
+            // 이 시퀀스를 끝까지 봤으니 저장해 둔 대사 위치는 지운다. (챕터 해금/클리어도 함께 저장된다)
+            if (GameManager.Instance.GetStoryBookmark() != null)
             {
                 GameManager.Instance.SetStoryBookmark(null);
             }
@@ -355,7 +366,30 @@ public class DialogueManager : MonoBehaviour
             }
         }
 
+        // 이어질 시퀀스(onEnd.nextSequence)가 있으면 대화를 끝내지 않고 그 시퀀스로 넘어간다 (챕터 -> 다음 챕터)
+        if (TryContinueToNextSequence()) return;
+
         OnDialogEnd?.Invoke();
+    }
+
+    /// <summary>지금 시퀀스의 onEnd.nextSequence로 넘어간다. 이어질 시퀀스가 없거나 불러오지 못하면 false.</summary>
+    private bool TryContinueToNextSequence()
+    {
+        if (dialogSequence == null) return false;
+
+        string nextId = dialogSequence.onEnd.nextSequence;
+        if (string.IsNullOrEmpty(nextId)) return false;
+
+        DialogueDataSO next = DialogueJsonLoader.Load(nextId);
+        if (!IsValidIndex(next, 0))
+        {
+            Debug.LogError($"[DialogueManager] '{dialogSequence.name}'의 onEnd.nextSequence '{nextId}'를 불러오지 못해 대화를 여기서 끝냅니다.");
+            return false;
+        }
+
+        _enteredSequenceId = next.name;
+        SetDialogSequence(next, 0);
+        return true;
     }
 
     /// <summary>현재 줄을 읽고 난 뒤 이동할 인덱스를 정한다. 마지막 줄을 지나거나 "end"면 lines.Length를 돌려준다.</summary>
@@ -482,6 +516,59 @@ public class DialogueManager : MonoBehaviour
         _ignorePlayOnce = true;
         AdvanceDialog();
         _ignorePlayOnce = false;
+    }
+
+    /// <summary>
+    /// play 줄을 넘긴 뒤 곡 선택창으로 나갈 때 부른다 (FlowStoryEntry). 진행은 멈춘 채로 두고,
+    /// play 줄의 "다음 줄"(branch -> goto -> 다음 줄)을 대사 위치로 저장한다. 다시 들어오면 그 줄부터 시작한다.
+    /// play 줄 뒤에 더 볼 줄이 없으면 대화를 마친 것으로 처리한다 (챕터 해금/클리어 반영, 저장 위치 삭제).
+    /// </summary>
+    public void LeaveAfterPlayLine()
+    {
+        if (!isSuspended || !IsValidIndex(dialogSequence, currentDialogIndex)) return;
+
+        int nextIndex;
+        if (!TryGetNextIndex(dialogSequence.lines[currentDialogIndex], out nextIndex))
+        {
+            // 목적지 라벨 오류: play 줄에 머문 채로 저장한다
+            SaveBookmark();
+            return;
+        }
+
+        int playable = nextIndex < dialogSequence.lines.Length ? FindPlayableIndex(nextIndex) : -1;
+        if (playable < 0)
+        {
+            isFinished = true;
+            if (GameManager.Instance != null)
+            {
+                var end = dialogSequence.onEnd;
+                if (end.clearChapter > 0) GameManager.Instance.ClearChapter(end.clearChapter);
+                if (end.unlockChapter > 0) GameManager.Instance.UnlockChapter(end.unlockChapter);
+
+                // 이어질 시퀀스가 있으면 그 시퀀스의 첫 줄을 대사 위치로 저장한다 (예: 튜토리얼 연주 -> 챕터 1)
+                DialogueDataSO next = string.IsNullOrEmpty(end.nextSequence) ? null : DialogueJsonLoader.Load(end.nextSequence);
+                if (IsValidIndex(next, 0))
+                {
+                    GameManager.Instance.SetStoryBookmark(new GameManager.StoryBookmark
+                    {
+                        sequenceId = next.name,
+                        lineIndex = 0,
+                        notShownYet = true
+                    });
+                }
+                else
+                {
+                    GameManager.Instance.SetStoryBookmark(null);
+                }
+            }
+            return;
+        }
+
+        // 다음 줄은 아직 보여준 적이 없으므로, 돌아오면 플래그/명령/BGM까지 처리하며 보여주도록 표시한다
+        int playLine = currentDialogIndex;
+        currentDialogIndex = playable;
+        SaveBookmark(false, true);
+        currentDialogIndex = playLine;
     }
 
     /// <summary>줄에 play 명령이 있으면 진행을 멈추고 연주를 요청한다. 요청했으면 true.</summary>
@@ -630,7 +717,8 @@ public class DialogueManager : MonoBehaviour
     /// 저장할 위치가 없으면(대화가 끝났거나 시작 전) false.
     /// </summary>
     /// <param name="interrupted">게임 종료로 저장하는 경우 true (다음 실행 때 Lobby에서 이어하기 창을 띄운다)</param>
-    public bool SaveBookmark(bool interrupted = false)
+    /// <param name="notShownYet">저장하는 줄을 아직 보여주지 않았으면 true (돌아오면 플래그/명령까지 처리하며 보여준다)</param>
+    public bool SaveBookmark(bool interrupted = false, bool notShownYet = false)
     {
         if (GameManager.Instance == null)
         {
@@ -645,7 +733,8 @@ public class DialogueManager : MonoBehaviour
             sequenceId = dialogSequence.name,
             lineIndex = currentDialogIndex,
             bgmLineIndex = _currentBgmLine,
-            interrupted = interrupted
+            interrupted = interrupted,
+            notShownYet = notShownYet
         };
 
         foreach (var record in _stageLog)
@@ -739,7 +828,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         ReplayStage(log);
-        ShowDialog(bookmark.lineIndex, true);
+        ShowDialog(bookmark.lineIndex, !bookmark.notShownYet);
         return true;
     }
     #endregion

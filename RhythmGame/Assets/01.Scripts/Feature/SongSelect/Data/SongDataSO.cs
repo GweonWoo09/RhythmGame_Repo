@@ -43,6 +43,26 @@ public class SongDataSO : ScriptableObject
 
     public bool HasChart(Difficulty difficulty) => GetChart(difficulty) != null;
 
+    /// <summary>
+    /// 스토리 대사의 play:곡ID가 이 곡을 가리키는가.
+    /// 곡 ID(songId), 이 에셋 이름, 난이도별 채보(SongItem) 에셋 이름 중 하나와 같으면 같은 곡으로 본다. (대소문자 무시)
+    /// </summary>
+    public bool MatchesId(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return false;
+        return Same(songId, id) || Same(name, id)
+            || (easy != null && Same(easy.name, id))
+            || (normal != null && Same(normal.name, id))
+            || (hard != null && Same(hard.name, id));
+    }
+
+    // 시트의 곡 ID는 밑줄(Merry_Deception_124_Normal), 에셋 이름은 공백(Merry Deception_124_Normal)을 쓰는 경우가 있어
+    // 공백, 밑줄, 하이픈을 무시하고 비교한다
+    private static bool Same(string a, string b) =>
+        a != null && string.Equals(Normalize(a), Normalize(b), StringComparison.OrdinalIgnoreCase);
+
+    private static string Normalize(string s) => s.Replace(" ", "").Replace("_", "").Replace("-", "");
+
     /// <summary>표시용 BPM. 직접 입력한 값이 없으면 첫 번째 채보의 BPM</summary>
     public int Bpm
     {
