@@ -31,6 +31,8 @@ public class SettingsPopup : MonoBehaviour
 
     private void Update()
     {
+        if (CalibrationPanel.BlocksInput) return; // [수정] 자동 보정 중에는 ESC/F8로 설정창을 닫지 않는다
+
         if (Input.GetKeyDown(toggleKey)) SetOpen(!isOpen);
         else if (isOpen && Input.GetKeyDown(closeKey)) SetOpen(false);
     }

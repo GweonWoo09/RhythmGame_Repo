@@ -14,6 +14,7 @@ public static class SettingsAccessor
             case SettingKey.SfxVolume: return data.sfxVolume;
             case SettingKey.NoteSpeed: return data.noteSpeed;
             case SettingKey.AudioOffset: return data.audioOffsetMs;
+            case SettingKey.Resolution: return data.resolutionIndex;
             default: return 0f;
         }
     }
@@ -26,6 +27,7 @@ public static class SettingsAccessor
             case SettingKey.SfxVolume: data.sfxVolume = value; break;
             case SettingKey.NoteSpeed: data.noteSpeed = value; break;
             case SettingKey.AudioOffset: data.audioOffsetMs = Mathf.RoundToInt(value); break;
+            case SettingKey.Resolution: data.resolutionIndex = Mathf.RoundToInt(value); break;
         }
     }
 }

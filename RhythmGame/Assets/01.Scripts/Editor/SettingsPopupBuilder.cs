@@ -22,8 +22,9 @@ public static class SettingsPopupBuilder
     private static readonly Color TitleColor = new Color(0.75f, 0.72f, 0.68f, 0.75f);
 
     private static TMP_FontAsset font;
+    private static CalibrationPanel calibrationPanel; // 자동 보정 줄이 연결할 화면
 
-    private enum RowType { Choice, Number, Slider, Exit }
+    private enum RowType { Choice, Number, Slider, Exit, Calibrate }
 
     private struct RowDef
     {
@@ -45,6 +46,8 @@ public static class SettingsPopupBuilder
             {
                 new RowDef { type = RowType.Number, key = SettingKey.NoteSpeed, label = "노트 속도", min = 1f, max = 10f, step = 0.5f, format = "0.0" },
                 new RowDef { type = RowType.Number, key = SettingKey.AudioOffset, label = "싱크 조절", min = -300f, max = 300f, step = 5f, format = "+0;-0;0", suffix = " ms" },
+                new RowDef { type = RowType.Calibrate, key = SettingKey.None, label = "자동 보정" },
+                new RowDef { type = RowType.Choice, key = SettingKey.Resolution, label = "해상도", options = ResolutionOptions.Labels },
                 new RowDef { type = RowType.Exit, key = SettingKey.None, label = "곡 나가기" }, // 인게임에서만 보임
             }},
             new TabDef { name = "SOUND", x = -132f, title = "SOUND SETTING", rows = new[]
@@ -66,10 +69,11 @@ public static class SettingsPopupBuilder
         var scaler = root.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand; // 21:9 등 넓은 화면에서도 위아래가 잘리지 않는다
         root.AddComponent<GraphicRaycaster>();
         var popup = root.AddComponent<SettingsPopup>();
         root.AddComponent<AudioSettingsApplier>();
+        root.AddComponent<ResolutionSettingsApplier>();
 
         var panel = CreateRect(root.transform, "Panel", Vector2.zero, Vector2.zero);
         Stretch(panel);
@@ -90,6 +94,9 @@ public static class SettingsPopupBuilder
         var cursor = CreateImage(rowSelection, "Row_Cursor", "Row_Cursor", new Vector2(0f, 35.5f));
         cursor.rectTransform.sizeDelta = new Vector2(1920, 1080);
 
+        // 자동 보정 화면 (탭의 줄이 참조하므로 탭보다 먼저 만든다)
+        calibrationPanel = CreateCalibrationPanel(panel);
+
         // 탭과 페이지
         var tabsRoot = CreateRect(panel, "Tabs", Vector2.zero, Vector2.zero);
         Stretch(tabsRoot);
@@ -101,6 +108,8 @@ public static class SettingsPopupBuilder
         CreateText(panel, "Guide_LeftRight", "값 변경 / 탭 이동", new Vector2(-392f, -523f), new Vector2(400, 40), 24, TextAlignmentOptions.MidlineLeft, Color.white, 0f);
         CreateText(panel, "Guide_Enter", "확인", new Vector2(683f, -522f), new Vector2(150, 40), 24, TextAlignmentOptions.MidlineLeft, Color.white, 0f);
         CreateText(panel, "Guide_Esc", "닫기", new Vector2(857f, -522f), new Vector2(150, 40), 24, TextAlignmentOptions.MidlineLeft, Color.white, 0f);
+
+        calibrationPanel.transform.SetAsLastSibling(); // 맨 위에 보이게
 
         // 연결
         var view = panel.gameObject.AddComponent<SettingsSelectionView>();
@@ -155,7 +164,7 @@ public static class SettingsPopupBuilder
 
     private static SettingRow CreateRow(RectTransform parent, RowDef def, Vector2 pos)
     {
-        var rowRect = CreateRect(parent, "Row_" + (def.type == RowType.Exit ? "Exit" : def.key.ToString()), pos, new Vector2(1135, 92));
+        var rowRect = CreateRect(parent, "Row_" + (def.key == SettingKey.None ? def.type.ToString() : def.key.ToString()), pos, new Vector2(1135, 92));
         var label = CreateText(rowRect, "Label", def.label, new Vector2(-522.5f, 0f), new Vector2(500, 80), 52, TextAlignmentOptions.MidlineLeft, LabelColor, 0f);
 
         SettingRow row;
@@ -165,6 +174,13 @@ public static class SettingsPopupBuilder
             CreateText(rowRect, "Value", "ENTER", new Vector2(ValueX, 0f), new Vector2(260, 70), 46, TextAlignmentOptions.Center, Color.white, 0.5f);
             row = rowRect.gameObject.AddComponent<SongExitSettingRow>();
             so = new SerializedObject(row);
+        }
+        else if (def.type == RowType.Calibrate)
+        {
+            CreateText(rowRect, "Value", "ENTER", new Vector2(ValueX, 0f), new Vector2(260, 70), 46, TextAlignmentOptions.Center, Color.white, 0.5f);
+            row = rowRect.gameObject.AddComponent<CalibrationSettingRow>();
+            so = new SerializedObject(row);
+            so.FindProperty("panel").objectReferenceValue = calibrationPanel;
         }
         else if (def.type == RowType.Slider)
         {
@@ -187,6 +203,9 @@ public static class SettingsPopupBuilder
         {
             var arrows = CreateImage(rowRect, "Value_Arrows", "Value_Arrows", new Vector2(ValueX, 1f));
             var value = CreateText(rowRect, "Value", "", new Vector2(ValueX, 0f), new Vector2(260, 70), 46, TextAlignmentOptions.Center, Color.white, 0.5f);
+            value.enableAutoSizing = true; // 긴 글자("3840 x 2160")는 칸에 맞게 줄인다
+            value.fontSizeMin = 28f;
+            value.fontSizeMax = 46f;
 
             if (def.type == RowType.Number)
             {
@@ -218,6 +237,31 @@ public static class SettingsPopupBuilder
         so.FindProperty("label").objectReferenceValue = label;
         so.ApplyModifiedPropertiesWithoutUndo();
         return row;
+    }
+
+    private static CalibrationPanel CreateCalibrationPanel(RectTransform parent)
+    {
+        var rect = CreateRect(parent, "CalibrationPanel", Vector2.zero, Vector2.zero);
+        Stretch(rect);
+        var dim = rect.gameObject.AddComponent<Image>();
+        dim.color = new Color(0f, 0f, 0f, 0.88f);
+
+        CreateText(rect, "Title", "싱크 자동 보정", new Vector2(0f, 300f), new Vector2(1200, 80), 60, TextAlignmentOptions.Center, Color.white, 0.5f);
+        CreateText(rect, "Guide", "화면이 아니라 '틱' 소리에 맞춰 키를 누르세요", new Vector2(0f, 200f), new Vector2(1600, 60), 34, TextAlignmentOptions.Center, LabelColor, 0.5f);
+        var count = CreateText(rect, "Count", "", new Vector2(0f, 20f), new Vector2(900, 160), 120, TextAlignmentOptions.Center, Color.white, 0.5f);
+        var status = CreateText(rect, "Status", "", new Vector2(0f, -150f), new Vector2(1400, 60), 40, TextAlignmentOptions.Center, Color.white, 0.5f);
+        CreateText(rect, "Hint", "ESC 취소", new Vector2(0f, -450f), new Vector2(400, 50), 28, TextAlignmentOptions.Center, LabelColor, 0.5f);
+
+        var metronome = rect.gameObject.AddComponent<CalibrationMetronome>(); // AudioSource는 자동으로 붙는다
+        var calibration = rect.gameObject.AddComponent<CalibrationPanel>();
+        var so = new SerializedObject(calibration);
+        so.FindProperty("metronome").objectReferenceValue = metronome;
+        so.FindProperty("countText").objectReferenceValue = count;
+        so.FindProperty("statusText").objectReferenceValue = status;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        rect.gameObject.SetActive(false);
+        return calibration;
     }
 
     private static RectTransform CreateRect(Transform parent, string name, Vector2 pos, Vector2 size)

@@ -25,6 +25,7 @@ using UnityEngine;
         public string language = "ko";
         public float noteSpeed = 5f;       // [수정] 노트 속도
         public int audioOffsetMs = 0;      // [수정] 싱크 보정 (ms)
+        public int resolutionIndex = ResolutionOptions.DefaultIndex; // 해상도 (ResolutionOptions 번호)
     }
     #endregion
 

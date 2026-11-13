@@ -815,20 +815,28 @@ public class DialogueUIView : MonoBehaviour
             _typingCoroutine = null;
         }
 
+        if (_typingTarget != null) _typingTarget.maxVisibleCharacters = int.MaxValue; // [수정] 중간에 멈춰도 글자가 숨지 않게
         _isTyping = false;
     }
 
     private IEnumerator TypeTextRoutine(TextMeshProUGUI textComponent, string fullText)
     {
         _isTyping = true;
-        textComponent.text = "";
 
-        foreach (char c in fullText)
+        // [수정] 글자마다 문자열을 새로 만들지 않고, 전체를 넣은 뒤 보이는 글자 수만 늘린다 (메모리 절약, 서식 태그도 안 깨짐)
+        textComponent.text = fullText;
+        textComponent.maxVisibleCharacters = 0;
+        textComponent.ForceMeshUpdate();
+
+        int total = textComponent.textInfo.characterCount;
+        var wait = new WaitForSeconds(charInterval);
+        for (int i = 1; i <= total; i++)
         {
-            textComponent.text += c;
-            yield return new WaitForSeconds(charInterval);
+            textComponent.maxVisibleCharacters = i;
+            yield return wait;
         }
 
+        textComponent.maxVisibleCharacters = int.MaxValue;
         _isTyping = false;
         _typingCoroutine = null;
 
@@ -843,6 +851,7 @@ public class DialogueUIView : MonoBehaviour
         if (_typingTarget != null)
         {
             _typingTarget.text = _currentFullText;
+            _typingTarget.maxVisibleCharacters = int.MaxValue; // [수정]
         }
 
         OnTypingFinished();

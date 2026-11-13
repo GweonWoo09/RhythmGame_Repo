@@ -1315,6 +1315,7 @@ GameObject:
   - component: {fileID: 928520091}
   - component: {fileID: 928520090}
   - component: {fileID: 928520093}
+  - component: {fileID: 928520094}
   m_Layer: 0
   m_Name: IngameSettings
   m_TagString: Untagged
@@ -1392,6 +1393,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 033770f284a62204eaea68d9613d75b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IngameExitHandler
+  songManager: {fileID: 2048646723}
+--- !u!114 &928520094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 928520088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f3df4b50e8746bfa4bda357a0075ebe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IngameAudioOffsetApplier
   songManager: {fileID: 2048646723}
 --- !u!1 &1023015808
 GameObject:
@@ -1516,12 +1530,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 1
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -2693,6 +2707,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1010229408725746048, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
+      propertyPath: effects
+      value: 
+      objectReference: {fileID: 5095945610907031299, guid: 284ee10310edffa4c8414faafdce9a8d, type: 3}
     - target: {fileID: 2812891354770858997, guid: fe644e17ab53a314f926aa81d877b247, type: 3}
       propertyPath: beatSize
       value: 8
@@ -3053,12 +3071,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ScreenMatchMode: 1
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

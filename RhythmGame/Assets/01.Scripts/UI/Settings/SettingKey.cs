@@ -5,5 +5,6 @@ public enum SettingKey
     BgmVolume,
     SfxVolume,
     NoteSpeed,
-    AudioOffset
+    AudioOffset,
+    Resolution          // 끝에만 추가할 것 (프리팹에 번호로 저장됨)
 }

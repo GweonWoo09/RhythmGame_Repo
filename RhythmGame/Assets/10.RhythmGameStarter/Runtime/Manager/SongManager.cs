@@ -28,6 +28,7 @@ namespace RhythmGameStarter
 
         [HideInInspector] public float secPerBeat;
         [HideInInspector] public float songPosition;
+        [NonSerialized] public float timingOffset; // [수정] 싱크 보정(초). 양수면 노트와 판정이 늦어진다
         [HideInInspector] public IEnumerable<SongItem.MidiNote> currnetNotes;
 
         [Title("Events", 0)]
@@ -52,6 +53,7 @@ namespace RhythmGameStarter
         private double dspStartTime;
         private double dspPausedTime;
         private double accumulatedPauseTime;
+        private float audioPosition; // [수정] 보정 전 실제 오디오 재생 위치 (오디오 예약/곡 종료에 사용)
 
         #endregion
 
@@ -97,6 +99,7 @@ namespace RhythmGameStarter
             accumulatedPauseTime = 0;
             dspPausedTime = 0;
             songPosition = -1;
+            audioPosition = -1; // [수정]
 
             if (audioSource) audioSource.clip = songItem.clip;
             if (songItem.customMidiMapping || songItem.customPrefabMapping)
@@ -132,7 +135,7 @@ namespace RhythmGameStarter
             // [수정] 시작 대기(delay) 중이면 예약 재생을 멈추고, 재개할 때 남은 시간만큼 다시 예약한다
             if (audioSource)
             {
-                if (songPosition < 0) audioSource.Stop();
+                if (audioPosition < 0) audioSource.Stop();
                 else audioSource.Pause();
             }
 
@@ -152,7 +155,7 @@ namespace RhythmGameStarter
             // [수정]
             if (audioSource)
             {
-                if (songPosition < 0) audioSource.PlayScheduled(AudioSettings.dspTime - songPosition / audioSource.pitch);
+                if (audioPosition < 0) audioSource.PlayScheduled(AudioSettings.dspTime - audioPosition / audioSource.pitch);
                 else audioSource.Play();
             }
 
@@ -195,7 +198,8 @@ namespace RhythmGameStarter
             //Sync the tracks position with the audio
             if (!songPaused && songHasStarted)
             {
-                songPosition = (float)(AudioSettings.dspTime - dspStartTime - delay - accumulatedPauseTime) * audioSource.pitch;
+                audioPosition = (float)(AudioSettings.dspTime - dspStartTime - delay - accumulatedPauseTime) * audioSource.pitch;
+                songPosition = audioPosition - timingOffset; // [수정] 노트 위치와 판정 모두 이 값을 쓴다
 
                 trackManager.UpdateTrack(songPosition, secPerBeat);
 
@@ -218,7 +222,7 @@ namespace RhythmGameStarter
                 }
             }
 
-            if (songHasStarted && currentSongItem.clip && songPosition >= currentSongItem.clip.length)
+            if (songHasStarted && currentSongItem.clip && audioPosition >= currentSongItem.clip.length) // [수정]
             {
                 songHasStarted = false;
                 songStartEventInvoked = false;

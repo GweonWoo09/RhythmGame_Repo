@@ -96,6 +96,17 @@ public static class DialogueJsonLoader
 
     private static readonly Dictionary<string, DialogueDataSO> _cache = new Dictionary<string, DialogueDataSO>();
 
+    // [수정] 캐시가 BGM과 캐릭터 이미지를 붙잡고 있어서, 씬을 나갈 때 비우지 않으면 메모리가 계속 쌓인다
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void RegisterCacheRelease()
+    {
+        _cache.Clear();
+        UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
+        UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    private static void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene) => _cache.Clear();
+
     /// <summary>언어를 바꾸면 캐시를 비워서 다음 Load부터 새 언어 JSON을 읽는다.</summary>
     public static void SetLanguage(string language)
     {

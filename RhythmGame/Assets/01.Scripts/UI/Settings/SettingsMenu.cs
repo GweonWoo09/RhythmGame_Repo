@@ -27,10 +27,26 @@ public class SettingsMenu : MonoBehaviour
         CollectRows();
         rowIndex = Rows.Count > 0 ? 0 : TabBar;
         Refresh(true);
+
+        if (DataManager.Instance != null) DataManager.Instance.OnSettingsChanged += OnSettingsChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (DataManager.Instance != null) DataManager.Instance.OnSettingsChanged -= OnSettingsChanged;
+    }
+
+    // 다른 곳(자동 보정 등)에서 설정이 바뀌면 화면 값도 갱신한다
+    private void OnSettingsChanged(SettingsData data)
+    {
+        working = Copy(data);
+        Refresh(false);
     }
 
     private void Update()
     {
+        if (CalibrationPanel.BlocksInput) return; // 자동 보정 화면이 키 입력을 쓴다
+
         if (Input.GetKeyDown(KeyCode.UpArrow)) MoveRow(-1);
         else if (Input.GetKeyDown(KeyCode.DownArrow)) MoveRow(1);
         else if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveHorizontal(-1);

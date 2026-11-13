@@ -283,7 +283,7 @@ namespace RhythmGameStarter
             if (effect && !currentNote.noTapEffect)
                 effect.EmitEffects(tapEffectCustomTarget != null
                     ? tapEffectCustomTarget.transform
-                    : currentNote.transform);
+                    : track.lineArea); // [수정] 판정(완벽/좋음)과 상관없이 판정선 위치에서 이펙트
         }
 
         public void ResetNoteArea()
