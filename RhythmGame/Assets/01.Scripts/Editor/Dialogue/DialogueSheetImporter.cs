@@ -346,6 +346,7 @@ using UnityEngine.Networking;
             private readonly DialogueSheetSettings _settings;
             private readonly Dictionary<string, SpeakerDataSO> _speakers = new Dictionary<string, SpeakerDataSO>();
             private readonly Dictionary<string, bool> _audio = new Dictionary<string, bool>();
+            private readonly Dictionary<string, bool> _sprites = new Dictionary<string, bool>();
 
             public UnityEnvironment(DialogueSheetSettings settings)
             {
@@ -377,6 +378,18 @@ using UnityEngine.Networking;
                 {
                     exists = Resources.Load<AudioClip>(resourcePath) != null;
                     _audio[resourcePath] = exists;
+                }
+
+                return exists;
+            }
+
+            public bool SpriteExists(string resourcePath)
+            {
+                bool exists;
+                if (!_sprites.TryGetValue(resourcePath, out exists))
+                {
+                    exists = Resources.Load<Sprite>(resourcePath) != null;
+                    _sprites[resourcePath] = exists;
                 }
 
                 return exists;

@@ -119,6 +119,7 @@ public class GameManager : MonoBehaviour
         public string sequenceId = "";
         public int lineIndex;
         public int bgmLineIndex = -1;  // 지금 BGM을 바꾼 줄 (-1: 시퀀스 기본 BGM)
+        public int bgLineIndex = -1;   // 지금 배경을 바꾼 줄 (-1: 시퀀스 기본 배경)
         public List<StoryStageEntry> stage = new List<StoryStageEntry>();
 
         /// <summary>스토리 도중 게임을 종료해서 저장된 위치인가. true면 다음 실행 때 Lobby에서 이어하기 창을 띄운다.</summary>

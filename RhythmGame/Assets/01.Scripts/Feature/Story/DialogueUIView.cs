@@ -111,7 +111,6 @@ public class DialogueUIView : MonoBehaviour
     private Coroutine _typingCoroutine;
     private TextMeshProUGUI _typingTarget;
     private bool _isTyping = false;
-    private string _currentFullText = "";
 
     // 스타일 적용 전의 원래 글꼴 스타일/색 (스타일 없는 줄에서 되돌리기 위해 기억)
     private readonly Dictionary<TextMeshProUGUI, FontStyles> _defaultFontStyles = new Dictionary<TextMeshProUGUI, FontStyles>();
@@ -798,12 +797,15 @@ public class DialogueUIView : MonoBehaviour
     #endregion
 
     #region Typing
+    // 글자 사이 대기. 글자마다 new 하지 않고 재사용한다 (charInterval이 바뀌었을 때만 새로 만든다)
+    private WaitForSeconds _charWait;
+    private float _charWaitInterval = -1f;
+
     private void StartTyping(TextMeshProUGUI textComponent, string fullText)
     {
         StopTyping();
 
         _typingTarget = textComponent;
-        _currentFullText = fullText;
         _typingCoroutine = StartCoroutine(TypeTextRoutine(textComponent, fullText));
     }
 
@@ -819,28 +821,47 @@ public class DialogueUIView : MonoBehaviour
         _isTyping = false;
     }
 
+    /// <summary>
+    /// 전체 대사를 한 번에 넣고 maxVisibleCharacters만 늘려 한 글자씩 보여준다.
+    /// 글자마다 문자열을 새로 만들지 않으므로 쓰레기 메모리가 생기지 않고, &lt;color&gt; 같은 리치 텍스트 태그도 깨지지 않는다.
+    /// </summary>
     private IEnumerator TypeTextRoutine(TextMeshProUGUI textComponent, string fullText)
     {
         _isTyping = true;
 
-        // [수정] 글자마다 문자열을 새로 만들지 않고, 전체를 넣은 뒤 보이는 글자 수만 늘린다 (메모리 절약, 서식 태그도 안 깨짐)
         textComponent.text = fullText;
         textComponent.maxVisibleCharacters = 0;
-        textComponent.ForceMeshUpdate();
 
+        // 태그를 뺀 실제 글자 수 (오브젝트가 꺼져 있어 계산되지 않으면 문자열 길이로 대신한다)
+        textComponent.ForceMeshUpdate();
         int total = textComponent.textInfo.characterCount;
-        var wait = new WaitForSeconds(charInterval);
-        for (int i = 1; i <= total; i++)
+        if (total <= 0) total = fullText != null ? fullText.Length : 0;
+
+        WaitForSeconds wait = GetCharWait();
+
+        for (int visible = 1; visible <= total; visible++)
         {
-            textComponent.maxVisibleCharacters = i;
+            textComponent.maxVisibleCharacters = visible;
             yield return wait;
         }
 
         textComponent.maxVisibleCharacters = int.MaxValue;
+
         _isTyping = false;
         _typingCoroutine = null;
 
         OnTypingFinished();
+    }
+
+    private WaitForSeconds GetCharWait()
+    {
+        if (_charWait == null || !Mathf.Approximately(_charWaitInterval, charInterval))
+        {
+            _charWaitInterval = charInterval;
+            _charWait = new WaitForSeconds(charInterval);
+        }
+
+        return _charWait;
     }
 
     /// <summary>Space로 스킵했을 때, 타이핑 중이던 텍스트를 즉시 전체 출력으로 완성</summary>
@@ -848,10 +869,10 @@ public class DialogueUIView : MonoBehaviour
     {
         StopTyping();
 
+        // 대사는 처음부터 전부 들어 있으므로 가려 둔 글자만 모두 보이게 한다
         if (_typingTarget != null)
         {
-            _typingTarget.text = _currentFullText;
-            _typingTarget.maxVisibleCharacters = int.MaxValue; // [수정]
+            _typingTarget.maxVisibleCharacters = int.MaxValue;
         }
 
         OnTypingFinished();

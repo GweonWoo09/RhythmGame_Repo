@@ -14,6 +14,9 @@ using System.Text.RegularExpressions;
         bool SpeakerExists(string speakerId);
         bool SpeakerHasExpression(string speakerId, string expressionName);
         bool AudioExists(string resourcePath);
+
+        /// <summary>배경 스프라이트가 Resources 경로에 있는가 (bg 칸 / meta bg 검사용)</summary>
+        bool SpriteExists(string resourcePath);
         bool SceneExists(string sceneName);
         bool SequenceFileExists(string language, string sequenceId);
 
@@ -56,7 +59,7 @@ using System.Text.RegularExpressions;
     ///
     /// [lines 탭 열]
     ///   sequence | id | type | speaker | expression | slot | name | style | text_{언어} ... |
-    ///   if | goto | target_sequence | setFlags | commands | bgm | memo
+    ///   if | goto | target_sequence | setFlags | commands | bgm | bg | memo
     ///
     ///   type = line / choice / branch / comment
     ///   - line   : 대사 한 줄. speaker가 비어 있으면 내레이션.
@@ -70,6 +73,8 @@ using System.Text.RegularExpressions;
     ///   name  = 이 줄에서만 화자 이름 대신 보여줄 이름 (예: ???). {player} 같은 변수 사용 가능.
     ///   style = 대사 표시 방식 (thought, shout, whisper ...).
     ///   expression = 비우면 기본(첫 번째) 표정.
+    ///   bgm   = 이 줄부터 바꿀 BGM의 Resources 경로 (예: Audio/BGM/calm). stop이면 BGM을 페이드아웃하며 멈춘다. 비우면 유지.
+    ///   bg    = 이 줄부터 바꿀 배경 스프라이트의 Resources 경로 (예: Backgrounds/studio_night). none이면 배경을 비운다. 비우면 유지.
     ///   memo  = 작업 메모. 임포터는 읽지 않는다.
     ///   setFlags / commands 는 한 칸에 여러 개를 ; 또는 줄바꿈으로 구분한다.
     ///   commands = hide:슬롯 / show:슬롯 / show:슬롯:speakerId[:expression] / play:곡ID[:난이도] /
@@ -83,8 +88,9 @@ using System.Text.RegularExpressions;
     ///   결과: Resources/SongCatalog.json 에 곡 ID -> 경로 목록이 만들어진다.
     ///
     /// [meta 탭 열]   sequence | key | value | (memo)
-    ///   key = bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty,
+    ///   key = bgm, bg, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty,
     ///         onEnd.nextSequence
+    ///   bgm / bg = 시퀀스가 시작될 때의 BGM / 배경 (Resources 경로). 비우면 이전 것을 그대로 유지한다.
     ///   onEnd.nextSequence = 이 시퀀스가 끝나면 이어서 재생할 시퀀스 (다른 시트의 시퀀스도 가능. 예: chapter2 -> chapter3)
     ///
     /// [여러 시트]  챕터/엔딩마다 스프레드시트를 나눠도 된다. Build(inputs)에 한꺼번에 넘기면
@@ -112,6 +118,9 @@ using System.Text.RegularExpressions;
         private const string ColSetFlags = "setflags";
         private const string ColCommands = "commands";
         private const string ColBgm = "bgm";
+        private const string ColBg = "bg";
+        private const string BgmStopKeyword = "stop";
+        private const string BgNoneKeyword = "none";
         private const string ColMemo = "memo";
         private const string TextPrefix = "text_";
 
@@ -122,12 +131,12 @@ using System.Text.RegularExpressions;
         private static readonly HashSet<string> KnownColumns = new HashSet<string>
     {
         ColSequence, ColId, ColType, ColSpeaker, ColExpression, ColSlot, ColName, ColStyle, ColIf, ColGoto,
-        ColTargetSequence, ColSetFlags, ColCommands, ColBgm, ColMemo
+        ColTargetSequence, ColSetFlags, ColCommands, ColBgm, ColBg, ColMemo
     };
 
         private static readonly HashSet<string> KnownMetaKeys = new HashSet<string>
     {
-        "bgm", "chapterid", "cast",
+        "bgm", "bg", "chapterid", "cast",
         "onend.scene", "onend.clearchapter", "onend.unlockchapter", "onend.songid", "onend.difficulty",
         "onend.nextsequence"
     };
@@ -208,6 +217,7 @@ using System.Text.RegularExpressions;
             public string Style;
             public string Goto;
             public string Bgm;
+            public string Bg;
             public string[] SetFlags;
             public string[] Commands;
             public Dictionary<string, string> Texts = new Dictionary<string, string>();
@@ -235,6 +245,7 @@ using System.Text.RegularExpressions;
             public bool HasChapterId;
             public int ChapterId;
             public string Bgm;
+            public string Bg;
             public string EndScene;
             public int EndClearChapter;
             public int EndUnlockChapter;
@@ -560,7 +571,8 @@ using System.Text.RegularExpressions;
                 DisplayName = row.Get(ColName),
                 Style = row.Get(ColStyle),
                 Goto = row.Get(ColGoto),
-                Bgm = row.Get(ColBgm),
+                Bgm = NormalizeKeyword(row.Get(ColBgm), BgmStopKeyword),
+                Bg = NormalizeKeyword(row.Get(ColBg), BgNoneKeyword),
                 SetFlags = SplitList(row.Get(ColSetFlags)),
                 Commands = SplitList(row.Get(ColCommands))
             };
@@ -606,6 +618,7 @@ using System.Text.RegularExpressions;
                     Style = row.Get(ColStyle),
                     Goto = choice.Goto,
                     Bgm = "",
+                    Bg = "",
                     Texts = choice.Texts
                 };
             }
@@ -622,8 +635,8 @@ using System.Text.RegularExpressions;
         private static void WarnIgnoredColumns(SheetRow row, string sequenceName, string type, SheetConvertResult result)
         {
             string[] columns = type == "choice"
-                ? new[] { ColId, ColCommands, ColBgm }
-                : new[] { ColId, ColSpeaker, ColExpression, ColSlot, ColName, ColStyle, ColCommands, ColBgm };
+                ? new[] { ColId, ColCommands, ColBgm, ColBg }
+                : new[] { ColId, ColSpeaker, ColExpression, ColSlot, ColName, ColStyle, ColCommands, ColBgm, ColBg };
 
             var ignored = new List<string>();
             foreach (string column in columns)
@@ -668,7 +681,7 @@ using System.Text.RegularExpressions;
                 if (!KnownMetaKeys.Contains(key))
                 {
                     AddError(result, "meta", row.Number, sequenceName,
-                        $"알 수 없는 key '{row.Get("key")}'입니다. (bgm, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty, onEnd.nextSequence)");
+                        $"알 수 없는 key '{row.Get("key")}'입니다. (bgm, bg, chapterId, cast, onEnd.scene, onEnd.clearChapter, onEnd.unlockChapter, onEnd.songId, onEnd.difficulty, onEnd.nextSequence)");
                     continue;
                 }
 
@@ -815,6 +828,13 @@ using System.Text.RegularExpressions;
                 else AddError(result, "meta", entry.Row, sequence.Name, $"bgm 'Resources/{entry.Value}'에서 오디오를 찾을 수 없습니다.");
             }
 
+            if (sequence.Meta.TryGetValue("bg", out entry))
+            {
+                if (env.SpriteExists(entry.Value)) sequence.Bg = entry.Value;
+                else AddError(result, "meta", entry.Row, sequence.Name,
+                    $"bg 'Resources/{entry.Value}'에서 스프라이트를 찾을 수 없습니다. (Texture Type이 Sprite인지 확인)");
+            }
+
             if (sequence.Meta.TryGetValue("onend.scene", out entry))
             {
                 if (env.SceneExists(entry.Value)) sequence.EndScene = entry.Value;
@@ -922,9 +942,16 @@ using System.Text.RegularExpressions;
                 CheckLabel(sequence, line.Goto, row, result);
             }
 
-            if (line.Bgm.Length > 0 && !env.AudioExists(line.Bgm))
+            if (line.Bgm.Length > 0 && line.Bgm != BgmStopKeyword && !env.AudioExists(line.Bgm))
             {
-                AddError(result, "lines", row, sequence.Name, $"bgm 'Resources/{line.Bgm}'에서 오디오를 찾을 수 없습니다.");
+                AddError(result, "lines", row, sequence.Name,
+                    $"bgm 'Resources/{line.Bgm}'에서 오디오를 찾을 수 없습니다. (BGM을 멈추려면 {BgmStopKeyword})");
+            }
+
+            if (line.Bg.Length > 0 && line.Bg != BgNoneKeyword && !env.SpriteExists(line.Bg))
+            {
+                AddError(result, "lines", row, sequence.Name,
+                    $"bg 'Resources/{line.Bg}'에서 스프라이트를 찾을 수 없습니다. (Texture Type이 Sprite인지 확인, 배경을 비우려면 {BgNoneKeyword})");
             }
 
             if (line.Commands != null)
@@ -1144,6 +1171,12 @@ using System.Text.RegularExpressions;
             {
                 AddWarning(result, "lines", row, sequenceName, "짝이 맞지 않는 { } 가 있습니다. 변수는 {player} 처럼 중괄호로 감싸야 합니다.");
             }
+        }
+
+        /// <summary>예약어(stop, none)는 대소문자와 상관없이 소문자로 맞춘다. 그 밖의 값(Resources 경로)은 그대로 둔다.</summary>
+        private static string NormalizeKeyword(string value, string keyword)
+        {
+            return string.Equals(value, keyword, StringComparison.OrdinalIgnoreCase) ? keyword : value;
         }
 
         private static string CommandName(string command)
@@ -1412,6 +1445,7 @@ using System.Text.RegularExpressions;
 
             if (sequence.HasChapterId) top.Add(Prop("chapterId", Num(sequence.ChapterId)));
             if (!string.IsNullOrEmpty(sequence.Bgm)) top.Add(Prop("bgm", Str(sequence.Bgm)));
+            if (!string.IsNullOrEmpty(sequence.Bg)) top.Add(Prop("bg", Str(sequence.Bg)));
 
             if (sequence.Cast.Count > 0)
             {
@@ -1493,6 +1527,7 @@ using System.Text.RegularExpressions;
             m.Add(Prop("text", Str(PickText(line.Texts, language, defaultLanguage, line.Row.Number, fallbackRows))));
 
             if (line.Bgm.Length > 0) m.Add(Prop("bgmOverride", Str(line.Bgm)));
+            if (line.Bg.Length > 0) m.Add(Prop("bgOverride", Str(line.Bg)));
             if (line.SetFlags != null) m.Add(Prop("setFlags", StrArr(line.SetFlags)));
             if (line.Commands != null) m.Add(Prop("commands", StrArr(line.Commands)));
 

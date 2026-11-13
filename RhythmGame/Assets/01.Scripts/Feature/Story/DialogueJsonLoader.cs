@@ -17,6 +17,8 @@ public class DialogueJsonData
     public int chapterId;
     [Tooltip("시퀀스 기본 BGM의 Resources 경로. 예: \"Audio/BGM/calm_morning\". 비우면 기존 BGM 유지")]
     public string bgm;
+    [Tooltip("시퀀스 기본 배경 스프라이트의 Resources 경로. 예: \"Backgrounds/studio_night\". 비우면 기존 배경 유지")]
+    public string bg;
     public DialogueCastJson[] cast;
     public DialogueEndJson onEnd;
     public DialogueLineJson[] lines;
@@ -52,7 +54,8 @@ public class DialogueLineJson
     public string name;           // 이 줄에서만 쓸 표시 이름 (예: "???"). 비우면 SpeakerDataSO.speakerName
     public string style;          // 대사 표시 방식 (thought, shout, whisper ...)
     public string text;
-    public string bgmOverride;    // 이 줄부터 BGM 교체 (Resources 경로, 비우면 유지)
+    public string bgmOverride;    // 이 줄부터 BGM 교체 (Resources 경로, 비우면 유지, "stop"이면 멈춤)
+    public string bgOverride;     // 이 줄부터 배경 교체 (Resources 경로, 비우면 유지, "none"이면 비움)
     public string[] setFlags;     // 예: ["ch1_eager=1", "affinity+=1"]
     public string[] commands;     // 예: ["hide:0", "bg:studio_night"]
     public DialogueBranchJson[] branch;
@@ -116,6 +119,17 @@ public static class DialogueJsonLoader
         _cache.Clear();
     }
 
+    /// <summary>
+    /// 읽어 둔 대사 시퀀스를 모두 잊는다. 시퀀스가 BGM(AudioClip), 배경(Sprite), 화자(SpeakerDataSO)를 참조하고 있어서,
+    /// 캐시에 남아 있으면 씬을 바꿔도 그 에셋들이 메모리에서 내려가지 않는다. Story 씬을 나갈 때 DialogueManager가 부른다.
+    /// 시퀀스를 Destroy하지는 않는다. 아직 쓰는 곳이 있으면 그대로 살아 있고, 아무도 안 쓰면
+    /// Resources.UnloadUnusedAssets()가 시퀀스와 그 에셋을 함께 정리한다.
+    /// </summary>
+    public static void ClearCache()
+    {
+        _cache.Clear();
+    }
+
     /// <summary>sequenceId에 해당하는 JSON을 로드해 DialogueDataSO로 반환. 실패하면 null.</summary>
     public static DialogueDataSO Load(string sequenceId)
     {
@@ -170,6 +184,7 @@ public static class DialogueJsonLoader
         sequence.name = sequenceId;
         sequence.chapterId = json.chapterId;
         sequence.bgm = LoadAudio(json.bgm);
+        sequence.background = LoadSprite(json.bg);
         sequence.cast = ConvertCast(json.cast, sequenceId);
         sequence.onEnd = ConvertEnd(json.onEnd);
 
@@ -188,7 +203,10 @@ public static class DialogueJsonLoader
                 displayName = src.name,
                 style = src.style,
                 dialogText = src.text,
-                bgmOverride = LoadAudio(src.bgmOverride),
+                bgmOverride = IsKeyword(src.bgmOverride, DialogueDataSO.BgmStopKeyword) ? null : LoadAudio(src.bgmOverride),
+                bgmStop = IsKeyword(src.bgmOverride, DialogueDataSO.BgmStopKeyword),
+                bgOverride = IsKeyword(src.bgOverride, DialogueDataSO.BgNoneKeyword) ? null : LoadSprite(src.bgOverride),
+                bgClear = IsKeyword(src.bgOverride, DialogueDataSO.BgNoneKeyword),
                 setFlags = NullIfEmpty(src.setFlags),
                 commands = NullIfEmpty(src.commands),
                 branches = ConvertBranches(src.branch),
@@ -299,6 +317,24 @@ public static class DialogueJsonLoader
         }
 
         return speaker;
+    }
+
+    private static bool IsKeyword(string value, string keyword)
+    {
+        return !string.IsNullOrEmpty(value) && string.Equals(value.Trim(), keyword, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Sprite LoadSprite(string resourcePath)
+    {
+        if (string.IsNullOrEmpty(resourcePath)) return null;
+
+        var sprite = Resources.Load<Sprite>(resourcePath);
+        if (sprite == null)
+        {
+            Debug.LogWarning($"[DialogueJsonLoader] Resources/{resourcePath} 배경 스프라이트를 찾을 수 없습니다. (Texture Type이 Sprite인지 확인)");
+        }
+
+        return sprite;
     }
 
     private static AudioClip LoadAudio(string resourcePath)

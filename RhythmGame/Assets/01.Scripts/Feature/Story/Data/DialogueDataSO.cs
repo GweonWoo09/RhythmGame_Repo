@@ -16,11 +16,20 @@ using UnityEngine;
         /// <summary>goto 대상으로 쓰면 "여기서 대화 종료"를 뜻하는 예약어</summary>
         public const string EndLabel = "end";
 
+        /// <summary>bg 칸에 쓰면 "배경을 비운다(emptyColor로 덮는다)"를 뜻하는 예약어</summary>
+        public const string BgNoneKeyword = "none";
+
+        /// <summary>bgm 칸에 쓰면 "BGM을 페이드아웃하며 멈춘다"를 뜻하는 예약어</summary>
+        public const string BgmStopKeyword = "stop";
+
         [Tooltip("이 시퀀스가 속한 챕터 번호. 0이면 지정 안 함.")]
         public int chapterId; // 챕터 ID
 
         [Tooltip("이 시퀀스 재생 중 기본으로 깔릴 BGM. 비워두면 이전 BGM을 그대로 유지한다.")]
         public AudioClip bgm; // BGM
+
+        [Tooltip("이 시퀀스가 시작될 때 깔릴 배경. 비워두면 이전 배경을 그대로 유지한다.")]
+        public Sprite background; // 배경
 
         [Tooltip("시퀀스 동안 화면에 계속 서 있을 인물. 비어있으면 말하는 사람만 보인다(기존 방식).")]
         public DialogueCast[] cast; // 인물 목록
@@ -126,6 +135,15 @@ using UnityEngine;
 
         [Tooltip("이 줄부터 BGM을 바꾸고 싶을 때만 지정. 비워두면 기존 BGM 유지.")]
         public AudioClip bgmOverride;
+
+        [Tooltip("이 줄에서 BGM을 페이드아웃하며 멈춘다. (시트의 bgm 칸에 stop)")]
+        public bool bgmStop;
+
+        [Tooltip("이 줄부터 배경을 바꾸고 싶을 때만 지정. 비워두면 기존 배경 유지.")]
+        public Sprite bgOverride;
+
+        [Tooltip("이 줄에서 배경을 비운다 (StoryBackgroundView의 emptyColor로 덮는다). (시트의 bg 칸에 none)")]
+        public bool bgClear;
 
         [Tooltip("이 줄이 표시될 때 기록할 플래그. 예: \"ch1_eager=1\", \"affinity+=1\"")]
         public string[] setFlags;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 대화 진행 로직 담당.
@@ -9,7 +10,8 @@ using UnityEngine;
 ///
 /// [v2 진행 규칙]
 /// 1) 줄을 보여주기 전에 condition이 거짓이면 그 줄을 통째로 건너뛴다 (setFlags/goto도).
-/// 2) 줄이 표시될 때: bgmOverride -> setFlags 적용 -> commands 발행 -> OnDialogUpdated -> 선택지.
+/// 2) 줄이 표시될 때: BGM(bgmOverride / bgmStop) -> 배경(bgOverride / bgClear) -> setFlags 적용 -> commands 발행
+///    -> OnDialogUpdated -> 선택지. 배경은 OnBackgroundChanged로 StoryBackgroundView에 알린다.
 /// 3) 줄을 읽고 넘어갈 때: branches(처음 참인 것) -> gotoLabel -> 다음 줄 순서로 목적지를 정한다.
 ///    목적지가 "end"이거나 마지막 줄을 지나면 대화 종료.
 /// 4) 선택지는 condition이 참인 것만 UI로 전달한다 (SelectChoice 인덱스도 전달된 목록 기준).
@@ -52,6 +54,11 @@ public class DialogueManager : MonoBehaviour
     private AudioClip _currentBgm;
     private int _currentBgmLine = -1; // 지금 BGM을 바꾼 줄 (-1: 시퀀스 기본 BGM). 대사 위치 저장용
 
+    // 지금 배경. _hasBackground가 false면 아직 한 번도 정하지 않은 것(씬에 놓인 기본 배경 그대로).
+    private Sprite _currentBg;
+    private bool _hasBackground;
+    private int _currentBgLine = -1; // 지금 배경을 바꾼 줄 (-1: 시퀀스 기본 배경). 대사 위치 저장용
+
     // 씬에 들어왔을 때의 시퀀스. 이 대화를 끝까지 보면 저장된 대사 위치를 지운다.
     private string _enteredSequenceId;
 
@@ -83,6 +90,18 @@ public class DialogueManager : MonoBehaviour
     /// 구독자가 없으면 에러 로그를 남기고 play를 건너뛴다.
     /// </summary>
     public event Action<DialoguePlaySnapshot> OnPlayRequested;
+
+    /// <summary>
+    /// 배경이 바뀔 때: (새 배경 스프라이트. null이면 배경 비움, 바로 바꿀지 여부).
+    /// instant가 true면 저장 위치/연주에서 돌아와 복원하는 경우라 페이드 없이 바꿔야 한다. 처리는 StoryBackgroundView 몫.
+    /// </summary>
+    public event Action<Sprite, bool> OnBackgroundChanged;
+
+    /// <summary>지금 배경 (null이면 비웠거나 아직 정하지 않음). 늦게 구독한 쪽이 현재 상태를 맞출 때 쓴다.</summary>
+    public Sprite CurrentBackground => _currentBg;
+
+    /// <summary>시퀀스나 줄이 배경을 한 번이라도 정했으면 true (false면 씬에 놓인 기본 배경을 그대로 둔다)</summary>
+    public bool HasBackground => _hasBackground;
 
     private void Start()
     {
@@ -120,6 +139,30 @@ public class DialogueManager : MonoBehaviour
             BeginSequence(0);
         }
     }
+
+    #region Memory (Story 씬을 나갈 때 대사 데이터 정리)
+    private static bool _unloadScheduled;
+
+    // Story 씬이 닫힐 때: 읽어 둔 대사 캐시를 비우고, 씬이 완전히 내려간 뒤 쓰이지 않는 에셋(BGM, 배경, 캐릭터 이미지)을 정리한다.
+    // UnloadUnusedAssets를 여기서 바로 부르면 아직 내려가는 중인 씬 오브젝트가 에셋을 잡고 있어서, sceneUnloaded까지 미룬다.
+    private void OnDestroy()
+    {
+        DialogueJsonLoader.ClearCache();
+
+        if (_unloadScheduled) return;
+
+        _unloadScheduled = true;
+        SceneManager.sceneUnloaded += UnloadUnusedAfterSceneUnloaded;
+    }
+
+    private static void UnloadUnusedAfterSceneUnloaded(Scene scene)
+    {
+        SceneManager.sceneUnloaded -= UnloadUnusedAfterSceneUnloaded;
+        _unloadScheduled = false;
+
+        Resources.UnloadUnusedAssets();
+    }
+    #endregion
 
     /// <summary>
     /// Start()가 시작할 JSON 시퀀스를 바꾼다. 인스펙터에 지정된 dialogSequence 에셋은 무시된다.
@@ -250,6 +293,7 @@ public class DialogueManager : MonoBehaviour
     private void BeginSequence(int startIndex)
     {
         PlaySequenceBGM();
+        ApplySequenceBackground();
 
         // cast 이벤트가 UI의 무대를 초기화하므로, 무대 상태 기록도 시퀀스가 시작될 때마다 새로 쌓는다
         _stageLog.Clear();
@@ -288,6 +332,19 @@ public class DialogueManager : MonoBehaviour
                 _currentBgm = line.bgmOverride;
                 _currentBgmLine = index;
                 AudioManager.Instance.PlayBGM(line.bgmOverride);
+            }
+            else if (line.bgmStop)
+            {
+                _currentBgm = null;
+                _currentBgmLine = index;
+                if (AudioManager.Instance != null) AudioManager.Instance.StopBGM();
+            }
+
+            // 이 줄에서 배경을 바꾸거나 비우도록 지정되어 있으면 교체
+            if (line.bgOverride != null || line.bgClear)
+            {
+                _currentBgLine = index;
+                SetBackground(line.bgClear ? null : line.bgOverride, false);
             }
 
             // 플래그 기록 -> 명령 발행 (선택지 조건은 이 기록이 반영된 뒤에 평가된다)
@@ -594,7 +651,10 @@ public class DialogueManager : MonoBehaviour
             difficulty = difficulty,
             stageLog = new List<DialogueStageRecord>(_stageLog),
             bgm = _currentBgm,
-            bgmLineIndex = _currentBgmLine
+            bgmLineIndex = _currentBgmLine,
+            background = _currentBg,
+            hasBackground = _hasBackground,
+            bgLineIndex = _currentBgLine
         });
 
         return true;
@@ -652,6 +712,19 @@ public class DialogueManager : MonoBehaviour
         {
             _currentBgm = snapshot.bgm;
             if (AudioManager.Instance != null) AudioManager.Instance.PlayBGM(snapshot.bgm);
+        }
+        else if (IsValidIndex(dialogSequence, snapshot.bgmLineIndex) && dialogSequence.lines[snapshot.bgmLineIndex].bgmStop)
+        {
+            // 연주 전에 BGM을 멈춰 둔 상태였다
+            _currentBgm = null;
+            if (AudioManager.Instance != null) AudioManager.Instance.StopBGM(0f);
+        }
+
+        // 배경: 연주하러 나가기 직전의 배경을 페이드 없이 되살린다
+        _currentBgLine = snapshot.bgLineIndex;
+        if (snapshot.hasBackground)
+        {
+            SetBackground(snapshot.background, true);
         }
 
         ReplayStage(snapshot.stageLog);
@@ -733,6 +806,7 @@ public class DialogueManager : MonoBehaviour
             sequenceId = dialogSequence.name,
             lineIndex = currentDialogIndex,
             bgmLineIndex = _currentBgmLine,
+            bgLineIndex = _currentBgLine,
             interrupted = interrupted,
             notShownYet = notShownYet
         };
@@ -814,17 +888,45 @@ public class DialogueManager : MonoBehaviour
 
         // BGM: 저장 당시 BGM을 바꾼 줄이 있으면 그 곡, 없으면 시퀀스 기본 BGM
         AudioClip bgm = dialogSequence.bgm;
+        bool bgmStopped = false;
         _currentBgmLine = -1;
-        if (IsValidIndex(dialogSequence, bookmark.bgmLineIndex) && dialogSequence.lines[bookmark.bgmLineIndex].bgmOverride != null)
+        if (IsValidIndex(dialogSequence, bookmark.bgmLineIndex))
         {
-            bgm = dialogSequence.lines[bookmark.bgmLineIndex].bgmOverride;
-            _currentBgmLine = bookmark.bgmLineIndex;
+            DialogLine bgmLine = dialogSequence.lines[bookmark.bgmLineIndex];
+            if (bgmLine.bgmOverride != null || bgmLine.bgmStop)
+            {
+                bgm = bgmLine.bgmOverride;
+                bgmStopped = bgmLine.bgmStop;
+                _currentBgmLine = bookmark.bgmLineIndex;
+            }
         }
 
         if (bgm != null)
         {
             _currentBgm = bgm;
             if (AudioManager.Instance != null) AudioManager.Instance.PlayBGM(bgm);
+        }
+        else if (bgmStopped)
+        {
+            _currentBgm = null;
+            if (AudioManager.Instance != null) AudioManager.Instance.StopBGM(0f);
+        }
+
+        // 배경: 저장 당시 배경을 바꾼 줄이 있으면 그 배경, 없으면 시퀀스 기본 배경 (둘 다 없으면 씬 기본 배경 유지)
+        _currentBgLine = -1;
+        if (IsValidIndex(dialogSequence, bookmark.bgLineIndex))
+        {
+            DialogLine bgLine = dialogSequence.lines[bookmark.bgLineIndex];
+            if (bgLine.bgOverride != null || bgLine.bgClear)
+            {
+                _currentBgLine = bookmark.bgLineIndex;
+                SetBackground(bgLine.bgClear ? null : bgLine.bgOverride, true);
+            }
+        }
+
+        if (_currentBgLine < 0 && dialogSequence.background != null)
+        {
+            SetBackground(dialogSequence.background, true);
         }
 
         ReplayStage(log);
@@ -836,12 +938,33 @@ public class DialogueManager : MonoBehaviour
     /// <summary>시퀀스 진입 시 기본 BGM 재생 (지정 안 됐으면 기존 BGM 유지)</summary>
     private void PlaySequenceBGM()
     {
+        // 줄 번호는 시퀀스마다 다르므로, 이전 시퀀스에서 BGM을 바꾼 줄 번호는 여기서 버린다
+        _currentBgmLine = -1;
+
         if (dialogSequence.bgm != null && AudioManager.Instance != null)
         {
-            _currentBgmLine = -1;
             _currentBgm = dialogSequence.bgm;
             AudioManager.Instance.PlayBGM(dialogSequence.bgm);
         }
+    }
+
+    /// <summary>시퀀스 진입 시 기본 배경 표시 (지정 안 됐으면 기존 배경 유지)</summary>
+    private void ApplySequenceBackground()
+    {
+        _currentBgLine = -1;
+
+        if (dialogSequence.background != null)
+        {
+            SetBackground(dialogSequence.background, false);
+        }
+    }
+
+    /// <summary>배경 상태를 바꾸고 OnBackgroundChanged를 발행한다. sprite가 null이면 배경을 비운다.</summary>
+    private void SetBackground(Sprite sprite, bool instant)
+    {
+        _currentBg = sprite;
+        _hasBackground = true;
+        OnBackgroundChanged?.Invoke(sprite, instant);
     }
 
     /// <summary>JSON 파일(Resources/Dialogue/{언어}/{sequenceId}.json)을 불러와 바로 재생</summary>
@@ -948,4 +1071,7 @@ public sealed class DialoguePlaySnapshot
     public List<DialogueStageRecord> stageLog;
     public AudioClip bgm;
     public int bgmLineIndex = -1;
+    public Sprite background;
+    public bool hasBackground;
+    public int bgLineIndex = -1;
 }
