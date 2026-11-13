@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: HYPERION_148_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
   songId: HYPERION
-  title: HYPERLON
+  title: HYPERION
   composer: 
   bpm: 148
   flavorText: 

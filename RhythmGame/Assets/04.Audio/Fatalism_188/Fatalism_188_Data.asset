@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
   m_Name: Fatalism_188_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
-  songId: Fatalism_188
-  title: Fatalism_188
+  songId: Fatalism
+  title: Fatalism
   composer: 
   bpm: 188
   flavorText: 

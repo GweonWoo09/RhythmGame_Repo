@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
   m_Name: Lacuna_196_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
-  songId: Lacuna_196
-  title: Lacuna_196
+  songId: Lacuna
+  title: Lacuna
   composer: 
   bpm: 196
   flavorText: 

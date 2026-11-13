@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
   m_Name: APORIA_150_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
-  songId: APORIA_150
-  title: APORIA_150
+  songId: APORIA
+  title: APORIA
   composer: 
   bpm: 150
   flavorText: 
