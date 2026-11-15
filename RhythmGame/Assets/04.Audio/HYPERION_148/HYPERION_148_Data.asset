@@ -20,6 +20,6 @@ MonoBehaviour:
   cover: {fileID: -3105460717243385808, guid: f9f3c079985aaef4f86dd13a78bf04e5, type: 3}
   isStorySong: 0
   previewClip: {fileID: 8300000, guid: 450d7ddb51c808a4dbb2f271d9a2d5ad, type: 3}
-  easy: {fileID: 0}
+  easy: {fileID: 11400000, guid: 00ef3371d1e43254ea534d60b10ef348, type: 2}
   normal: {fileID: 11400000, guid: 0924572a1b2791f4b95c8dd04aa48d55, type: 2}
   hard: {fileID: 11400000, guid: 80e5f5aa1c0756943b5a9bd60da69577, type: 2}

@@ -1,5 +1,6 @@
 {
   "_generated": "Generated from Google Sheet by DialogueSheetImporter. Do not edit by hand.",
+  "bgm": "Audio/BGM/Moonlight Waltz",
   "cast": [ { "speakerId": "White", "slot": 0 } ],
   "onEnd": { "nextSequence": "ch1" },
   "lines": [

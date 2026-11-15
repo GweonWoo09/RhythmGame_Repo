@@ -21,5 +21,5 @@ MonoBehaviour:
   isStorySong: 0
   previewClip: {fileID: 8300000, guid: ce372e25a034dd845a1ec3ed866fe731, type: 3}
   easy: {fileID: 11400000, guid: 92012e50a9877a64ea0e71f3029f963b, type: 2}
-  normal: {fileID: 0}
+  normal: {fileID: 11400000, guid: 8d1cc20b383033843995880e12256719, type: 2}
   hard: {fileID: 0}
