@@ -99,12 +99,6 @@ MonoBehaviour:
     noteLength: 0.8108108
     beatIndex: 16
     beatLengthIndex: 2
-  - noteName: 0
-    noteOctave: 5
-    time: 7.421297
-    noteLength: 0.8108108
-    beatIndex: 18
-    beatLengthIndex: 2
   - noteName: 2
     noteOctave: 4
     time: 7.826703
@@ -183,12 +177,6 @@ MonoBehaviour:
     noteLength: 0.8108108
     beatIndex: 17
     beatLengthIndex: 2
-  - noteName: 2
-    noteOctave: 4
-    time: 7.421297
-    noteLength: 0.8108108
-    beatIndex: 18
-    beatLengthIndex: 2
   - noteName: 4
     noteOctave: 4
     time: 9.85373
@@ -248,12 +236,6 @@ MonoBehaviour:
     time: 14.31319
     noteLength: 0.8108108
     beatIndex: 35
-    beatLengthIndex: 2
-  - noteName: 2
-    noteOctave: 4
-    time: 7.015892
-    noteLength: 0.8108108
-    beatIndex: 17
     beatLengthIndex: 2
   - noteName: 5
     noteOctave: 5
@@ -627,30 +609,6 @@ MonoBehaviour:
     noteLength: 0.4054054
     beatIndex: 3
     beatLengthIndex: 1
-  - noteName: 0
-    noteOctave: 4
-    time: 2.9618378
-    noteLength: 0.4054054
-    beatIndex: 7
-    beatLengthIndex: 1
-  - noteName: 2
-    noteOctave: 4
-    time: 3.1645405
-    noteLength: 0.4054054
-    beatIndex: 7.5
-    beatLengthIndex: 1
-  - noteName: 4
-    noteOctave: 4
-    time: 6.6104865
-    noteLength: 0.4054054
-    beatIndex: 16
-    beatLengthIndex: 1
-  - noteName: 4
-    noteOctave: 4
-    time: 3.3672433
-    noteLength: 0.4054054
-    beatIndex: 8
-    beatLengthIndex: 1
   - noteName: 2
     noteOctave: 4
     time: 9.042919
@@ -734,6 +692,42 @@ MonoBehaviour:
     time: 13.806433
     noteLength: 0.2027027
     beatIndex: 33.75
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 2.9618378
+    noteLength: 0.2027027
+    beatIndex: 7
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 3.1645405
+    noteLength: 0.2027027
+    beatIndex: 7.5
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 6.813189
+    noteLength: 0.2027027
+    beatIndex: 16.5
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 7.2185946
+    noteLength: 0.4054054
+    beatIndex: 17.5
+    beatLengthIndex: 1
+  - noteName: 0
+    noteOctave: 5
+    time: 7.421297
+    noteLength: 0.2027027
+    beatIndex: 18
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 7.624
+    noteLength: 0.2027027
+    beatIndex: 18.5
     beatLengthIndex: 0.5
   useGenerator: 1
   runtimeGenerate: 0

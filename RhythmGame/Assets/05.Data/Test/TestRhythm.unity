@@ -679,7 +679,7 @@ PrefabInstance:
     - target: {fileID: 2492644252168886258, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: defaultSong
       value: 
-      objectReference: {fileID: 11400000, guid: ed7c81d575bafe141818170660e1bfd2, type: 2}
+      objectReference: {fileID: 11400000, guid: 0c59dc99bcb377d4db36b885b4a8842e, type: 2}
     - target: {fileID: 2658213517499901638, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_textAlignment
       value: 65535
@@ -863,6 +863,10 @@ PrefabInstance:
     - target: {fileID: 6754552735954136656, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 119.70996
+      objectReference: {fileID: 0}
+    - target: {fileID: 6823101425222065983, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
+      propertyPath: beatSize
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6823101425222065983, guid: 8c4ea05311ba67e4a99ffbb1cb5dd565, type: 3}
       propertyPath: midiTracksMapping
