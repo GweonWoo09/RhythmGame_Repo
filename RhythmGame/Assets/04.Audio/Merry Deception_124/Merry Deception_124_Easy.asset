@@ -1,0 +1,279 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c9aee7e548d5de44a366308702e981a, type: 3}
+  m_Name: Merry Deception_124_Easy
+  m_EditorClassIdentifier: com.bennykok.rgs.runtime::RhythmGameStarter.SongItem
+  coverArt: {fileID: 0}
+  clip: {fileID: 8300000, guid: f9487e29bd6b3f54db71b5b54908c392, type: 3}
+  author: 
+  bpm: 124
+  speedModifier: 1
+  startDelay: 0.355
+  customMidiMapping: {fileID: 0}
+  customPrefabMapping: {fileID: 0}
+  metadata:
+    values: []
+  useCurrentBpmMidiImport: 0
+  notes:
+  - noteName: 5
+    noteOctave: 4
+    time: 1.5646774
+    noteLength: 0.24193548
+    beatIndex: 2.5
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 2.290484
+    noteLength: 0.24193548
+    beatIndex: 4
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 2.5324194
+    noteLength: 0.24193548
+    beatIndex: 4.5
+    beatLengthIndex: 0.5
+  - noteName: 0
+    noteOctave: 4
+    time: 3.0162904
+    noteLength: 0.24193548
+    beatIndex: 5.5
+    beatLengthIndex: 0.5
+  - noteName: 0
+    noteOctave: 4
+    time: 1.0808065
+    noteLength: 0.24193548
+    beatIndex: 1.5
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 3.2582257
+    noteLength: 0.24193548
+    beatIndex: 6
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 5.19371
+    noteLength: 0.24193548
+    beatIndex: 10
+    beatLengthIndex: 0.5
+  - noteName: 0
+    noteOctave: 4
+    time: 5.435645
+    noteLength: 0.24193548
+    beatIndex: 10.5
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 5.677581
+    noteLength: 0.24193548
+    beatIndex: 11
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 5.919516
+    noteLength: 0.24193548
+    beatIndex: 11.5
+    beatLengthIndex: 0.5
+  - noteName: 5
+    noteOctave: 4
+    time: 6.161452
+    noteLength: 0.24193548
+    beatIndex: 12
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 6.403387
+    noteLength: 0.24193548
+    beatIndex: 12.5
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 3.5001612
+    noteLength: 0.24193548
+    beatIndex: 6.5
+    beatLengthIndex: 0.5
+  - noteName: 0
+    noteOctave: 4
+    time: 3.7420967
+    noteLength: 0.24193548
+    beatIndex: 7
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 4
+    time: 1.3227419
+    noteLength: 0.24193548
+    beatIndex: 2
+    beatLengthIndex: 0.5
+  - noteName: 2
+    noteOctave: 4
+    time: 1.8066128
+    noteLength: 0.24193548
+    beatIndex: 3
+    beatLengthIndex: 0.5
+  - noteName: 5
+    noteOctave: 4
+    time: 4.709839
+    noteLength: 0.24193548
+    beatIndex: 9
+    beatLengthIndex: 0.5
+  - noteName: 4
+    noteOctave: 5
+    time: 6.524355
+    noteLength: 1.451613
+    beatIndex: 12.75
+    beatLengthIndex: 3
+  - noteName: 2
+    noteOctave: 4
+    time: 0.59693545
+    noteLength: 1.451613
+    beatIndex: 0.5
+    beatLengthIndex: 3
+  - noteName: 0
+    noteOctave: 4
+    time: 0.83887094
+    noteLength: 1.451613
+    beatIndex: 1
+    beatLengthIndex: 3
+  - noteName: 4
+    noteOctave: 4
+    time: 0.355
+    noteLength: 1.451613
+    beatIndex: 0
+    beatLengthIndex: 3
+  - noteName: 5
+    noteOctave: 4
+    time: 0.83887094
+    noteLength: 1.451613
+    beatIndex: 1
+    beatLengthIndex: 3
+  - noteName: 5
+    noteOctave: 4
+    time: 2.774355
+    noteLength: 1.451613
+    beatIndex: 5
+    beatLengthIndex: 3
+  - noteName: 2
+    noteOctave: 4
+    time: 4.225968
+    noteLength: 1.451613
+    beatIndex: 8
+    beatLengthIndex: 3
+  - noteName: 5
+    noteOctave: 4
+    time: 8.096935
+    noteLength: 1.451613
+    beatIndex: 16
+    beatLengthIndex: 3
+  - noteName: 0
+    noteOctave: 4
+    time: 8.580807
+    noteLength: 1.451613
+    beatIndex: 17
+    beatLengthIndex: 3
+  - noteName: 5
+    noteOctave: 4
+    time: 8.580807
+    noteLength: 1.451613
+    beatIndex: 17
+    beatLengthIndex: 3
+  - noteName: 4
+    noteOctave: 4
+    time: 8.338871
+    noteLength: 1.451613
+    beatIndex: 16.5
+    beatLengthIndex: 3
+  - noteName: 2
+    noteOctave: 4
+    time: 8.8227415
+    noteLength: 1.451613
+    beatIndex: 17.5
+    beatLengthIndex: 3
+  - noteName: 0
+    noteOctave: 4
+    time: 9.064677
+    noteLength: 1.451613
+    beatIndex: 18
+    beatLengthIndex: 3
+  - noteName: 4
+    noteOctave: 4
+    time: 9.306613
+    noteLength: 1.451613
+    beatIndex: 18.5
+    beatLengthIndex: 3
+  - noteName: 2
+    noteOctave: 5
+    time: 9.548549
+    noteLength: 0.48387095
+    beatIndex: 19
+    beatLengthIndex: 1
+  - noteName: 0
+    noteOctave: 4
+    time: 10.032419
+    noteLength: 0.48387095
+    beatIndex: 20
+    beatLengthIndex: 1
+  - noteName: 2
+    noteOctave: 4
+    time: 10.274355
+    noteLength: 0.48387095
+    beatIndex: 20.5
+    beatLengthIndex: 1
+  - noteName: 0
+    noteOctave: 4
+    time: 10.516291
+    noteLength: 0.48387095
+    beatIndex: 21
+    beatLengthIndex: 1
+  - noteName: 5
+    noteOctave: 4
+    time: 10.516291
+    noteLength: 0.48387095
+    beatIndex: 21
+    beatLengthIndex: 1
+  - noteName: 2
+    noteOctave: 4
+    time: 10.758225
+    noteLength: 0.48387095
+    beatIndex: 21.5
+    beatLengthIndex: 1
+  - noteName: 4
+    noteOctave: 4
+    time: 11.000161
+    noteLength: 0.48387095
+    beatIndex: 22
+    beatLengthIndex: 1
+  - noteName: 5
+    noteOctave: 4
+    time: 11.242097
+    noteLength: 0.48387095
+    beatIndex: 22.5
+    beatLengthIndex: 1
+  - noteName: 4
+    noteOctave: 5
+    time: 11.484033
+    noteLength: 0.48387095
+    beatIndex: 23
+    beatLengthIndex: 1
+  - noteName: 0
+    noteOctave: 4
+    time: 4.709839
+    noteLength: 0.24193548
+    beatIndex: 9
+    beatLengthIndex: 0.5
+  useGenerator: 0
+  runtimeGenerate: 0
+  generator: {fileID: 0}
+  onsetSensitivity: 1
+  onsetData: []
+  onsetMin: 0
+  onsetMax: 0
