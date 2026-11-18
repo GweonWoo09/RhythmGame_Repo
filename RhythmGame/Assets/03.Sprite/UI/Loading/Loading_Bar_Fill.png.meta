@@ -1,0 +1,247 @@
+fileFormatVersion: 2
+guid: 0af5520e6797bf24c9a49bfce9040249
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4717802038622624428
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_0"
+  - first:
+      213: -7144474065658286153
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_1"
+  - first:
+      213: 3913228979197102881
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_2"
+  - first:
+      213: -5091580781141910860
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_3"
+  - first:
+      213: 9174661153721293583
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_4"
+  - first:
+      213: 8421326545404494123
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_5"
+  - first:
+      213: -5426419788559934176
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_6"
+  - first:
+      213: 1948893353657699673
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_7"
+  - first:
+      213: 7367404112667732081
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_8"
+  - first:
+      213: 7620118292058042601
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_9"
+  - first:
+      213: 5418674946833708886
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_10"
+  - first:
+      213: 1651828408990556171
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_11"
+  - first:
+      213: 8594450495631005956
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_12"
+  - first:
+      213: -2171998278243527989
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_13"
+  - first:
+      213: -396480259479846574
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_14"
+  - first:
+      213: 2649616034671081392
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_15"
+  - first:
+      213: -6135950625147639525
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_16"
+  - first:
+      213: 4433141862466032575
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_17"
+  - first:
+      213: 6834567392296928071
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_18"
+  - first:
+      213: -3574518923381803145
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_19"
+  - first:
+      213: -2836966575654055881
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_20"
+  - first:
+      213: -1299842312155519889
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_21"
+  - first:
+      213: 891743645844813806
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_22"
+  - first:
+      213: 6130288914656307061
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_23"
+  - first:
+      213: 6151958889748581242
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_24"
+  - first:
+      213: -9206173531284143219
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_25"
+  - first:
+      213: 5265309240856893986
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_26"
+  - first:
+      213: 8346485047008861083
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_27"
+  - first:
+      213: 1734423324846254286
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_28"
+  - first:
+      213: -1860281868440233221
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_29"
+  - first:
+      213: 59506802647747025
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_30"
+  - first:
+      213: 3570222199997073213
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_31"
+  - first:
+      213: 2108723003382603768
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_32"
+  - first:
+      213: 1221123414473023305
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_33"
+  - first:
+      213: -7196487127200463940
+    second: "\uAC80\uC740 \uBC30\uACBD\uC758 \uD770\uC0C9 \uCEA1\uC290 \uBC14_34"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Loading_Bar_Fill_0
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 309
+        width: 1806
+        height: 163
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 85, y: 81, z: 85, w: 82}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dcf1fe14307b6de4f9179a6f3a2b854a
+      internalID: -1375127686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 1e7d1eb1c5d93bf4ca25a8017cc4673b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":2172.0,"y":724.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Loading_Bar_Fill_0: -1375127686
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

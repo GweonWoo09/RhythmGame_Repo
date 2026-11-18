@@ -242,7 +242,38 @@ public class SceneChanger : MonoBehaviour
             SetPayload(payload);
         }
 
-        StartCoroutine(LoadSceneRoutine(targetScene, entry, payloadFromThisCall));
+        StartCoroutine(LoadSceneRoutine(targetScene, entry, payloadFromThisCall, true, null));
+        return true;
+    }
+
+    /// <summary>
+    /// 화면을 가리지 않은 채 씬을 미리 불러온다 (Loading 씬의 로딩바용).
+    /// 불러오는 동안 OnLoadProgress가 발행되고, 다 불러온 뒤 canActivate가 true가 될 때까지 기다렸다가
+    /// 페이드아웃 -> 씬 활성화 -> 페이드인 순서로 넘어간다. canActivate가 null이면 기다리지 않는다.
+    /// 반환값과 이벤트 정책은 LoadScene과 같다.
+    /// </summary>
+    public bool LoadSceneInBackground(SceneType targetScene, Func<bool> canActivate, ScenePayload payload = null)
+    {
+        if (_isLoading)
+        {
+            Debug.LogWarning("[SceneChanger] 이미 씬을 로드하는 중입니다.");
+            return false;
+        }
+
+        if (!TryValidateTarget(targetScene, out var entry, out string reason))
+        {
+            Debug.LogError($"[SceneChanger] '{targetScene}' 전환 거부: {reason}");
+            OnSceneLoadFailed?.Invoke(targetScene, reason);
+            return false;
+        }
+
+        bool payloadFromThisCall = payload != null;
+        if (payloadFromThisCall)
+        {
+            SetPayload(payload);
+        }
+
+        StartCoroutine(LoadSceneRoutine(targetScene, entry, payloadFromThisCall, false, canActivate));
         return true;
     }
 
@@ -290,7 +321,10 @@ public class SceneChanger : MonoBehaviour
 
     // 씬 불러올 때 루틴
     #region Load Routine
-    private IEnumerator LoadSceneRoutine(SceneType targetScene, SceneEntry entry, bool payloadFromThisCall)
+    /// <param name="fadeBeforeLoad">true면 화면을 가린 뒤 불러온다 (기본). false면 불러온 다음 활성화 직전에 가린다.</param>
+    /// <param name="canActivate">다 불러온 뒤 활성화해도 되는지 (null이면 바로 활성화)</param>
+    private IEnumerator LoadSceneRoutine(SceneType targetScene, SceneEntry entry, bool payloadFromThisCall,
+        bool fadeBeforeLoad, Func<bool> canActivate)
     {
         _isLoading = true;
 
@@ -302,8 +336,8 @@ public class SceneChanger : MonoBehaviour
         {
             OnSceneLoadStart?.Invoke(targetScene);
 
-            // 1. 화면을 가린다 (ScreenFader에 위임)
-            if (ScreenFader.Instance != null)
+            // 1. 화면을 가린다 (ScreenFader에 위임). 미리 불러오기면 활성화 직전에 가린다.
+            if (fadeBeforeLoad && ScreenFader.Instance != null)
             {
                 fadedOut = true; // 페이드 도중 중단돼도 복구 대상이 되도록 먼저 표시
                 yield return ScreenFader.Instance.FadeOut(fadeDuration);
@@ -326,6 +360,19 @@ public class SceneChanger : MonoBehaviour
             }
 
             OnLoadProgress?.Invoke(1f);
+
+            // 미리 불러오기: 호출한 쪽(로딩바 등)이 준비될 때까지 기다린 뒤 화면을 가린다
+            if (canActivate != null)
+            {
+                yield return new WaitUntil(canActivate);
+            }
+
+            if (!fadeBeforeLoad && ScreenFader.Instance != null)
+            {
+                fadedOut = true;
+                yield return ScreenFader.Instance.FadeOut(fadeDuration);
+            }
+
             op.allowSceneActivation = true;
 
             yield return new WaitUntil(() => op.isDone);
