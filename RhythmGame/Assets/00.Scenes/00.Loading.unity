@@ -810,7 +810,7 @@ MonoBehaviour:
     excludeFromHistory: 0
   - type: 1
     sceneName: 01.Lobby
-    bgm: {fileID: 0}
+    bgm: {fileID: 8300000, guid: c23248db3f815cb4fac2ec3b4096964a, type: 3}
     excludeFromHistory: 0
   - type: 3
     sceneName: 02.SongSelect
@@ -818,7 +818,7 @@ MonoBehaviour:
     excludeFromHistory: 0
   - type: 2
     sceneName: 03.ChapterSelect
-    bgm: {fileID: 0}
+    bgm: {fileID: 8300000, guid: c23248db3f815cb4fac2ec3b4096964a, type: 3}
     excludeFromHistory: 0
   - type: 4
     sceneName: 04.InGame

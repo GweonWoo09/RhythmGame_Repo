@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 899aaf7caf062a74d98be04993108606, type: 3}
   m_Name: Nothing Stays_145_Data
   m_EditorClassIdentifier: Assembly-CSharp::SongDataSO
-  songId: 
-  title: 
+  songId: Nothing Stays
+  title: Nothing Stays
   composer: 
-  bpm: 0
+  bpm: 145
   flavorText: 
   cover: {fileID: 0}
   isStorySong: 0
-  previewClip: {fileID: 0}
+  previewClip: {fileID: 8300000, guid: ff7ba83c9903e7e4f975aef74a59a779, type: 3}
   easy: {fileID: 0}
-  normal: {fileID: 0}
+  normal: {fileID: 11400000, guid: 4be5d6e6ada6cca44a519cfc3f7f3b3c, type: 2}
   hard: {fileID: 0}
