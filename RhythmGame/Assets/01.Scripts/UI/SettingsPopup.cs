@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 설정창 열기/닫기만 담당한다. F8로 열고, F8이나 ESC로 닫는다.
-/// 설정창이 열려 있는 동안 다른 입력(메뉴, 나가기)은 BlocksInput으로 막는다.
+/// 설정창이 열려 있는 동안 다른 입력(메뉴, 나가기)은 BlocksInput으로 막고, 뒤 화면 버튼의 Enter/방향키(EventSystem)도 멈춘다.
 /// </summary>
 public class SettingsPopup : MonoBehaviour
 {
@@ -48,6 +49,9 @@ public class SettingsPopup : MonoBehaviour
         isOpen = open;
         if (panel != null) panel.SetActive(open);
         if (!open) closedFrame = Time.frameCount;
+
+        // [수정] EventSystem은 BlocksInput을 모르므로, 열려 있는 동안 뒤 화면 버튼이 Enter(Submit)를 받지 않게 멈춘다
+        if (EventSystem.current != null) EventSystem.current.sendNavigationEvents = !open;
 
         if (open) Opened?.Invoke(); // [수정]
         else Closed?.Invoke();

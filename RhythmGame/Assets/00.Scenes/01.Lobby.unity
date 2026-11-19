@@ -3328,6 +3328,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1892647555}
   - component: {fileID: 1892647556}
+  - component: {fileID: 1892647557}
   m_Layer: 0
   m_Name: LobbyMenu
   m_TagString: Untagged
@@ -3368,6 +3369,19 @@ MonoBehaviour:
   upKey: 273
   downKey: 274
   submitKey: 13
+--- !u!114 &1892647557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892647554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d4f6b0c2a5e7d9f1b3c4e6a8d0f2b54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuitGameKey
+  quitKey: 27
 --- !u!1 &1996883783
 GameObject:
   m_ObjectHideFlags: 0

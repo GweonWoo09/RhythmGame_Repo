@@ -70,7 +70,10 @@ namespace RhythmGameStarter
 
                 //We set the size of the note
                 var size = applyNoteLenghtTarget.size;
-                size.y = length / songManager.secPerBeat * songManager.trackManager.beatSize;
+                // [수정] 노트 크기(Scale)로 나눠야 화면에 보이는 길이가 실제 시간 길이와 같아진다
+                // (노트 Scale이 0.7이라 롱노트가 30% 짧게 보여서, 꼬리에 맞춰 떼면 미스가 났음)
+                float scaleY = transform.localScale.y * applyNoteLenghtTarget.transform.localScale.y;
+                size.y = length / songManager.secPerBeat * songManager.trackManager.beatSize / Mathf.Max(0.0001f, scaleY);
                 applyNoteLenghtTarget.size = size;
 
                 //Update target collider

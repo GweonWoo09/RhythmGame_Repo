@@ -75,3 +75,9 @@ RhythmGame/.idea
 
 # Unity build output
 RhythmGame/Builds/
+
+# 빌드 결과물 / Unity 복구 씬 / 지울 파일 모음 (커밋하지 않음)
+RhythmGame/rhythmGame_*/
+RhythmGame/Assets/_Recovery/
+RhythmGame/Assets/_Recovery.meta
+RhythmGame/Assets/_to_delete~/

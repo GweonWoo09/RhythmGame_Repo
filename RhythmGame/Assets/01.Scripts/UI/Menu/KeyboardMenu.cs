@@ -28,6 +28,13 @@ public class KeyboardMenu : MonoBehaviour
             items[index].Submit();
     }
 
+    /// <summary>첫 항목을 고른 상태로 되돌린다 (창을 다시 열 때)</summary>
+    public void ResetSelection()
+    {
+        index = 0;
+        Refresh();
+    }
+
     private void Move(int direction)
     {
         index = (index + direction + items.Length) % items.Length; // 끝에서 처음으로 돌아감

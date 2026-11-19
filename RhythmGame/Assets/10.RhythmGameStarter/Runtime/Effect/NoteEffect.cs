@@ -84,7 +84,7 @@ namespace RhythmGameStarter
         {
             foreach (var s in particleSys)
             {
-                s.Stop();
+                s.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // [수정] 떼는 순간 바로 사라지게 (남은 프레임 재생 안 함)
             }
         }
     }

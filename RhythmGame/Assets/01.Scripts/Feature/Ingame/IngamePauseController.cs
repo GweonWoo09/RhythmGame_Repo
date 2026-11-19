@@ -1,10 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using RhythmGameStarter;
 using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// 설정창이 열리면 곡을 멈추고, 닫히면 카운트다운 후 다시 재생한다.
+/// 인게임 곡 멈춤/재개(카운트다운)만 담당한다.
+/// 설정창, 일시정지 메뉴, 창 전환(포커스)처럼 여러 곳이 동시에 멈출 수 있으므로, 멈춘 곳이 모두 풀어야 카운트다운 후 다시 재생한다.
 /// </summary>
 public class IngamePauseController : MonoBehaviour
 {
@@ -12,42 +14,59 @@ public class IngamePauseController : MonoBehaviour
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private int countdownSeconds = 3;
 
+    private static readonly object SettingsSource = new object();
+    private static readonly object FocusSource = new object(); // [수정] 창 전환(Alt+Tab 등)
+
+    private readonly HashSet<object> holders = new HashSet<object>();
     private Coroutine countdown;
-    private bool pausedBySettings;
 
     private void OnEnable()
     {
-        SettingsPopup.Opened += Pause;
-        SettingsPopup.Closed += StartCountdown;
+        SettingsPopup.Opened += HoldForSettings;
+        SettingsPopup.Closed += ReleaseForSettings;
         SetCountdownText("");
     }
 
     private void OnDisable()
     {
-        SettingsPopup.Opened -= Pause;
-        SettingsPopup.Closed -= StartCountdown;
+        SettingsPopup.Opened -= HoldForSettings;
+        SettingsPopup.Closed -= ReleaseForSettings;
     }
 
-    private void Pause()
+    private void HoldForSettings() => Hold(SettingsSource);
+
+    private void ReleaseForSettings() => Release(SettingsSource);
+
+    // [수정] 포커스를 잃으면 곡을 멈추고, 돌아오면 카운트다운 후 다시 재생한다
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus) Release(FocusSource);
+        else Hold(FocusSource);
+    }
+
+    /// <summary>곡을 멈춘다. 멈춘 곳(source)이 Release를 불러야 풀린다.</summary>
+    public void Hold(object source)
     {
         if (!songManager.SongHasStarted) return;
 
-        // 카운트다운 중에 다시 열면 카운트다운을 취소한다
-        if (countdown != null)
-        {
-            StopCoroutine(countdown);
-            countdown = null;
-            SetCountdownText("");
-        }
-
+        CancelCountdown(); // 카운트다운 중에 다시 멈추면 카운트다운 취소
+        holders.Add(source);
         songManager.PauseSong();
-        pausedBySettings = true;
     }
 
-    private void StartCountdown()
+    /// <summary>멈춘 곳이 모두 풀리면 카운트다운 후 다시 재생한다.</summary>
+    public void Release(object source)
     {
-        if (!pausedBySettings || !songManager.SongHasStarted) return; // 곡을 나간 경우 재개하지 않는다
-        countdown = StartCoroutine(Countdown());
+        if (!holders.Remove(source)) return;
+        if (holders.Count == 0 && songManager.SongHasStarted) countdown = StartCoroutine(Countdown());
+    }
+
+    private void CancelCountdown()
+    {
+        if (countdown == null) return;
+        StopCoroutine(countdown);
+        countdown = null;
+        SetCountdownText("");
     }
 
     private IEnumerator Countdown()
@@ -60,8 +79,7 @@ public class IngamePauseController : MonoBehaviour
 
         SetCountdownText("");
         countdown = null;
-        pausedBySettings = false;
-        if (songManager.SongHasStarted) songManager.ResumeSong();
+        if (holders.Count == 0 && songManager.SongHasStarted) songManager.ResumeSong(); // 곡을 나간 경우 재개하지 않는다
     }
 
     private void SetCountdownText(string text)

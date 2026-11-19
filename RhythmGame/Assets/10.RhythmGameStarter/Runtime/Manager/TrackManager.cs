@@ -167,6 +167,9 @@ namespace RhythmGameStarter
         {
             var note = noteObject.GetComponent<Note>();
             if (!note) return;
+            // [수정] 원래 레인의 목록에서 뺀다. 빼지 않으면 다른 레인에서 재사용될 때 두 레인이 같은 노트를 판정해
+            // 엉뚱한 레인 키로 노트가 처리되고, 정작 그 레인의 노트는 미스가 되어 콤보가 끊긴다
+            if (note.parentTrack != null) note.parentTrack.runtimeNote.Remove(note);
             note.ResetForPool();
             // [수정] 크기를 그대로 둔 채 옮긴다. (true면 트랙 크기 비율이 재사용할 때마다 곱해져 노트가 점점 작아짐)
             note.transform.SetParent(notesPoolParent, false);
@@ -237,10 +240,12 @@ namespace RhythmGameStarter
 
                 var x = midiTracksMapping.mapping[i];
 
+                // [수정] ToList: 곡 시작 때 한 번만 레인별로 나눠 둔다.
+                // (Where만 쓰면 매 프레임 곡 전체 노트를 다시 걸러서, 노트가 많은 곡일수록 프레임이 떨어진다)
                 track.allNotes = songManager.currnetNotes.Where(n =>
                 {
                     return midiTracksMapping.CompareMidiMapping(x, n);
-                });
+                }).ToList();
 
                 //We clear previous notes object
                 track.RecycleAllNotes(this);
@@ -300,10 +305,12 @@ namespace RhythmGameStarter
                 var track = tracks[i];
                 var x = midiTracksMapping.mapping[i];
 
+                // [수정] ToList: 곡 시작 때 한 번만 레인별로 나눠 둔다.
+                // (Where만 쓰면 매 프레임 곡 전체 노트를 다시 걸러서, 노트가 많은 곡일수록 프레임이 떨어진다)
                 track.allNotes = songManager.currnetNotes.Where(n =>
                 {
                     return midiTracksMapping.CompareMidiMapping(x, n);
-                });
+                }).ToList();
 
                 //We clear previous notes object
                 track.DestoryAllNotes();

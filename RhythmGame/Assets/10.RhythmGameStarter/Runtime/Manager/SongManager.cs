@@ -7,6 +7,7 @@ namespace RhythmGameStarter
 {
     [HelpURL("https://bennykok.gitbook.io/rhythm-game-starter/hierarchy-overview/song-manager")]
     [RequireComponent(typeof(TrackManager))]
+    [DefaultExecutionOrder(-100)] // [수정] 노트 판정(NoteArea)보다 먼저 곡 시간을 갱신해야 같은 프레임의 시간으로 판정된다
     public class SongManager : MonoBehaviour
     {
         [Comment("Responsible for song control, handling song related events.")]
@@ -55,6 +56,13 @@ namespace RhythmGameStarter
         private double accumulatedPauseTime;
         private float audioPosition; // [수정] 보정 전 실제 오디오 재생 위치 (오디오 예약/곡 종료에 사용)
 
+        // [수정] 부드러운 dspTime 계산용
+        private double lastDspTime = -1;
+        private double lastDspRealtime;
+        private double smoothDspTime;
+
+        private int lastProgressValue = -1; // [수정] 진행도 글자가 바뀔 때만 갱신하기 위함
+
         #endregion
 
         private void Awake()
@@ -100,6 +108,7 @@ namespace RhythmGameStarter
             dspPausedTime = 0;
             songPosition = -1;
             audioPosition = -1; // [수정]
+            lastProgressValue = -1; // [수정]
 
             if (audioSource) audioSource.clip = songItem.clip;
             if (songItem.customMidiMapping || songItem.customPrefabMapping)
@@ -174,6 +183,25 @@ namespace RhythmGameStarter
             trackManager.ClearAllTracks();
         }
 
+        // [수정] dspTime은 오디오 버퍼 단위(약 10~20ms)로 끊겨서 올라간다. 그대로 쓰면 노트가 덜컥거리므로
+        // 그 사이를 실제 흐른 시간으로 이어 준다. 뒤로 가지는 않게 막는다.
+        private double GetSmoothDspTime()
+        {
+            double dsp = AudioSettings.dspTime;
+            double now = Time.realtimeSinceStartupAsDouble;
+            if (dsp != lastDspTime)
+            {
+                lastDspTime = dsp;
+                lastDspRealtime = now;
+            }
+
+            // [수정] 오디오 시계가 멈춘 동안(장치 변경, 창 전환 등) 실제 시간을 끝없이 더하지 않게 50ms(버퍼 2개 정도)까지만 이어 준다
+            double smooth = lastDspTime + Math.Min(now - lastDspRealtime, 0.05);
+            if (smooth < smoothDspTime) smooth = smoothDspTime;
+            smoothDspTime = smooth;
+            return smooth;
+        }
+
         void Update()
         {
             if (!songStartEventInvoked && songHasStarted && songPosition >= 0)
@@ -198,26 +226,36 @@ namespace RhythmGameStarter
             //Sync the tracks position with the audio
             if (!songPaused && songHasStarted)
             {
-                audioPosition = (float)(AudioSettings.dspTime - dspStartTime - delay - accumulatedPauseTime) * audioSource.pitch;
+                audioPosition = (float)(GetSmoothDspTime() - dspStartTime - delay - accumulatedPauseTime) * audioSource.pitch; // [수정]
                 songPosition = audioPosition - timingOffset; // [수정] 노트 위치와 판정 모두 이 값을 쓴다
 
                 trackManager.UpdateTrack(songPosition, secPerBeat);
 
                 onSongProgress.Invoke(songPosition);
 
-                if (inverseProgressFill)
-                    onSongProgressFill.Invoke(1 - (songPosition / currentSongItem.clip.length));
-                else
-                    onSongProgressFill.Invoke(songPosition / currentSongItem.clip.length);
-
-                if (songPosition >= 0)
+                // [수정] 음악이 없는 테스트 채보는 진행도 표시를 건너뛴다 (매 프레임 에러 방지)
+                if (currentSongItem.clip)
                 {
-                    if (progressAsPercentage)
-                        onSongProgressDisplay.Invoke(Math.Truncate(songPosition / currentSongItem.clip.length * 100) + "%");
+                    if (inverseProgressFill)
+                        onSongProgressFill.Invoke(1 - (songPosition / currentSongItem.clip.length));
                     else
+                        onSongProgressFill.Invoke(songPosition / currentSongItem.clip.length);
+                }
+
+                // [수정] 매 프레임 새 글자를 만들지 않고, 표시 값(% 또는 초)이 바뀔 때만 갱신한다
+                if (songPosition >= 0 && currentSongItem.clip)
+                {
+                    int value = progressAsPercentage
+                        ? (int)Math.Truncate(songPosition / currentSongItem.clip.length * 100)
+                        : (int)songPosition;
+
+                    if (value != lastProgressValue)
                     {
-                        var now = new DateTime((long)songPosition * TimeSpan.TicksPerSecond);
-                        onSongProgressDisplay.Invoke(now.ToString("mm:ss"));
+                        lastProgressValue = value;
+                        if (progressAsPercentage)
+                            onSongProgressDisplay.Invoke(value + "%");
+                        else
+                            onSongProgressDisplay.Invoke(new DateTime((long)value * TimeSpan.TicksPerSecond).ToString("mm:ss"));
                     }
                 }
             }
